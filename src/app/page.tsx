@@ -10,8 +10,8 @@ export default function Home() {
     <div className="flex-1 flex flex-col">
       <Header />
 
-      {/* White section — eyebrow + three top zones */}
-      <section className="bg-paper">
+      {/* Warm cream desk — header + eyebrow + zones float as paper sheets on it */}
+      <section className="bg-paper-soft">
         <div className="mx-auto w-full max-w-[1480px] px-8 pb-12">
           <Eyebrow />
           <div className="mt-8 grid grid-cols-12 gap-6">
