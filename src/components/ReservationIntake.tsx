@@ -101,8 +101,10 @@ export function ReservationIntake() {
     setPropertyId(p.propertyId);
     setHoldUi(Math.round(p.privacyOpennessScore / 10));
     // Update the store immediately so the bottom dial reflects this guest's
-    // saved POS even before the briefing runs.
+    // saved POS even before the briefing runs, AND so /profile renders the
+    // right person when staff click "View as guest →".
     useDossier.getState().setActiveGuestPos(p.privacyOpennessScore);
+    useDossier.getState().setActiveGuestId(id);
   };
 
   useEffect(() => () => aborter.current?.abort(), []);
