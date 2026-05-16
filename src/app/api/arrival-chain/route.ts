@@ -21,7 +21,9 @@ import { flightLookup } from "@/lib/flight";
 import type { PropertyId } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// 120s ceiling — 3 web_search steps (~8-15s each) + 3 Haiku reasoning
+// (~2-3s each) + flight + ETA composition. Comfortable headroom.
+export const maxDuration = 120;
 
 const TRANSIT_MIN: Record<PropertyId, { airport: string; minutes: number; timezone: string }> = {
   "sand-hill": { airport: "SFO", minutes: 28, timezone: "America/Los_Angeles" },
@@ -154,49 +156,67 @@ async function streamWebResearch(
   stepId: string,
   userPrompt: string,
   emit: (e: unknown) => void,
-  maxUses: number = 2,
+  maxUses: number = 1,
 ): Promise<{ text: string; queries: string[]; resultCount: number }> {
   const client = anthropic();
   let full = "";
   const queries: string[] = [];
   let resultCount = 0;
-  const response = await client.messages.create({
+
+  // Pre-emit a "starting" beat so the card shows life immediately.
+  emit({
+    type: "step_thinking",
+    payload: { id: stepId, delta: "Spawning web_search …\n" },
+    ts: new Date().toISOString(),
+  });
+
+  const stream = client.messages.stream({
     model: MODELS.discretion,
-    max_tokens: 600,
+    max_tokens: 500,
     system:
-      "You are a research assistant. Use the web_search tool to find what you're asked about. After running the searches, write ≤120 words summarizing the most relevant findings with source citations. Be specific: cite article titles, dates, profile URLs.",
+      "You are a research assistant. Use the web_search tool to find what you're asked about. After running the searches, write ≤100 words summarizing the most relevant findings with source citations. Be specific: cite article titles, dates, profile URLs.",
     tools: [{ type: "web_search_20260209", name: "web_search", max_uses: maxUses }],
     messages: [{ role: "user", content: userPrompt }],
   });
 
-  for (const block of response.content) {
-    if (block.type === "server_tool_use" && block.name === "web_search") {
-      const input = block.input as { query?: string };
-      const q = input.query;
-      if (q) {
-        queries.push(q);
+  for await (const event of stream) {
+    if (event.type === "content_block_start") {
+      const block = event.content_block;
+      if (block.type === "server_tool_use" && block.name === "web_search") {
+        // Query may not be in input yet; we'll fill it from finalMessage.
         emit({
           type: "step_thinking",
-          payload: { id: stepId, delta: `\n→ searching: "${q}"\n` },
+          payload: { id: stepId, delta: "\n→ web_search firing…\n" },
+          ts: new Date().toISOString(),
+        });
+      } else if (block.type === "web_search_tool_result") {
+        const list = Array.isArray(block.content) ? block.content : [];
+        resultCount += list.length;
+        emit({
+          type: "step_thinking",
+          payload: { id: stepId, delta: `   ${list.length} result${list.length === 1 ? "" : "s"} returned\n` },
           ts: new Date().toISOString(),
         });
       }
-    } else if (block.type === "web_search_tool_result") {
-      const list = Array.isArray(block.content) ? block.content : [];
-      resultCount += list.length;
-      emit({
-        type: "step_thinking",
-        payload: { id: stepId, delta: `   ${list.length} result${list.length === 1 ? "" : "s"}\n` },
-        ts: new Date().toISOString(),
-      });
-    } else if (block.type === "text") {
-      const txt = block.text;
-      full += txt;
-      emit({
-        type: "step_thinking",
-        payload: { id: stepId, delta: txt },
-        ts: new Date().toISOString(),
-      });
+    } else if (event.type === "content_block_delta") {
+      const delta = event.delta;
+      if (delta.type === "text_delta") {
+        full += delta.text;
+        emit({
+          type: "step_thinking",
+          payload: { id: stepId, delta: delta.text },
+          ts: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  // Pull final message to read the actual queries (input is now resolved).
+  const final = await stream.finalMessage();
+  for (const block of final.content) {
+    if (block.type === "server_tool_use" && block.name === "web_search") {
+      const q = (block.input as { query?: string }).query;
+      if (q) queries.push(q);
     }
   }
   return { text: full, queries, resultCount };
