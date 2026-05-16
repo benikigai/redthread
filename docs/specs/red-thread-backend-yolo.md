@@ -8,5 +8,5 @@
 - [x] Task 5: Real agent loop replacing stub (src/app/api/agent/route.ts) — COMPLEX
 - [x] Task 6: ElevenLabs voice route (src/app/api/voice/route.ts) — SIMPLE
 - [x] Task 7: agent.json static file (public/.well-known/agent.json) — SIMPLE
-- [ ] Task 8: Pre-cached fixtures + DEMO_MODE wiring — SIMPLE
+- [x] Task 8: Pre-cached fixtures + DEMO_MODE wiring — SIMPLE
 - [ ] Task 9: README delta — backend contract section — SIMPLE

@@ -1,0 +1,158 @@
+{
+  "dossier": {
+    "guestId": "lin-chen",
+    "propertyId": "hong-kong",
+    "generatedAt": "2026-05-16T19:43:03.128Z",
+    "bio": "Ms. Lin Chen — a returning guest to Rosewood Hong Kong, an Affluential Explorer with a quiet, ritual-driven rhythm and a discerning palate.",
+    "conversationHooks": [
+      "Third stay with us at Victoria Dockside — she has previously praised Henry's tasting menu and the suite's sandalwood scent (CRM, Oct 2025).",
+      "She gravitates to early-morning movement and valued the Asaya wellness space during her recent stay (CRM, Feb 2026)."
+    ],
+    "handleWithCare": [
+      "Public-profile claims in the CRM (role, recent events) could not be independently verified via open web search on 2026-05-16; treat as internal context only and do not reference unprompted.",
+      "Declined alcohol throughout her Phuket stay — offer non-alcoholic pairings by default and without commentary.",
+      "Prefers silence and quiet; do not stage music or unsolicited in-room audio."
+    ],
+    "suppressed": [
+      {
+        "signal": "specific-film-preference",
+        "reason": "Behavioral detail (Wong Kar-wai interest) feels overly tracked; preserve in itinerary reasoning only, not conversationHooks"
+      },
+      {
+        "signal": "granular-ritual-tracking",
+        "reason": "6 AM beach walks + Asaya twice detail is surveillance-adjacent; keep pattern-level insight, drop specificity"
+      },
+      {
+        "signal": "prior-property-pattern",
+        "reason": "Phuket stay reference strips non-HK context; focus on Victoria Dockside only in conversation layer"
+      }
+    ],
+    "actuators": {
+      "roomState": {
+        "climateC": 19,
+        "lighting": "ambient, low",
+        "scent": "sandalwood, low",
+        "audio": "silence",
+        "bedding": "down-free pillows; non-down duvet alternative",
+        "reasoning": [
+          "Prior HK stay (Oct 2025): thermostat noted at 19°C; matches stated preference roomTempC=19.",
+          "Prior HK stay (Oct 2025): praised the suite's sandalwood scent — keep low, per property default register.",
+          "Prior HK stay (Feb 2026): requested down-free pillows — extend to bedding by default.",
+          "Stated preference: audio = silence; suppress in-room music and welcome playlist.",
+          "Property default lighting (ambient) retained, dimmed to match quiet register."
+        ]
+      },
+      "welcomeAmenity": {
+        "name": "Tea flight — three estates",
+        "source": "Lock Cha Tea House",
+        "dietary": [
+          "vegan",
+          "pescatarian",
+          "vegetarian"
+        ],
+        "story": "Curated by Lock Cha — Hong Kong's most respected tea master",
+        "reasoning": "Pescatarian-compatible and alcohol-free, matching her stated pattern of declining alcohol. Builds on her interest in cultural Hong Kong and her morning-ritual rhythm. Sets up a possible Placemaker introduction to Selena Lai for a Wing Lee Street tea ceremony later in the stay — a Relationship Hospitality thread, not a transaction."
+      },
+      "itinerary": [
+        {
+          "title": "Sunrise Tai Chi on the harbour terrace",
+          "category": "wellness",
+          "timeOfDay": "morning",
+          "whyHere": "Victoria Harbour view; Asaya signature ritual",
+          "vendorOrPlace": "Asaya rooftop",
+          "time": "06:30",
+          "reasoning": "She valued Asaya during her recent stay and demonstrates a preference for early-morning wellness — a signature rhythm we can honour at Victoria Dockside."
+        },
+        {
+          "title": "Wing Lee Street tea ceremony",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Preserved 1950s street; a Lock Cha private tea ceremony",
+          "vendorOrPlace": "Wing Lee Street, Sheung Wan",
+          "time": "15:00",
+          "reasoning": "Pairs with the Lock Cha welcome tea flight and her expressed curiosity about heritage Hong Kong; a Placemaker moment with Selena Lai, third-generation Lock Cha master."
+        },
+        {
+          "title": "Wong Kar-wai film locations walk",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Mong Kok / Central in WKW's frames — a guest-requested past favourite",
+          "vendorOrPlace": "Hong Kong Island and Kowloon, guided",
+          "time": "16:30",
+          "reasoning": "She expressed interest in Hong Kong's cinematic heritage during her prior stay. Offering the walk honours a conversation she opened with us."
+        },
+        {
+          "title": "Indian tasting at Chaat",
+          "category": "culinary",
+          "timeOfDay": "evening",
+          "whyHere": "Michelin-starred; pescatarian-friendly menu available",
+          "vendorOrPlace": "Chaat by Manav Tuli",
+          "time": "19:30",
+          "reasoning": "Pescatarian-friendly with a Placemaker chef (Manav Tuli) in-house. She has shown appreciation for tasting menus at Victoria Dockside; Chaat offers a different culinary register for a returning guest seeking discovery."
+        }
+      ]
+    },
+    "toolCalls": [
+      {
+        "tool": "crm_cross_property",
+        "status": "complete",
+        "args": {
+          "guestId": "lin-chen"
+        },
+        "result": "3 prior stays: hong-kong, hong-kong, phuket",
+        "startedAt": "2026-05-16T19:43:07.254Z",
+        "finishedAt": "2026-05-16T19:43:07.255Z"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech founder CEO Series B"
+        },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech CEO Series B 2026"
+        },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "\"Lin Chen\" \"Lattice Capital\" fintech founder"
+        },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "0 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "\"Lattice Capital\" fintech Series B announcement 2026"
+        },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "2 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "\"Lin Chen\" \"HK FinTech Week\" 2025 keynote"
+        },
+        "startedAt": "2026-05-16T19:44:01.100Z",
+        "finishedAt": "2026-05-16T19:44:01.100Z",
+        "result": "0 results"
+      }
+    ]
+  }
+}

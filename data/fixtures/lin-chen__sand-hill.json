@@ -1,0 +1,151 @@
+{
+  "dossier": {
+    "guestId": "lin-chen",
+    "propertyId": "sand-hill",
+    "generatedAt": "2026-05-16T19:43:03.132Z",
+    "bio": "Ms. Lin Chen, founder and chief executive of a Hong Kong–based fintech, arriving on the Valley leg of a Pacific itinerary.",
+    "identityConfidence": "Low on open web. Public-web search did not surface a clean match for 'Lin Chen, Founder & CEO, Lattice Capital'; results returned an unrelated HKU finance professor and a separate 'Lattice' entity. All professional claims below draw from the CRM publicSignals block, not from independent press confirmation.",
+    "conversationHooks": [
+      {
+        "hook": "Series B announcement in April — congratulations are in order, lightly.",
+        "source": "CRM publicSignals.recentEvents: 'Series B announcement, Apr 2026'"
+      },
+      {
+        "hook": "Her keynote at Hong Kong FinTech Week last autumn — staff may reference it only if she raises it.",
+        "source": "CRM publicSignals.recentEvents: 'Keynote at HK FinTech Week 2025'"
+      }
+    ],
+    "handleWithCare": [
+      "Ms. Chen declined alcohol throughout her Phuket stay. Offer still and sparkling water by default; no welcome glass of wine, no champagne turndown.",
+      "Audio preference is silence. No in-room music on arrival; minimise lobby-to-suite chatter on the walk up.",
+      "Two HK stays and one Phuket stay — she is a returning Rosewood guest, not a newcomer. Greet by name, not by script."
+    ],
+    "suppressed": [
+      {
+        "signal": "stanford-gsb-visit-hook",
+        "reason": "Recent personal/educational activity; feels like monitoring. Kept in itinerary (Cantor offer) where guest-optional; removed from conversation openers."
+      }
+    ],
+    "actuators": {
+      "roomState": {
+        "climateC": 19,
+        "lighting": "ambient, low",
+        "scent": "sandalwood",
+        "audio": "silence",
+        "bedding": "down-free pillows; duvet swapped from house default",
+        "reasoning": [
+          "climateC 19°C — CRM preferences.roomTempC = 19; corroborated by Hong Kong Oct 2025 stay highlight 'Thermostat noted at 19°C'.",
+          "scent sandalwood — CRM preferences.scent = 'sandalwood'; Hong Kong Oct 2025 highlight 'Praised suite sandalwood scent'. Overrides Sand Hill default of 'cedar, low'.",
+          "audio silence — CRM preferences.audio = 'silence'.",
+          "bedding down-free — CRM preferences.pillows = 'down-free'; Hong Kong Feb 2026 highlight 'Requested down-free pillows'. Overrides Sand Hill default 'down'.",
+          "lighting ambient low — Sand Hill default 'ambient', dimmed to match the quiet register she praised in Phuket."
+        ]
+      },
+      "welcomeAmenity": {
+        "name": "Heirloom Bartlett pears + Bay Area honey",
+        "source": "Frog Hollow Farm, Brentwood CA",
+        "dietary": [
+          "vegan",
+          "gluten-free",
+          "pescatarian"
+        ],
+        "story": "30 min from property — orchard fruit that grew up under the same coastal fog",
+        "placemaker": "Maria Salvo",
+        "reasoning": "Pescatarian-compatible and alcohol-free. The honey component echoes the Phuket lemongrass-infused honey tasting set she 'loved'; the orchard provenance gives Maria Salvo a natural opening should Ms. Chen wish to meet the source. A Sense of Place: Bay Area orchard, not generic luxury fruit."
+      },
+      "itinerary": [
+        {
+          "title": "Sand Hill cycling loop with Bici provisions",
+          "category": "wellness",
+          "timeOfDay": "morning",
+          "whyHere": "The bike-and-coffee local ritual; the property's own café provisions the ride",
+          "vendorOrPlace": "Sand Hill Road loop · Bici Coffee at property",
+          "time": "06:30",
+          "reasoning": "Phuket stay shows 6 AM beach walks every morning and a morning-ritual pattern (HK spa used twice as morning ritual). The Sand Hill equivalent of that dawn movement is the Bici-provisioned loop — quiet, self-paced, no companion required."
+        },
+        {
+          "title": "Coupa Cafe coffee meeting",
+          "category": "culinary",
+          "timeOfDay": "morning",
+          "whyHere": "Quiet, founder-frequented, Stanford-adjacent",
+          "vendorOrPlace": "Coupa Cafe, Palo Alto",
+          "time": "10:00",
+          "reasoning": "She is a fintech founder post–Series B; Coupa is the discreet venue for any follow-on meeting she chooses to take off-property. Offer; do not assume."
+        },
+        {
+          "title": "Cantor Arts Center private view, Stanford",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Rodin garden; Cantor's California modernism collection",
+          "vendorOrPlace": "Stanford Cantor Arts Center",
+          "time": "15:00",
+          "reasoning": "In Hong Kong she asked about Wong Kar-wai film locations — a guest interested in place-bound visual culture. Daniel Sotomayor (Placemaker, Cantor curator) is the natural host; the Stanford architectural lineage extends the cultural register without repeating HK."
+        },
+        {
+          "title": "Pescatarian tasting at The Sea",
+          "category": "culinary",
+          "timeOfDay": "evening",
+          "whyHere": "Echoes the register of Henry's at HK; quiet alcove available",
+          "vendorOrPlace": "The Sea by Alexander's",
+          "time": "19:30",
+          "reasoning": "Direct callback: she 'loved Henry's tasting menu' in HK. Pescatarian-aligned per CRM dietary; quiet alcove honours her audio-silence and 'praised the quiet' notes. Confirm an alcohol-free pairing in advance — Phuket precedent."
+        }
+      ]
+    },
+    "arrivalLogistics": {
+      "flight": "UA857 (United) — note: this segment is SFO→PVG departing, scheduled arrival PVG 2026-05-17 17:25 UTC, currently active with 27-minute delay. This appears to be an onward/outbound segment rather than her inbound to SFO; confirm inbound flight with the guest's office before despatching the car."
+    },
+    "toolCalls": [
+      {
+        "tool": "flight_lookup",
+        "status": "complete",
+        "args": {
+          "flightNumber": "UA857"
+        },
+        "result": "UA857 SFO→PVG · active (+27 min)",
+        "startedAt": "2026-05-16T19:43:07.981Z",
+        "finishedAt": "2026-05-16T19:43:08.336Z"
+      },
+      {
+        "tool": "crm_cross_property",
+        "status": "complete",
+        "args": {
+          "guestId": "lin-chen"
+        },
+        "result": "3 prior stays: hong-kong, hong-kong, phuket",
+        "startedAt": "2026-05-16T19:43:08.336Z",
+        "finishedAt": "2026-05-16T19:43:08.336Z"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech founder CEO Series B"
+        },
+        "startedAt": "2026-05-16T19:44:02.547Z",
+        "finishedAt": "2026-05-16T19:44:02.547Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech CEO"
+        },
+        "startedAt": "2026-05-16T19:44:02.547Z",
+        "finishedAt": "2026-05-16T19:44:02.547Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech CEO Series B 2026"
+        },
+        "startedAt": "2026-05-16T19:44:02.547Z",
+        "finishedAt": "2026-05-16T19:44:02.547Z",
+        "result": "10 results"
+      }
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "dossier": {
+    "guestId": "lin-chen",
+    "propertyId": "crillon",
+    "generatedAt": "2026-05-16T19:43:03.136Z",
+    "bio": "Ms. Lin Chen — founder-operator in fintech, returning Rosewood guest; quiet routines, considered tastes.",
+    "conversationHooks": [
+      "A Series B was announced in April; a light, congratulatory register is appropriate — no probing on terms or figures.",
+      "On her last Hong Kong stay she asked after Wong Kar-wai film locations — cinema and place may be a warmer thread than business."
+    ],
+    "handleWithCare": [
+      "Across Phuket she declined alcohol throughout the stay; offer the non-alcoholic register first and let her ask if she wants otherwise.",
+      "Mornings are hers — a 6 AM beach-walk pattern in Phuket and a twice-used morning spa ritual in Hong Kong. Schedule lightly before 10:00."
+    ],
+    "suppressed": [
+      {
+        "signal": "identity-verification-flag",
+        "reason": "Low-confidence identity verification risk; staff should never surface doubt about guest identity"
+      },
+      {
+        "signal": "sector-authority-hook",
+        "reason": "STANDARD POS: 'defer to her framing' implies tracking/monitoring her sector positioning; remove inference of professional authority negotiation"
+      },
+      {
+        "signal": "public-signals-caveat",
+        "reason": "Meta-instruction about CRM sources feels like surveillance scaffolding; staff should simply know what to reference without caveats"
+      }
+    ],
+    "actuators": {
+      "roomState": {
+        "climateC": 19,
+        "lighting": "ambient, low",
+        "scent": "sandalwood",
+        "audio": "silence",
+        "bedding": "down-free",
+        "reasoning": [
+          "Prior HK stay (Oct 2025): thermostat noted at 19°C; preferences.roomTempC = 19.",
+          "Prior HK stay (Oct 2025): praised suite sandalwood scent; preferences.scent = sandalwood — overrides Crillon default of rose absolute.",
+          "Prior HK stay (Feb 2026): requested down-free pillows; preferences.pillows = down-free — overrides Crillon default of down.",
+          "preferences.audio = silence; Phuket highlight praised the property's quiet.",
+          "Lighting kept ambient-low to match the silence register and her early-morning rhythm."
+        ]
+      },
+      "welcomeAmenity": {
+        "name": "Maison Plisson seasonal preserves",
+        "source": "Maison Plisson, Boulevard Beaumarchais",
+        "dietary": [
+          "vegan",
+          "pescatarian"
+        ],
+        "story": "The grocer-restaurant Parisians treat as a private pantry",
+        "reasoning": "Pescatarian-safe and alcohol-free — she declined alcohol throughout Phuket, so the Champagne demi is set aside. A pantry gesture rather than a pastry flight reads quieter; it echoes the lemongrass-honey tasting set she loved in Phuket (artisan, jarred, unhurried) without repeating it."
+      },
+      "itinerary": [
+        {
+          "title": "Private morning at Musée d'Orsay",
+          "category": "cultural",
+          "timeOfDay": "morning",
+          "whyHere": "Pre-opening access via Rosewood Placemaker; 8 min from property",
+          "vendorOrPlace": "Musée d'Orsay",
+          "time": "08:30",
+          "reasoning": "Honors her early-morning rhythm (Phuket 6 AM walks; HK morning spa) and her cultural curiosity shown by the Wong Kar-wai inquiry. Placemaker Inès Marchand can host."
+        },
+        {
+          "title": "Sense spa hammam ritual",
+          "category": "wellness",
+          "timeOfDay": "afternoon",
+          "whyHere": "Crillon's signature — restored 18th-century vaulted hammam",
+          "vendorOrPlace": "Sense, A Rosewood Spa",
+          "time": "15:00",
+          "reasoning": "She used the HK spa twice as a morning ritual; the Crillon's vaulted hammam is the property's sense-of-place answer and a natural continuation."
+        },
+        {
+          "title": "Dinner at Les Ambassadeurs",
+          "category": "culinary",
+          "timeOfDay": "evening",
+          "whyHere": "Restored Marie-Antoinette dining room; pescatarian tasting on request",
+          "vendorOrPlace": "Les Ambassadeurs by Jérôme Banctel",
+          "time": "20:00",
+          "reasoning": "She loved Henry's tasting menu in Hong Kong; a pescatarian tasting at Banctel's restored room is the Crillon parallel. Pair non-alcoholic — alcohol declined in Phuket."
+        },
+        {
+          "title": "Marais antique scarves with curator",
+          "category": "shopping",
+          "timeOfDay": "afternoon",
+          "whyHere": "Rue Vieille du Temple ateliers; a haute couture archivist guides",
+          "vendorOrPlace": "Le Marais, 4e arrondissement",
+          "time": "14:30",
+          "reasoning": "A quiet, expert-led walk in the register she prefers — small group, archival depth, no spectacle. An optional second-day offering."
+        }
+      ]
+    },
+    "toolCalls": [
+      {
+        "tool": "crm_cross_property",
+        "status": "complete",
+        "args": {
+          "guestId": "lin-chen"
+        },
+        "result": "3 prior stays: hong-kong, hong-kong, phuket",
+        "startedAt": "2026-05-16T19:43:07.126Z",
+        "finishedAt": "2026-05-16T19:43:07.126Z"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech founder CEO Series B"
+        },
+        "startedAt": "2026-05-16T19:43:58.454Z",
+        "finishedAt": "2026-05-16T19:43:58.454Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "Lin Chen Lattice Capital fintech founder CEO Series B 2026"
+        },
+        "startedAt": "2026-05-16T19:43:58.454Z",
+        "finishedAt": "2026-05-16T19:43:58.454Z",
+        "result": "10 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "\"Lin Chen\" \"Lattice Capital\" fintech keynote Hong Kong FinTech Week 2025"
+        },
+        "startedAt": "2026-05-16T19:43:58.454Z",
+        "finishedAt": "2026-05-16T19:43:58.454Z",
+        "result": "0 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": {
+          "query": "\"Lattice Capital\" fintech Series B 2026 founder"
+        },
+        "startedAt": "2026-05-16T19:43:58.454Z",
+        "finishedAt": "2026-05-16T19:43:58.454Z",
+        "result": "7 results"
+      }
+    ]
+  }
+}
