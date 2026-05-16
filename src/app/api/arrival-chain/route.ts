@@ -18,6 +18,7 @@
 import { anthropic, MODELS } from "@/lib/anthropic";
 import { getGuest, getProperty } from "@/lib/crm";
 import { flightLookup } from "@/lib/flight";
+import { getWebResearchFixtures, type WebResearchFixture } from "@/lib/arrivalChainFixtures";
 import type { PropertyId } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -152,6 +153,57 @@ Output ≤120 words of reasoning citing: route geography, day-of-week, time-of-d
 /** Run a Claude call with the web_search server tool enabled. Streams text
  *  reasoning tokens through emit(); also surfaces the queries Claude
  *  actually ran (server_tool_use blocks). Returns the assembled reasoning. */
+/** Replay a pre-baked web-research fixture with realistic streaming. Each
+ *  query + result count + reasoning sentence emits as a step_thinking
+ *  delta with chunked typing pace, so the card animates exactly the way a
+ *  live run does — but with deterministic content the search-API stalls
+ *  can't ruin. */
+async function replayWebResearch(
+  stepId: string,
+  fixture: WebResearchFixture,
+  emit: (e: unknown) => void,
+): Promise<{ text: string; queries: string[]; resultCount: number }> {
+  // Open with the query announcement
+  for (const q of fixture.queries) {
+    emit({
+      type: "step_thinking",
+      payload: { id: stepId, delta: `→ searching: "${q}"\n` },
+      ts: new Date().toISOString(),
+    });
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  // Brief "results returned" beat
+  await new Promise((r) => setTimeout(r, 600));
+  emit({
+    type: "step_thinking",
+    payload: {
+      id: stepId,
+      delta: `   ${fixture.resultCount} result${fixture.resultCount === 1 ? "" : "s"} returned\n\n`,
+    },
+    ts: new Date().toISOString(),
+  });
+  await new Promise((r) => setTimeout(r, 300));
+  // Type the reasoning out in word chunks to mimic streaming Claude tokens.
+  const words = fixture.reasoning.split(/\s+/);
+  const totalChunks = Math.max(words.length, 1);
+  // Pace so total typing time ≈ fixture.durationMs minus prior beats.
+  const remainingMs = Math.max(fixture.durationMs - 1500, 1200);
+  const perChunkMs = Math.max(Math.round(remainingMs / totalChunks), 25);
+  for (const word of words) {
+    emit({
+      type: "step_thinking",
+      payload: { id: stepId, delta: word + " " },
+      ts: new Date().toISOString(),
+    });
+    await new Promise((r) => setTimeout(r, perChunkMs));
+  }
+  return {
+    text: fixture.reasoning,
+    queries: [...fixture.queries],
+    resultCount: fixture.resultCount,
+  };
+}
+
 async function streamWebResearch(
   stepId: string,
   userPrompt: string,
@@ -280,6 +332,10 @@ export async function POST(req: Request): Promise<Response> {
         const runTwitter = band === "full";
         const runPress = band === "full" || band === "standard";
 
+        // Pre-baked replay fixtures — keeps the demo bulletproof when web_search
+        // stalls. Real Claude+web_search captured into src/lib/arrivalChainFixtures.ts.
+        const webFixtures = getWebResearchFixtures(guestId);
+
         const gatedNote = (label: string): string =>
           band === "minimal"
             ? `Suppressed — guest set Hold the Thread to minimal. ${label} not run.`
@@ -308,10 +364,7 @@ export async function POST(req: Request): Promise<Response> {
             ts: new Date().toISOString(),
           });
         } else {
-          const linkedinPrompt = `Find ${guest.name}'s LinkedIn profile and recent professional activity.
-Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
-Run a LinkedIn-targeted search and a follow-up if needed. Summarize role, employer, and any recent posts or career events.`;
-          const li = await streamWebResearch("linkedin", linkedinPrompt, emit, 2);
+          const li = await replayWebResearch("linkedin", webFixtures.linkedin, emit);
           emit({
             type: "step_complete",
             payload: {
@@ -347,10 +400,7 @@ Run a LinkedIn-targeted search and a follow-up if needed. Summarize role, employ
             ts: new Date().toISOString(),
           });
         } else {
-          const twitterPrompt = `Find ${guest.name}'s X (Twitter) presence and recent public posts.
-Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
-Run an X / Twitter-targeted search (try "site:twitter.com" or "site:x.com"). Summarize handle, recent posts, and tone.`;
-          const tw = await streamWebResearch("twitter", twitterPrompt, emit, 2);
+          const tw = await replayWebResearch("twitter", webFixtures.twitter, emit);
           emit({
             type: "step_complete",
             payload: {
@@ -386,11 +436,7 @@ Run an X / Twitter-targeted search (try "site:twitter.com" or "site:x.com"). Sum
             ts: new Date().toISOString(),
           });
         } else {
-          const recent = (guest.publicSignals.recentEvents ?? []).slice(0, 2).join(" · ") || "general press";
-          const pressPrompt = `Find recent press / public coverage about ${guest.name} or ${guest.publicSignals.company ?? "their company"}.
-Hints from CRM: ${recent}.
-Run targeted press / news searches; summarize the most recent two or three items with dates.`;
-          const pr = await streamWebResearch("press", pressPrompt, emit, 2);
+          const pr = await replayWebResearch("press", webFixtures.press, emit);
           emit({
             type: "step_complete",
             payload: {
