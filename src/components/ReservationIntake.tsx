@@ -82,6 +82,10 @@ export function ReservationIntake() {
   const [checkIn, setCheckIn] = useState(initial.checkIn);
   const [checkOut, setCheckOut] = useState(initial.checkOut);
   const [propertyId, setPropertyId] = useState<PropertyId>(initial.propertyId);
+  // Hold the Thread on a 0–10 dial — value the *guest* sets on /profile.
+  // In this demo the form exposes it so judges can see how the same research
+  // produces a different dossier at minimal vs full bands.
+  const [holdUi, setHoldUi] = useState(Math.round(initial.privacyOpennessScore / 10));
   const aborter = useRef<AbortController | null>(null);
 
   const selectPreset = (id: PresetId) => {
@@ -95,6 +99,7 @@ export function ReservationIntake() {
     setCheckIn(p.checkIn);
     setCheckOut(p.checkOut);
     setPropertyId(p.propertyId);
+    setHoldUi(Math.round(p.privacyOpennessScore / 10));
     // Update the store immediately so the bottom dial reflects this guest's
     // saved POS even before the briefing runs.
     useDossier.getState().setActiveGuestPos(p.privacyOpennessScore);
@@ -119,7 +124,10 @@ export function ReservationIntake() {
     const store = useDossier.getState();
     store.clear();
     store.setActiveProperty(reservation.propertyId);
-    store.setActiveGuestPos(PRESETS[presetId].privacyOpennessScore);
+    // Pin the guest's chosen Hold-the-Thread value into the store so the
+    // bottom mirror reflects what the guest just dialed.
+    const holdPos = Math.round(holdUi * 10);
+    store.setActiveGuestPos(holdPos);
     store.startArrival({
       guestName: reservation.guestName,
       reservationNumber: reservation.reservationNumber,
@@ -135,6 +143,8 @@ export function ReservationIntake() {
       await streamArrivalChain(reservation, ac.signal);
       // After arrival chain — kick the FULL LIVE agent flow so the brief +
       // actuators populate from real Claude. live=true bypasses DEMO_MODE.
+      // previewPos = the guest's just-set Hold-the-Thread value (0–100) so
+      // the Discretion Layer band-reduces zones 1/2/3 accordingly.
       useDossier.getState().startRun("manual");
       await streamAgent(
         {
@@ -142,6 +152,7 @@ export function ReservationIntake() {
           propertyId: reservation.propertyId,
           flightNumber: reservation.flightNumber,
           guestEmail: email,
+          previewPos: holdPos,
           live: true,
         },
         ac.signal,
@@ -178,6 +189,8 @@ export function ReservationIntake() {
           setFlightNumber={setFlightNumber}
           departureDate={departureDate}
           setDepartureDate={setDepartureDate}
+          holdUi={holdUi}
+          setHoldUi={setHoldUi}
           checkIn={checkIn}
           checkOut={checkOut}
           property={propertyId}
@@ -208,6 +221,8 @@ function IntakeForm({
   setFlightNumber,
   departureDate,
   setDepartureDate,
+  holdUi,
+  setHoldUi,
   checkIn,
   checkOut,
   property,
@@ -225,6 +240,8 @@ function IntakeForm({
   setFlightNumber: (s: string) => void;
   departureDate: string;
   setDepartureDate: (s: string) => void;
+  holdUi: number;
+  setHoldUi: (n: number) => void;
   checkIn: string;
   checkOut: string;
   property: PropertyId;
@@ -301,6 +318,41 @@ function IntakeForm({
           />
         </div>
       </div>
+
+      {/* Hold the Thread — guest-set 0–10. In the real product the guest
+          sets this on /profile and Rosewood can never touch it. For the
+          demo we expose it inline so judges can see the same research
+          produce a different dossier at minimal vs full bands. */}
+      <div className="border-t border-rule pt-4">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="caps flex items-center gap-2">
+            <span className="inline-block w-4 h-px bg-thread" />
+            Hold the Thread · {holdUi} of 10
+            <span className="text-ink-faint normal-case tracking-normal italic ml-2 text-[11px]">
+              — guest-set (only the guest can change)
+            </span>
+          </div>
+          <span className="text-[10px] tracking-[0.22em] uppercase text-ink-faint">
+            {holdUi <= 3 ? "Minimal" : holdUi <= 6 ? "Standard" : "Full"}
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={10}
+          step={1}
+          value={holdUi}
+          onChange={(e) => setHoldUi(parseInt(e.target.value, 10))}
+          aria-label="Hold the Thread — guest-set privacy openness 0 to 10"
+          className="w-full accent-thread cursor-pointer"
+        />
+        <div className="mt-1 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+          <span>Loosely</span>
+          <span aria-hidden="true">·</span>
+          <span>Fully</span>
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="text-sm text-ink-mute">
           <div className="caps text-ink-faint mb-1">Stay</div>
