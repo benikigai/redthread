@@ -40,14 +40,7 @@ export default function Home() {
       {/* Hold the Thread — concierge mirror of Ms. Chen's saved POS */}
       <DashboardDial />
 
-      {/* Full-bleed red thread bar — the literal divider */}
-      <div
-        className="h-[3px] w-full"
-        style={{ background: "#C8102E", boxShadow: "0 0 24px rgba(200,16,46,0.35)" }}
-        aria-hidden="true"
-      />
-
-      {/* Deep rose band — the live thread lives here */}
+      {/* Deep rose band — the live thread lives here. Clean transition, no red bar. */}
       <section className="bg-rose-deep text-on-dark">
         <div className="mx-auto w-full max-w-[1480px] px-8 py-14">
           <LiveThread />
@@ -78,13 +71,16 @@ function Eyebrow() {
           <span className="inline-block w-6 h-px bg-thread" />
           Live dossier
         </div>
-        <h1 className="font-display font-light text-[clamp(2.5rem,5vw,4.25rem)] leading-[0.98] tracking-tight mt-4">
+        <h1
+          className="font-display font-normal text-[clamp(2.5rem,5vw,4.25rem)] leading-[1.02] tracking-tight mt-5"
+          style={{ letterSpacing: "-0.014em" }}
+        >
           A sense of place,
           <br />
-          <em className="italic text-thread">threaded</em> through every guest.
+          <em className="italic text-thread font-normal">threaded</em> through every guest.
         </h1>
       </div>
-      <p className="font-display italic text-ink-mute text-lg max-w-[34ch] leading-snug">
+      <p className="text-ink-mute max-w-[48ch] mt-2" style={{ fontSize: "1.05rem", lineHeight: 1.7 }}>
         Pre-arrival, on-property, post-stay — held with discretion, returned with intention.
       </p>
     </div>
