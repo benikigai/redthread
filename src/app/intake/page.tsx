@@ -20,7 +20,49 @@ const AGENT_ID =
   process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_INTAKE ??
   "agent_5001krs8b43gfjstkz92k6fx9e3n";
 
-type Stage = "idle" | "connecting" | "talking" | "threading" | "done" | "error";
+// Pre-scripted demo conversation — two TTS voices speaking to each other.
+// No microphone required. Plays sequentially, populates transcript +
+// question outline, ends with fixture overrides routed to the dashboard.
+const CONCIERGE_VOICE_ID =
+  process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_CONCIERGE || "Xb7hH8MSUJpSbSDYk0k2"; // Alice
+const GUEST_VOICE_ID =
+  process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_GUEST || "9BWtsMINqrJLrRacOk9x"; // Aria
+
+const DEMO_DIALOG: { speaker: "ai" | "you"; text: string; questionKey?: string }[] = [
+  { speaker: "ai", text: "Welcome back, Ms. Chen. Five quick things, in your voice." },
+  { speaker: "ai", text: "First, the room — how would you like it set?", questionKey: "room" },
+  { speaker: "you", text: "Cool, around nineteen Celsius. Sandalwood scent — like Hong Kong." },
+  { speaker: "ai", text: "Bedding — any preference?", questionKey: "bedding" },
+  { speaker: "you", text: "Down-free pillows, please. I have a feather allergy." },
+  { speaker: "ai", text: "And your morning rhythm?", questionKey: "morning" },
+  { speaker: "you", text: "A walk first, somewhere quiet. Then a slow breakfast — no meetings before ten." },
+  { speaker: "ai", text: "Anything we should know about food?", questionKey: "dietary" },
+  { speaker: "you", text: "Pescatarian. The kitchen can surprise me a little." },
+  { speaker: "ai", text: "And how publicly may we draw on what's already known about you?", questionKey: "privacy" },
+  { speaker: "you", text: "Standard. The Series B is public. Otherwise, hold the thread close." },
+  { speaker: "ai", text: "Thank you, Ms. Chen. The thread is set." },
+];
+
+// Hard-coded fixture overrides matching DEMO_DIALOG — what the agent receives
+// when the demo conversation finishes. Mirrors what /api/voice/intake/complete
+// would extract from a real ElevenLabs conversation.
+const DEMO_OVERRIDES = {
+  roomTempC: 19,
+  bedding: "down-free" as const,
+  morningRitual: "walk first, then a slow breakfast",
+  dietary: "pescatarian",
+  privacyPosture: "standard" as const,
+};
+
+type Stage =
+  | "idle"
+  | "connecting"
+  | "talking"
+  | "threading"
+  | "done"
+  | "error"
+  | "demo-loading"
+  | "demo-playing";
 
 interface TranscriptLine {
   id: number;
@@ -78,6 +120,8 @@ function IntakeInner() {
   const lineIdRef = useRef(0);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const demoAudioRef = useRef<HTMLAudioElement | null>(null);
+  const demoCancelRef = useRef(false);
 
   const conversation = useConversation({
     onConnect: ({ conversationId }) => {
@@ -167,12 +211,124 @@ function IntakeInner() {
     };
   }, [stage, convId, router]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout / demo audio on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      demoCancelRef.current = true;
+      demoAudioRef.current?.pause();
     };
   }, []);
+
+  // Two pre-scripted voice agents speaking to each other. Fetches all audio
+  // in parallel from /api/voice (cached on disk after first play), then plays
+  // sequentially while the transcript + question outline animate forward.
+  const playDemoDialog = async () => {
+    setError(null);
+    setTranscript([]);
+    setActiveIdx(0);
+    setDoneKeys(new Set());
+    setStage("demo-loading");
+    demoCancelRef.current = false;
+
+    const fetchLine = async (text: string, voiceId: string): Promise<string> => {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voiceId }),
+      });
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        throw new Error(`Voice fetch ${res.status}${errBody ? `: ${errBody.slice(0, 120)}` : ""}`);
+      }
+      const blob = await res.blob();
+      return URL.createObjectURL(blob);
+    };
+
+    let audioUrls: string[];
+    try {
+      audioUrls = await Promise.all(
+        DEMO_DIALOG.map((line) =>
+          fetchLine(line.text, line.speaker === "ai" ? CONCIERGE_VOICE_ID : GUEST_VOICE_ID),
+        ),
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      setStage("error");
+      return;
+    }
+
+    if (demoCancelRef.current) {
+      audioUrls.forEach((u) => URL.revokeObjectURL(u));
+      return;
+    }
+
+    setStage("demo-playing");
+
+    const playOne = (url: string) =>
+      new Promise<void>((resolve) => {
+        const audio = new Audio(url);
+        demoAudioRef.current = audio;
+        audio.onended = () => resolve();
+        audio.onerror = () => resolve();
+        void audio.play().catch(() => resolve());
+      });
+
+    for (let i = 0; i < DEMO_DIALOG.length; i++) {
+      if (demoCancelRef.current) break;
+      const line = DEMO_DIALOG[i];
+
+      // Surface the line in transcript before playing audio
+      lineIdRef.current += 1;
+      setTranscript((t) => [
+        ...t,
+        { id: lineIdRef.current, speaker: line.speaker, text: line.text, at: Date.now() },
+      ]);
+      if (line.questionKey && line.speaker === "ai") {
+        const qIdx = QUESTIONS.findIndex((q) => q.key === line.questionKey);
+        if (qIdx !== -1) {
+          setActiveIdx(qIdx);
+          setDoneKeys((prev) => {
+            const next = new Set(prev);
+            for (let j = 0; j < qIdx; j++) next.add(QUESTIONS[j].key);
+            return next;
+          });
+        }
+      } else if (line.speaker === "you") {
+        setDoneKeys((prev) => {
+          const next = new Set(prev);
+          next.add(QUESTIONS[activeIdx].key);
+          return next;
+        });
+      }
+
+      await playOne(audioUrls[i]);
+      // small natural pause
+      if (!demoCancelRef.current) await new Promise((r) => setTimeout(r, 320));
+    }
+
+    audioUrls.forEach((u) => URL.revokeObjectURL(u));
+    if (demoCancelRef.current) return;
+
+    // Mark all questions complete; persist demo overrides and route.
+    setDoneKeys(new Set(QUESTIONS.map((q) => q.key)));
+    setStage("threading");
+    try {
+      sessionStorage.setItem("redthread:intake", JSON.stringify(DEMO_OVERRIDES));
+    } catch {
+      // ignore — proceed
+    }
+    await new Promise((r) => setTimeout(r, 900));
+    setStage("done");
+    router.push("/?fromIntake=1");
+  };
+
+  const cancelDemo = () => {
+    demoCancelRef.current = true;
+    demoAudioRef.current?.pause();
+    setStage("idle");
+  };
 
   const begin = async () => {
     setError(null);
@@ -225,7 +381,11 @@ function IntakeInner() {
   };
 
   const showQuestionPanel =
-    stage === "talking" || stage === "threading" || stage === "done";
+    stage === "talking" ||
+    stage === "threading" ||
+    stage === "done" ||
+    stage === "demo-loading" ||
+    stage === "demo-playing";
 
   const lastFewLines = useMemo(() => transcript.slice(-6), [transcript]);
 
@@ -340,23 +500,63 @@ function IntakeInner() {
             {/* RIGHT — control + transcript */}
             <section aria-label="Voice intake" className="space-y-6">
               {stage === "idle" && (
-                <div className="border border-rule bg-paper p-6 sm:p-8">
-                  <p className="caps text-thread-deep">Voice channel</p>
-                  <h2 className="font-display text-2xl mt-2 mb-4 leading-snug">
-                    Begin when you&rsquo;re ready.
-                  </h2>
-                  <p className="text-ink-mute text-sm leading-relaxed mb-6">
-                    Your browser will ask for microphone access — that&rsquo;s
-                    expected. Speak conversationally; the thread will weave in
-                    your answers as you go.
+                <div className="space-y-4">
+                  <div className="border border-rule bg-paper p-6 sm:p-8">
+                    <p className="caps text-thread-deep">Voice channel</p>
+                    <h2 className="font-display text-2xl mt-2 mb-4 leading-snug">
+                      Begin when you&rsquo;re ready.
+                    </h2>
+                    <p className="text-ink-mute text-sm leading-relaxed mb-6">
+                      Your browser will ask for microphone access — that&rsquo;s
+                      expected. Speak conversationally; the thread will weave in
+                      your answers as you go.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={begin}
+                      className="px-8 py-4 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-sm hover:bg-rose-darker transition-colors"
+                    >
+                      Begin briefing
+                    </button>
+                  </div>
+
+                  <div className="border border-rule bg-paper-soft p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="max-w-md">
+                        <p className="caps text-brass">Watch the demo</p>
+                        <h3 className="font-display text-xl mt-2 leading-snug">
+                          Two voices — concierge &amp; guest — speak it for
+                          you.
+                        </h3>
+                        <p className="text-ink-mute text-sm leading-relaxed mt-2">
+                          No microphone needed. A pre-scripted briefing plays
+                          aloud; the thread populates the same way.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={playDemoDialog}
+                        className="shrink-0 px-6 py-3 border border-thread-deep text-thread-deep font-sans uppercase tracking-[0.22em] text-xs hover:bg-thread-deep hover:text-on-dark transition-colors"
+                      >
+                        Play demo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {stage === "demo-loading" && (
+                <div className="border border-rule bg-paper p-6 sm:p-8 space-y-3">
+                  <div className="flex items-center gap-3 text-thread-deep">
+                    <span className="relative inline-flex w-2.5 h-2.5">
+                      <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-70" />
+                      <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-thread" />
+                    </span>
+                    <span className="caps">Preparing the voices</span>
+                  </div>
+                  <p className="font-display italic text-ink-mute text-lg">
+                    Rendering each line — about a second.
                   </p>
-                  <button
-                    type="button"
-                    onClick={begin}
-                    className="px-8 py-4 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-sm hover:bg-rose-darker transition-colors"
-                  >
-                    Begin briefing
-                  </button>
                 </div>
               )}
 
@@ -376,12 +576,15 @@ function IntakeInner() {
                 </div>
               )}
 
-              {(stage === "talking" || stage === "threading" || stage === "done") && (
+              {(stage === "talking" ||
+                stage === "threading" ||
+                stage === "done" ||
+                stage === "demo-playing") && (
                 <div className="border border-rule bg-paper p-6 sm:p-8 space-y-5">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 text-thread-deep">
                       <span className="relative inline-flex w-2.5 h-2.5">
-                        {stage === "talking" && (
+                        {(stage === "talking" || stage === "demo-playing") && (
                           <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-70" />
                         )}
                         <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-thread" />
@@ -389,9 +592,11 @@ function IntakeInner() {
                       <span className="caps">
                         {stage === "talking"
                           ? "Listening"
-                          : stage === "threading"
-                            ? "Threading the dossier"
-                            : "Thread set"}
+                          : stage === "demo-playing"
+                            ? "Demo conversation"
+                            : stage === "threading"
+                              ? "Threading the dossier"
+                              : "Thread set"}
                       </span>
                     </div>
                     {stage === "talking" && (
@@ -401,6 +606,15 @@ function IntakeInner() {
                         className="text-ink-faint text-xs uppercase tracking-[0.18em] hover:text-thread-deep"
                       >
                         End early
+                      </button>
+                    )}
+                    {stage === "demo-playing" && (
+                      <button
+                        type="button"
+                        onClick={cancelDemo}
+                        className="text-ink-faint text-xs uppercase tracking-[0.18em] hover:text-thread-deep"
+                      >
+                        Stop demo
                       </button>
                     )}
                   </div>
