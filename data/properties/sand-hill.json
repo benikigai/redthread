@@ -1,0 +1,63 @@
+{
+  "id": "sand-hill",
+  "name": "Rosewood Sand Hill",
+  "locale": "Menlo Park, California",
+  "senseOfPlace": "Oak woodland on Sand Hill Road — the modern clubhouse for Silicon Valley. Bici Coffee, the Roof at Madera, founder-frequented quiet. Not Mediterranean luxury; Northern California restraint.",
+  "amenityOptions": [
+    {
+      "name": "Heirloom Bartlett pears + Bay Area honey",
+      "source": "Frog Hollow Farm, Brentwood CA",
+      "dietary": ["vegan", "gluten-free"],
+      "story": "30 min from property — orchard fruit that grew up under the same coastal fog"
+    },
+    {
+      "name": "Sonoma olive oil + buckwheat crackers",
+      "source": "McEvoy Ranch, Petaluma",
+      "dietary": ["vegan"],
+      "story": "California's first commercial olive oil; orchard tour available via Placemaker"
+    },
+    {
+      "name": "Tartine sourdough boule + cultured butter",
+      "source": "Tartine Bakery, San Francisco",
+      "dietary": [],
+      "story": "Stanford grad's bakery — the bread that started the Bay Area sourdough movement"
+    }
+  ],
+  "signatureExperiences": [
+    {
+      "title": "Private morning hike",
+      "category": "nature",
+      "timeOfDay": "morning",
+      "whyHere": "Windy Hill Preserve, 12 min — the oak woodland that defines Sand Hill",
+      "vendorOrPlace": "Windy Hill Preserve"
+    },
+    {
+      "title": "Coupa Cafe coffee meeting",
+      "category": "culinary",
+      "timeOfDay": "morning",
+      "whyHere": "Quiet, founder-frequented, Stanford-adjacent",
+      "vendorOrPlace": "Coupa Cafe, Palo Alto"
+    },
+    {
+      "title": "Pescatarian tasting at The Sea",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Echoes the register of Henry's at HK; quiet alcove available",
+      "vendorOrPlace": "The Sea by Alexander's"
+    }
+  ],
+  "roomDefaults": {
+    "climateC": 21,
+    "lighting": "ambient",
+    "scent": "cedar, low",
+    "bedding": "down"
+  },
+  "placemakers": [
+    {
+      "name": "Maria Salvo",
+      "domain": "Bay Area orchard producers",
+      "bio": "Third-generation Brentwood orchardist; sources Sand Hill's amenity programme."
+    }
+  ],
+  "_t2_notes": "Expand to 5-7 amenityOptions and 8-12 experiences for the agent to pick from."
+}

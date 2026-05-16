@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* ─── Red Thread theme: dark rose red, editorial restraint ─── */
+:root {
+  /* Surfaces */
+  --paper:        #1a0e14;   /* deep oxblood near-black */
+  --paper-soft:   #221218;   /* card surface */
+  --paper-elev:   #2b1820;   /* elevated card */
+  --rule:         #3a2228;   /* hairline dividers */
+  --rule-soft:    #2a1820;
+
+  /* Text */
+  --ink:          #f5f1e8;   /* warm cream — primary text */
+  --ink-mute:     #c9b8b8;   /* muted rose-cream — body */
+  --ink-faint:    #8a6c70;   /* small-caps captions */
+
+  /* Brand accents */
+  --thread:       #b8485e;   /* the red thread */
+  --thread-glow:  rgba(184, 72, 94, 0.55);
+  --thread-deep:  #6b2937;   /* burgundy — legacy Rosewood nod */
+  --brass:        #b08d57;   /* warm metal — sparing */
+  --discovery:    #2d5a47;   /* Rosewood emerald — secondary nod */
+}
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+
+  --color-paper: var(--paper);
+  --color-paper-soft: var(--paper-soft);
+  --color-paper-elev: var(--paper-elev);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+
+  --color-ink: var(--ink);
+  --color-ink-mute: var(--ink-mute);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-thread: var(--thread);
+  --color-thread-deep: var(--thread-deep);
+  --color-brass: var(--brass);
+  --color-discovery: var(--discovery);
+
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-inter);
+}
+
+html, body { background: var(--paper); color: var(--ink); }
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--thread); color: var(--paper); }
+
+/* Editorial micro-utilities */
+.font-display { font-family: var(--font-cormorant), Georgia, serif; }
+.caps {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+.thread-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent 0%, var(--thread) 12%, var(--thread) 88%, transparent 100%);
+  opacity: .85;
+}
+.hairline { border-color: var(--rule); }
+
+/* The literal red thread mark */
+.mark-thread {
+  width: 28px; height: 1.5px;
+  background: var(--thread);
+  display: inline-block;
+  box-shadow: 0 0 12px var(--thread-glow);
+  animation: thread-pulse 4.5s ease-in-out infinite;
+}
+@keyframes thread-pulse {
+  0%, 100% { opacity: .85; }
+  50%      { opacity: 1; }
+}

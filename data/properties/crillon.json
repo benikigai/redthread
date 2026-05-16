@@ -1,0 +1,63 @@
+{
+  "id": "crillon",
+  "name": "Hôtel de Crillon, A Rosewood Hotel",
+  "locale": "Place de la Concorde, Paris",
+  "senseOfPlace": "18th-century palace turned Rosewood. Karl Lagerfeld suites, Les Ambassadeurs, Sense spa. Restraint and craft — no imposed Rosewood template; the building leads.",
+  "amenityOptions": [
+    {
+      "name": "Macarons, single flight",
+      "source": "Pierre Hermé, rue Cambon",
+      "dietary": [],
+      "story": "Hermé's atelier two blocks from the property; same morning batch"
+    },
+    {
+      "name": "Champagne demi — grower estate",
+      "source": "Egly-Ouriet, Ambonnay",
+      "dietary": ["pescatarian"],
+      "story": "Small-grower Champagne — what Parisians drink when no one is watching"
+    },
+    {
+      "name": "Le Pain Quotidien tartine board",
+      "source": "Le Pain Quotidien, Saint-Germain",
+      "dietary": ["vegan"],
+      "story": "Belgian-Parisian breakfast institution — quiet, communal table register"
+    }
+  ],
+  "signatureExperiences": [
+    {
+      "title": "Private morning at Musée d'Orsay",
+      "category": "cultural",
+      "timeOfDay": "morning",
+      "whyHere": "Pre-opening access via Rosewood Placemaker; 8 min from property",
+      "vendorOrPlace": "Musée d'Orsay"
+    },
+    {
+      "title": "Sense spa hammam ritual",
+      "category": "wellness",
+      "timeOfDay": "afternoon",
+      "whyHere": "Crillon's signature — restored 18th-century vaulted hammam",
+      "vendorOrPlace": "Sense, A Rosewood Spa"
+    },
+    {
+      "title": "Dinner at Les Ambassadeurs",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Restored Marie-Antoinette dining room; pescatarian tasting on request",
+      "vendorOrPlace": "Les Ambassadeurs by Jérôme Banctel"
+    }
+  ],
+  "roomDefaults": {
+    "climateC": 20,
+    "lighting": "ambient",
+    "scent": "rose absolute, low",
+    "bedding": "down"
+  },
+  "placemakers": [
+    {
+      "name": "Inès Marchand",
+      "domain": "Paris museum private access",
+      "bio": "Curator-trained Parisian guide; arranges pre-opening visits and atelier tours."
+    }
+  ],
+  "_t2_notes": "Crillon is the brand-restraint counterpoint — keep amenities understated; the building does the work."
+}

@@ -1,0 +1,63 @@
+{
+  "id": "hong-kong",
+  "name": "Rosewood Hong Kong",
+  "locale": "Victoria Dockside, Tsim Sha Tsui",
+  "senseOfPlace": "The soaring city estate — harbour view, cultural centerpiece. Asaya wellness, Henry's, Chaat. Tailored elegance and verticality.",
+  "amenityOptions": [
+    {
+      "name": "Mooncake — single, hand-painted",
+      "source": "Kee Wah Bakery, Kowloon",
+      "dietary": [],
+      "story": "Hong Kong's mooncake tradition — Kee Wah has made them since 1938"
+    },
+    {
+      "name": "Tea flight — three estates",
+      "source": "Lock Cha Tea House",
+      "dietary": ["vegan"],
+      "story": "Curated by Lock Cha — Hong Kong's most respected tea master"
+    },
+    {
+      "name": "Egg tarts, still warm",
+      "source": "Tai Cheong Bakery, Central",
+      "dietary": [],
+      "story": "Chris Patten's favourite — a Hong Kong civic memory in pastry form"
+    }
+  ],
+  "signatureExperiences": [
+    {
+      "title": "Sunrise Tai Chi on the harbour terrace",
+      "category": "wellness",
+      "timeOfDay": "morning",
+      "whyHere": "Victoria Harbour view; Asaya signature ritual",
+      "vendorOrPlace": "Asaya rooftop"
+    },
+    {
+      "title": "Indian tasting at Chaat",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Michelin-starred; pescatarian-friendly menu available",
+      "vendorOrPlace": "Chaat by Manav Tuli"
+    },
+    {
+      "title": "Private gallery walk — M+ Museum",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "Adjacent to property; Asian contemporary art at scale",
+      "vendorOrPlace": "M+ Museum, West Kowloon"
+    }
+  ],
+  "roomDefaults": {
+    "climateC": 22,
+    "lighting": "ambient",
+    "scent": "sandalwood, low",
+    "bedding": "down"
+  },
+  "placemakers": [
+    {
+      "name": "Selena Lai",
+      "domain": "Hong Kong tea ceremony",
+      "bio": "Third-generation Lock Cha master; private tastings for Rosewood guests."
+    }
+  ],
+  "_t2_notes": "Expand with more amenities and a Phuket counterpart if scope allows."
+}

@@ -1,0 +1,48 @@
+{
+  "id": "lin-chen",
+  "name": "Lin Chen",
+  "honorific": "Ms.",
+  "pronouns": "she/her",
+  "priorStays": [
+    {
+      "propertyId": "hong-kong",
+      "arrived": "2025-10-12",
+      "nights": 3,
+      "highlights": [
+        "Loved Henry's tasting menu",
+        "Praised suite sandalwood scent",
+        "Thermostat noted at 19°C"
+      ],
+      "amenityResponses": [
+        { "name": "Mooncake from Kee Wah", "reaction": "loved" }
+      ]
+    },
+    {
+      "propertyId": "hong-kong",
+      "arrived": "2026-02-04",
+      "nights": 2,
+      "highlights": ["Used spa twice — morning ritual", "Requested down-free pillows"],
+      "amenityResponses": []
+    },
+    {
+      "propertyId": "crillon",
+      "arrived": "TODO — T2 to confirm if Phuket lives in v1",
+      "nights": 0,
+      "highlights": []
+    }
+  ],
+  "dietary": ["pescatarian"],
+  "preferences": {
+    "roomTempC": 19,
+    "pillows": "down-free",
+    "scent": "sandalwood",
+    "audio": "silence"
+  },
+  "publicSignals": {
+    "role": "Founder & CEO",
+    "company": "Lattice Capital (fintech)",
+    "recentEvents": ["Series B announcement, Apr 2026", "Stanford GSB visit, May 2026"]
+  },
+  "privacyOpennessScore": 62,
+  "_t2_notes": "Add Phuket prior stay + 1-2 more signals if richer. Keep Series B as the public hook."
+}

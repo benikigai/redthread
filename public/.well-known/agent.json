@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agentprotocol.org/schemas/agent.v1.json",
+  "name": "Red Thread",
+  "description": "Agentic operating system for luxury hospitality. Agent-to-agent handoff for guest preference exchange — consent-based, structured, schema-governed.",
+  "operator": {
+    "name": "Red Thread",
+    "url": "https://redthread.boutique"
+  },
+  "version": "0.1.0",
+  "endpoints": [
+    {
+      "name": "guest_preference_handoff",
+      "description": "Inbound: a guest's personal agent may submit a structured preference packet ahead of arrival. Consent required.",
+      "method": "POST",
+      "url": "https://redthread.boutique/api/agent/handoff",
+      "consent_required": true,
+      "schema": "https://redthread.boutique/.well-known/schemas/guest-preferences.v1.json"
+    }
+  ],
+  "policies": {
+    "privacy_openness_score": "Guest-overridable scalar (0–100) gates depth of inferred context.",
+    "discretion_layer": "Second-pass model filters any signal that crosses the surveillance threshold."
+  }
+}
