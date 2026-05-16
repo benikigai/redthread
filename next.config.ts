@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // bundler to include the whole data tree in the /api/agent function.
   outputFileTracingIncludes: {
     "/api/agent": ["./data/**"],
+    "/api/airport-eta": ["./data/**"],
   },
 };
 
