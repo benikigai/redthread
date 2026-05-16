@@ -81,11 +81,11 @@ export function Header() {
             Red Thread
           </span>
           <span
-            className="mt-1 text-[0.72rem] text-brass"
+            className="mt-1 text-[0.88rem] text-brass"
             style={{
               fontFamily: "var(--font-noto-serif-sc), var(--font-cormorant), serif",
-              fontWeight: 400,
-              letterSpacing: "0.15em",
+              fontWeight: 500,
+              letterSpacing: "0.18em",
             }}
           >
             紅線
