@@ -18,22 +18,15 @@ export function Header() {
         className="group flex items-center gap-3 font-display text-xl tracking-wide text-ink no-underline transition-opacity hover:opacity-80"
         aria-label="Red Thread — home"
       >
-        <svg
-          className="mark-thread-svg text-thread"
-          viewBox="0 0 56 12"
-          width="56"
-          height="12"
-          fill="none"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/redthread-mark-128.jpg"
+          alt=""
+          width={32}
+          height={32}
+          className="mark-knot"
           aria-hidden="true"
-        >
-          <path
-            d="M 2 8 L 14 8 C 14 8 14 2 18 2 C 22 2 22 8 18 8 L 54 8"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        />
         Red Thread
       </a>
       <nav aria-label="Property switcher" className="flex items-center gap-1 text-xs">

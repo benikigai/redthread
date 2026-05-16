@@ -82,7 +82,19 @@ body {
 }
 .hairline { border-color: var(--rule); }
 
-/* The literal red thread mark — single-stroke loop SVG */
+/* Wordmark knot — Chinese endless knot, blends on cream paper-soft */
+.mark-knot {
+  display: inline-block;
+  mix-blend-mode: multiply;
+  /* removes any halo around the JPG when the surrounding bg matches cream */
+  animation: mark-fade 1.4s ease-out .15s both;
+}
+@keyframes mark-fade {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Legacy thread-loop SVG — kept for the three Movement cards on landing if reused */
 .mark-thread-svg {
   filter: drop-shadow(0 0 4px rgba(200, 16, 46, 0.35));
   overflow: visible;
@@ -93,9 +105,7 @@ body {
   animation: thread-draw 2.2s cubic-bezier(.5, 0, .25, 1) forwards .25s,
              thread-glow  4.5s ease-in-out 2.5s infinite;
 }
-@keyframes thread-draw {
-  to { stroke-dashoffset: 0; }
-}
+@keyframes thread-draw { to { stroke-dashoffset: 0; } }
 @keyframes thread-glow {
   0%, 100% { opacity: .9; }
   50%      { opacity: 1;  }
