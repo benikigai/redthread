@@ -210,7 +210,9 @@ function PhaseColumn({ phase }: { phase: Phase }) {
     <div className="flex flex-col">
       {/* Phase header — sits ON the red thread (top: 28px line) */}
       <div className="relative h-[56px] flex flex-col justify-end items-start">
-        <span className="caps text-brass leading-none mb-2">{phase.label}</span>
+        <span className="text-[0.78rem] tracking-[0.22em] uppercase font-semibold text-paper leading-none mb-2">
+          {phase.label}
+        </span>
         {/* Anchor dot on the thread */}
         <span
           className="absolute -top-[5px] left-0 w-[10px] h-[10px] rounded-full border border-on-dark/40"
@@ -227,10 +229,14 @@ function PhaseColumn({ phase }: { phase: Phase }) {
         {phase.beats.map((b, i) => (
           <li
             key={`${phase.id}-${i}`}
-            className="bg-rose-darker border border-white/10 px-3 py-2"
+            className="bg-rose-darker border border-white/15 px-3 py-2.5"
           >
-            <div className="caps text-brass text-[0.62rem]">{b.t}</div>
-            <p className="mt-1.5 text-[12.5px] text-on-dark leading-snug">{b.note}</p>
+            <div className="text-[0.68rem] tracking-[0.22em] uppercase font-semibold text-brass">
+              {b.t}
+            </div>
+            <p className="mt-1.5 text-[13.5px] text-paper leading-snug font-normal">
+              {b.note}
+            </p>
           </li>
         ))}
       </ol>
