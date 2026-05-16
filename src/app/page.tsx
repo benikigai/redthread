@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { ContinuityOffers } from "@/components/ContinuityOffers";
 import { DashboardDial } from "@/components/DashboardDial";
+import { WeeklyAgentDialog } from "@/components/WeeklyAgentDialog";
 import { DemoLoader } from "@/components/DemoLoader";
 import { DemoTrigger } from "@/components/DemoTrigger";
 import { Header } from "@/components/Header";
@@ -28,7 +29,9 @@ export default function Home() {
           <ReservationIntake />
           {/* Read-only Hold-the-Thread band — guest controls this on /profile */}
           <DashboardDial />
-          {/* Continuity offers only render when activeGuestPos >= 90 (POS 9-10) */}
+          {/* The next two only render at POS 9-10 (Fully bespoke) — A2A weekly
+              call transcript on top, the offers it produced below. */}
+          <WeeklyAgentDialog />
           <ContinuityOffers />
           <DemoTrigger />
           <div className="mt-8 grid grid-cols-12 gap-6">
