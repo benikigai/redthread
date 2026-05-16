@@ -6,6 +6,7 @@
     "name": "Red Thread",
     "url": "https://redthread.boutique"
   },
+  "contact": "agents@redthread.boutique",
   "version": "0.1.0",
   "endpoints": [
     {
@@ -20,5 +21,12 @@
   "policies": {
     "privacy_openness_score": "Guest-overridable scalar (0–100) gates depth of inferred context.",
     "discretion_layer": "Second-pass model filters any signal that crosses the surveillance threshold."
-  }
+  },
+  "principles": [
+    "Privacy Openness Score governs all dossier depth — manifest never escalates a guest's declared POS band",
+    "Discretion Layer is a separate, auditable Claude pass — every redaction is logged in Dossier.suppressed[]",
+    "Multi-layered defense — no single safety mechanism is load-bearing; consent gates and POS gates compose",
+    "Consent-based, schema-governed, guest-overridable — the guest's agent holds the keys, Red Thread holds the craft",
+    "A Sense of Place is half the equation — the same manifest produces different actuators at different properties, by design"
+  ]
 }
