@@ -19,7 +19,7 @@ export default function Home() {
       <Header />
 
       {/* Warm cream desk — header + eyebrow + zones float as paper sheets on it */}
-      <section className="bg-paper-soft">
+      <section className="bg-paper-canvas">
         <div className="mx-auto w-full max-w-[1480px] px-8 pb-12">
           <Eyebrow />
           <DemoTrigger />

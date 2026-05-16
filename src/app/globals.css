@@ -3,8 +3,9 @@
 /* ─── Red Thread theme — all-in rose red on white paper ─── */
 :root {
   /* Surfaces */
-  --paper:        #FFFFFF;   /* pure white */
-  --paper-soft:   #FAF6EC;   /* warm cream nested surface */
+  --paper:        #FFFFFF;   /* pure white — zone cards */
+  --paper-soft:   #FAF6EC;   /* light cream — nested chips inside cards */
+  --paper-canvas: #F2EBE0;   /* deeper cream — body + top section (matches landing band) */
   --paper-elev:   #F5F1E8;   /* cream — used on dark bands for body text */
   --rule:         #E8E3D5;   /* hairline divider — warm bone */
   --rule-soft:    #F0EBDF;
@@ -35,6 +36,7 @@
 
   --color-paper: var(--paper);
   --color-paper-soft: var(--paper-soft);
+  --color-paper-canvas: var(--paper-canvas);
   --color-paper-elev: var(--paper-elev);
   --color-rule: var(--rule);
   --color-rule-soft: var(--rule-soft);
