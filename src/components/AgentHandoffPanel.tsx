@@ -87,6 +87,7 @@ export function AgentHandoffPanel({
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const audioQueueRef = useRef<AudioJob[]>([]);
   const playingRef = useRef(false);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Voice queue — every incoming message gets pushed; one plays at a time.
   // Different voice per role; cached on /tmp by hash so repeat demos warm.
@@ -94,6 +95,17 @@ export function AgentHandoffPanel({
     if (!voiceEnabled) return;
     audioQueueRef.current.push(job);
     void drainAudio();
+  };
+
+  const stopAudio = () => {
+    audioQueueRef.current = [];
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
+    }
+    setSpeaking(null);
+    setVoiceEnabled(false); // also flip the toggle so no new audio enqueues
   };
 
   const drainAudio = async () => {
@@ -112,6 +124,7 @@ export function AgentHandoffPanel({
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
+        currentAudioRef.current = audio;
         await new Promise<void>((resolve) => {
           audio.onended = () => {
             URL.revokeObjectURL(url);
@@ -121,8 +134,14 @@ export function AgentHandoffPanel({
             URL.revokeObjectURL(url);
             resolve();
           };
+          audio.onpause = () => {
+            // If we paused (via stopAudio), bail out of the loop early.
+            URL.revokeObjectURL(url);
+            resolve();
+          };
           audio.play().catch(() => resolve());
         });
+        currentAudioRef.current = null;
       } catch {
         // swallow — keep the UX going even if one TTS call fails
       } finally {
@@ -203,9 +222,21 @@ export function AgentHandoffPanel({
               {speaking === "threadkeeper" ? "Threadkeeper · Alice" : "elias · George"}
             </span>
           )}
+          {speaking && voiceEnabled && (
+            <button
+              type="button"
+              onClick={stopAudio}
+              className="caps border border-thread bg-thread text-paper hover:bg-thread-deep hover:border-thread-deep px-3 py-1 transition-colors text-[10px] tracking-[0.18em]"
+            >
+              ■ Stop voice
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => setVoiceEnabled((v) => !v)}
+            onClick={() => {
+              if (voiceEnabled) stopAudio();
+              else setVoiceEnabled(true);
+            }}
             className={[
               "caps border hairline px-2 py-1 transition-colors text-[10px] tracking-[0.18em]",
               voiceEnabled
