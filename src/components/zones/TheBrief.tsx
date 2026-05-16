@@ -1,7 +1,11 @@
 "use client";
 
 import { ZoneShell } from "./ZoneShell";
+import { BriefMeButton, composeNarrationFromDossier } from "@/components/BriefMeButton";
 import { useDossier } from "@/lib/dossierStore";
+
+const STATIC_NARRATION =
+  "Ms. Lin Chen — founder, fintech, first visit to Sand Hill. Room is set: nineteen degrees, warm dim, down-free pillows, sandalwood low. Welcome amenity is heirloom Bartlett pears with Bay Area honey, from Frog Hollow Farm, thirty minutes from property. Itinerary held: a seven AM private hike at Windy Hill; and a pescatarian tasting at The Sea by Alexander's. Conversation hooks. Closed Series B last month — congratulate without prying. The Discretion Layer suppressed three signals, auditable. The thread is held.";
 
 export function TheBrief() {
   const dossier = useDossier((s) => s.dossier);
@@ -16,6 +20,7 @@ export function TheBrief() {
 function BriefLive() {
   const dossier = useDossier((s) => s.dossier);
   if (!dossier) return null;
+  const narration = composeNarrationFromDossier(dossier);
   return (
     <div className="space-y-6">
       <div>
@@ -55,13 +60,7 @@ function BriefLive() {
         </p>
       </div>
 
-      <button
-        type="button"
-        className="caps text-ink hover:text-thread-deep border hairline px-4 py-3 w-full transition-colors flex items-center justify-between"
-      >
-        <span>Brief me · ElevenLabs voice</span>
-        <span aria-hidden="true">↻</span>
-      </button>
+      <BriefMeButton narration={narration} />
     </div>
   );
 }
@@ -97,13 +96,7 @@ function BriefStatic() {
         </p>
       </div>
 
-      <button
-        type="button"
-        className="caps text-ink hover:text-thread-deep border hairline px-4 py-3 w-full transition-colors flex items-center justify-between"
-      >
-        <span>Brief me · ElevenLabs voice</span>
-        <span aria-hidden="true">↻</span>
-      </button>
+      <BriefMeButton narration={STATIC_NARRATION} />
     </div>
   );
 }
