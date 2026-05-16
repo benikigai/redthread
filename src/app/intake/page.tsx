@@ -10,6 +10,8 @@
 // re-runs the agent with the new prefs landing on the dossier.
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 
@@ -105,11 +107,43 @@ function IntakeInner() {
   };
 
   return (
-    <main className="min-h-screen bg-paper text-ink flex flex-col">
-      <header className="w-full border-b border-rule-soft">
-        <div className="mx-auto w-full max-w-[1100px] px-8 py-6 flex items-baseline gap-4">
-          <div className="font-serif text-2xl tracking-tight">Red Thread</div>
-          <div className="text-ink-faint text-xs uppercase tracking-[0.18em]">
+    <main className="min-h-screen bg-paper-canvas text-ink flex flex-col">
+      <header className="w-full border-b border-rule bg-paper-canvas">
+        <div className="mx-auto w-full max-w-[1100px] px-8 py-5 flex items-center justify-between gap-6">
+          <Link
+            href="/profile"
+            className="lockup group flex items-center gap-3 text-ink no-underline transition-opacity hover:opacity-85"
+            aria-label="Red Thread — your profile"
+          >
+            <Image
+              src="/logo.png"
+              alt=""
+              width={36}
+              height={36}
+              priority
+              className="lockup-mark"
+              aria-hidden="true"
+            />
+            <span className="flex flex-col leading-none">
+              <span
+                className="font-display text-[1.35rem] leading-none"
+                style={{ letterSpacing: "0.02em" }}
+              >
+                Red Thread
+              </span>
+              <span
+                className="mt-1 text-[0.72rem] text-brass"
+                style={{
+                  fontFamily: "var(--font-noto-serif-sc), var(--font-cormorant), serif",
+                  fontWeight: 400,
+                  letterSpacing: "0.15em",
+                }}
+              >
+                紅線
+              </span>
+            </span>
+          </Link>
+          <div className="text-ink-faint text-xs uppercase tracking-[0.22em]">
             Pre-Arrival Intake
           </div>
         </div>

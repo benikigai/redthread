@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -70,21 +71,47 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-paper text-ink">
-      <header className="border-b border-rule">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+    <main className="min-h-screen bg-paper-canvas text-ink">
+      <header className="border-b border-rule bg-paper-canvas">
+        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between gap-6">
           <Link
             href="/"
-            className="text-[14px] tracking-[0.16em] uppercase text-ink-mute hover:text-thread transition-colors"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            className="lockup group flex items-center gap-3 text-ink no-underline transition-opacity hover:opacity-85"
+            aria-label="Red Thread — concierge dashboard"
           >
-            ← Red Thread
+            <Image
+              src="/logo.png"
+              alt=""
+              width={36}
+              height={36}
+              priority
+              className="lockup-mark"
+              aria-hidden="true"
+            />
+            <span className="flex flex-col leading-none">
+              <span
+                className="font-display text-[1.35rem] leading-none"
+                style={{ letterSpacing: "0.02em" }}
+              >
+                Red Thread
+              </span>
+              <span
+                className="mt-1 text-[0.72rem] text-brass"
+                style={{
+                  fontFamily: "var(--font-noto-serif-sc), var(--font-cormorant), serif",
+                  fontWeight: 400,
+                  letterSpacing: "0.15em",
+                }}
+              >
+                紅線
+              </span>
+            </span>
           </Link>
           <span
-            className="text-[11px] tracking-[0.18em] uppercase text-ink-faint"
+            className="text-[11px] tracking-[0.22em] uppercase text-ink-faint hidden sm:inline"
             style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
-            紅線 · Your profile
+            Your profile
           </span>
         </div>
       </header>
@@ -110,6 +137,36 @@ export default function ProfilePage() {
           One thread connects you to the property, the property to the place,
           and the place to the next stay. You decide how tightly we hold it.
         </p>
+
+        {/* Voice intake CTA — five-minute briefing she gives us by voice */}
+        <section
+          aria-label="Pre-arrival voice briefing"
+          className="mt-10 bg-paper border border-rule p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
+        >
+          <div>
+            <p className="text-[10px] tracking-[0.22em] uppercase text-thread-deep">
+              Pre-arrival briefing
+            </p>
+            <h2
+              className="mt-2 text-[22px] leading-tight text-ink"
+              style={{ fontFamily: "var(--font-cormorant), serif" }}
+            >
+              Five quick questions, in your voice.
+            </h2>
+            <p className="mt-2 text-[14px] text-ink-mute max-w-md leading-relaxed">
+              Room, bedding, morning rhythm, food, and how publicly we may draw
+              on what&rsquo;s known about you. About a minute.
+            </p>
+          </div>
+          <Link
+            href="/intake"
+            className="shrink-0 inline-flex items-center gap-2 bg-rose-deep text-on-dark px-6 py-3 text-[12px] tracking-[0.22em] uppercase hover:bg-rose-darker transition-colors"
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          >
+            Begin briefing
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
 
         <div className="mt-10 space-y-6">
           <DiscretionDial
