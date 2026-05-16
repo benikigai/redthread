@@ -33,7 +33,7 @@ const RESERVATION_A123: Reservation = {
   guestName: "Benjamin Shyong",
   reservationNumber: "A123",
   propertyId: "hong-kong",
-  flightNumber: "CX872",
+  flightNumber: "CX879",
   checkIn: "2026-05-29",
   checkOut: "2026-05-31",
 };
