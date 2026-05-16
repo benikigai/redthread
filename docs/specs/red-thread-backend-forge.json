@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "category": "simple",
+    "description": "Scaffold the Next.js 14 App Router project at repo root with TypeScript + Tailwind. Create package.json, tsconfig.json, tailwind.config.ts (with the Rosewood palette from the shared product spec), app/layout.tsx, app/page.tsx (placeholder string 'Red Thread loading…'), app/globals.css, .env.example listing ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, AVIATIONSTACK_API_KEY (optional), .gitignore, next.config.ts. Install @anthropic-ai/sdk.",
+    "verify": "test -f package.json && test -f tsconfig.json && test -f tailwind.config.ts && grep -q '@anthropic-ai/sdk' package.json && grep -q 'rw-green' tailwind.config.ts",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 2,
+    "category": "moderate",
+    "description": "Create lib/types.ts containing every type from the shared product spec verbatim (Property, Placemaker, Experience, AmenityOption, RoomState, PriorStay, GuestProfile, POSBand, PrivacyOpennessScore, ActuatorOutputs, Citation, RedactionLog, Dossier, UpcomingArrival, FlightStatus) plus SSEEvent = { phase, type, payload, ts } where phase is one of verify | research | synthesize | discretion | done | error. Create lib/prompts.ts exporting RESEARCH_AGENT_SYSTEM, DISCRETION_LAYER_SYSTEM, POS_CALCULATOR_SYSTEM as const strings from the shared product spec.",
+    "verify": "npx tsc --noEmit && grep -q 'SSEEvent' lib/types.ts && grep -q 'RESEARCH_AGENT_SYSTEM' lib/prompts.ts && grep -q 'DISCRETION_LAYER_SYSTEM' lib/prompts.ts && grep -q 'POS_CALCULATOR_SYSTEM' lib/prompts.ts",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 3,
+    "category": "moderate",
+    "description": "Create data/guests.json with Ms. Mei-Ling Chen (3 prior stays: HK x2, Phuket x1, all preferences per shared product spec) and Aldo Bellandi as backup. Create data/properties.json with Sand Hill, Hong Kong, Crillon — each must have tagline, senseOfPlace, >=2 placemakers, >=8 signatureExperiences, >=6 amenityOptions, roomDefaults, timezone, airportCode, language.",
+    "verify": "node -e \"const g=require('./data/guests.json'),p=require('./data/properties.json'); if(!g['chen-mei-ling']||g['chen-mei-ling'].priorStays.length<3) process.exit(1); for(const k of ['sand-hill','hong-kong','crillon-paris']){const x=p[k]; if(!x||x.signatureExperiences.length<8||x.amenityOptions.length<6||x.placemakers.length<2)process.exit(1);} console.log('ok')\"",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 4,
+    "category": "simple",
+    "description": "Create lib/crm.ts exporting crmCrossProperty(guestId) which reads data/guests.json and returns the guest's priorStays array (throws on unknown id). Create lib/flight.ts exporting flightLookup(flightNumber): Promise<FlightStatus>. If process.env.AVIATIONSTACK_API_KEY is set, hit the real AviationStack API; else return deterministic mock data. Both must be typed strictly via imports from lib/types.ts.",
+    "verify": "node -e \"const {crmCrossProperty}=require('./lib/crm.ts');const s=crmCrossProperty('chen-mei-ling');if(s.length<3)process.exit(1);try{crmCrossProperty('nope');process.exit(1)}catch{} console.log('ok')\" || npx tsx -e \"import('./lib/crm').then(async m=>{const s=m.crmCrossProperty('chen-mei-ling'); if(s.length<3)process.exit(1); try{m.crmCrossProperty('nope');process.exit(1)}catch{} console.log('ok')})\"",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 5,
+    "category": "simple",
+    "description": "Create lib/pos.ts exporting computePOS(guestName, hints?): Promise<PrivacyOpennessScore>. Single Claude call to claude-sonnet-4-6 using POS_CALCULATOR_SYSTEM from lib/prompts.ts, JSON output. In-module Map cache by guest name. Clamp score 0-10. Derive band: 0-3 minimal, 4-6 standard, 7-10 full.",
+    "verify": "npx tsx -e \"import('./lib/pos').then(async m=>{const p1=await m.computePOS('Mei-Ling Chen'); const p2=await m.computePOS('Mei-Ling Chen'); if(typeof p1.score!=='number'||!['minimal','standard','full'].includes(p1.band)||Object.keys(p1.signals).length!==5)process.exit(1); console.log('ok')})\"",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 6,
+    "category": "moderate",
+    "description": "Create lib/tools.ts exporting TOOL_DEFINITIONS: Anthropic.Tool[] array containing Claude native web_search server tool plus flight_lookup and crm_cross_property as custom tools. Export dispatchTool(name, input): Promise<unknown> that switch-dispatches to handlers (crmCrossProperty, flightLookup). Unknown tool name throws structured error.",
+    "verify": "npx tsx -e \"import('./lib/tools').then(async m=>{const r=await m.dispatchTool('crm_cross_property',{guestId:'chen-mei-ling'}); if(!Array.isArray(r))process.exit(1); try{await m.dispatchTool('nope',{});process.exit(1)}catch{} console.log('ok')})\"",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 7,
+    "category": "complex",
+    "description": "Create app/api/thread/route.ts. POST { guestId, propertyId, flightNumber? } returns text/event-stream. runtime='nodejs', dynamic='force-dynamic'. Phases in order: verify (computePOS) -> research (Anthropic.messages.stream with TOOL_DEFINITIONS, loop on tool_use until end_turn, max 8 iterations, claude-opus-4-7, max_tokens=4096) -> synthesize (parse <dossier>...</dossier>) -> discretion (separate claude-sonnet-4-6 call with DISCRETION_LAYER_SYSTEM, parse <filtered>...</filtered>) -> done. Emit SSE event per phase boundary and per tool_use begin/end. Errors emit { phase:'error', payload:{message} } and close stream gracefully. If process.env.DEMO_MODE==='1' bypass Claude and replay events from data/fixtures/<guestId>__<propertyId>.json with per-event delayMs.",
+    "verify": "curl -fsS -N -X POST http://localhost:3000/api/thread -H 'Content-Type: application/json' -d '{\"guestId\":\"chen-mei-ling\",\"propertyId\":\"sand-hill\"}' | head -c 2000 | grep -q 'phase' && DEMO_MODE=1 curl -fsS -N -X POST http://localhost:3000/api/thread -H 'Content-Type: application/json' -d '{\"guestId\":\"chen-mei-ling\",\"propertyId\":\"sand-hill\"}' | head -c 2000 | grep -q 'done'",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 8,
+    "category": "simple",
+    "description": "Create app/api/voice/route.ts. POST { text, voiceId? } proxies to ElevenLabs https://api.elevenlabs.io/v1/text-to-speech/{voiceId}/stream with model eleven_turbo_v2_5, settings stability=0.55 similarity_boost=0.75 style=0.2 use_speaker_boost=true. Default voiceId = Xb7hH8MSUJpSbSDYk0k2 (Alice). Stream audio/mpeg back. Hash text+voiceId, cache mp3 to /tmp/voice-cache, return cached bytes on hit. Missing ELEVENLABS_API_KEY -> 503 JSON error.",
+    "verify": "curl -fsS -X POST http://localhost:3000/api/voice -H 'Content-Type: application/json' -d '{\"text\":\"Briefed.\"}' --output /tmp/voice-test.mp3 && file /tmp/voice-test.mp3 | grep -q 'MPEG' && rm /tmp/voice-test.mp3",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 9,
+    "category": "simple",
+    "description": "Create app/.well-known/agent.json/route.ts. GET returns the JSON document from the shared product spec describing Red Thread as agent-to-agent inbound endpoint: name, version, description, publisher, contact, schemas.guestPreferenceManifest, endpoints.submit/verify, principles array. Content-Type: application/json.",
+    "verify": "curl -fsS http://localhost:3000/.well-known/agent.json | jq -e '.name == \"Red Thread\"' && curl -fsS http://localhost:3000/.well-known/agent.json | jq -e '.principles | length >= 4'",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 10,
+    "category": "simple",
+    "description": "Create scripts/capture-fixture.ts that POSTs to /api/thread (live mode) for a guest+property pair, captures every SSE event with relative delayMs from start, and writes data/fixtures/<guestId>__<propertyId>.json. Run it three times for chen-mei-ling x {sand-hill, hong-kong, crillon-paris}. Wire app/api/thread/route.ts (from T7) so DEMO_MODE=1 replays these fixtures with realistic per-event delays.",
+    "verify": "test -f data/fixtures/chen-mei-ling__sand-hill.json && test -f data/fixtures/chen-mei-ling__hong-kong.json && test -f data/fixtures/chen-mei-ling__crillon-paris.json && DEMO_MODE=1 curl -fsS -N -X POST http://localhost:3000/api/thread -H 'Content-Type: application/json' -d '{\"guestId\":\"chen-mei-ling\",\"propertyId\":\"hong-kong\"}' | head -c 2000 | grep -q 'discretion'",
+    "passes": false,
+    "skipped": false
+  },
+  {
+    "id": 11,
+    "category": "simple",
+    "description": "Write README.md documenting: stack, required env vars (ANTHROPIC_API_KEY via op://Clawdbot/Anthropic API Key/credential; ELEVENLABS_API_KEY; AVIATIONSTACK_API_KEY optional), local dev command (op run -- pnpm dev), DEMO_MODE toggle, deploy command (vercel --prod), the SSE event shape so Terminal 1 has a contract reference, and brief project description.",
+    "verify": "test -f README.md && grep -q 'op run' README.md && grep -q 'DEMO_MODE' README.md && grep -q 'SSEEvent' README.md",
+    "passes": false,
+    "skipped": false
+  }
+]
