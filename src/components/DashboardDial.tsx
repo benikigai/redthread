@@ -3,25 +3,35 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { useDossier } from "@/lib/dossierStore";
 import { bandFor, posToUi, uiToPos, BAND_LABEL } from "./DiscretionDial";
 import { ThreadSlider } from "./ThreadSlider";
 
 /**
- * Dashboard banner — the concierge mirror of Mr. Shyong's Hold the Thread
- * setting. Read-only "preview" semantics: staff can drag to see what other
- * levels look like; saving requires the guest's consent through /profile.
- *
- * Single source of truth for the saved value is the guest's profile; in this
- * hackathon scope we hard-code the starting value from data/guests/ben.json
- * (POS=55 → 5/10). A real product would fetch /api/guest/ben.
+ * Dashboard banner — the concierge mirror of the active guest's "Hold the
+ * Thread" setting. Read-only "preview" semantics: staff can drag to see what
+ * other levels look like; the saved value comes from the guest via /profile
+ * and is mirrored here through the zustand store (ReservationIntake sets it
+ * on preset selection and on submit).
  */
-const SAVED_POS = 55; // matches data/guests/ben.json
-const SAVED_UI = posToUi(SAVED_POS);
-
 export function DashboardDial() {
-  const [value, setValue] = useState(SAVED_UI);
+  const savedPos = useDossier((s) => s.activeGuestPos);
+  const savedUi = posToUi(savedPos);
+  // Track a UI-level "override" — when the user drags the dial we use the
+  // override; when the user-bound saved value changes (preset toggle), we
+  // mirror it. The "store previous prop in state" pattern lets us bail out
+  // of stale override without using an effect.
+  const [override, setOverride] = useState<number | null>(null);
+  const [prevSaved, setPrevSaved] = useState(savedUi);
+  if (prevSaved !== savedUi) {
+    setPrevSaved(savedUi);
+    setOverride(null);
+  }
+  const value = override ?? savedUi;
+  const setValue = (next: number) =>
+    setOverride(next === savedUi ? null : next);
   const band = bandFor(uiToPos(value));
-  const isPreview = value !== SAVED_UI;
+  const isPreview = override !== null && override !== savedUi;
 
   return (
     <section
@@ -36,7 +46,7 @@ export function DashboardDial() {
               <span className="inline-block w-4 h-px bg-thread" />
               Hold the Thread · {value} of 10
               <span className="text-ink-faint normal-case tracking-normal italic ml-2 text-[11px]">
-                — Ms. Chen&rsquo;s preference
+                — guest&rsquo;s preference
                 {isPreview ? " · preview" : ""}
               </span>
             </div>
@@ -78,7 +88,7 @@ export function DashboardDial() {
               href="/profile"
               className="caps text-ink hover:text-thread border-b border-rule hover:border-thread transition-colors no-underline pb-0.5"
             >
-              View as Ms. Chen →
+              View as guest →
             </Link>
           </p>
         </div>

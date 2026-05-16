@@ -52,6 +52,13 @@ interface DossierStore {
   activeProperty: PropertyId;
   setActiveProperty: (id: PropertyId) => void;
 
+  /** Saved Privacy Openness Score for the currently selected guest. The
+   *  bottom-of-dashboard "Hold the Thread" dial reads from here so it
+   *  reflects whoever the user just selected (Ben=55, Lin Chen=62). The
+   *  guest sets this on /profile; the dashboard mirrors it read-only. */
+  activeGuestPos: number;
+  setActiveGuestPos: (pos: number) => void;
+
   /** Live arrival-research chain. Each step streams reasoning tokens; UI
    *  surfaces the typing reasoning + final value. LiveThread (Zone IV) also
    *  reads from this to render the pre-arrival timeline beats live. */
@@ -86,6 +93,9 @@ export const useDossier = create<DossierStore>((set) => ({
 
   activeProperty: "hong-kong",
   setActiveProperty: (activeProperty) => set({ activeProperty }),
+
+  activeGuestPos: 55,  // ben.json default; ReservationIntake updates on preset change
+  setActiveGuestPos: (activeGuestPos) => set({ activeGuestPos }),
 
   arrivalSteps: [],
   arrivalRunning: false,

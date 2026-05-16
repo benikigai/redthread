@@ -71,6 +71,9 @@ interface RequestBody {
    *  reservation flow uses this so the dashboard isn't reading from a
    *  pre-baked fixture. */
   live?: boolean;
+  /** Surface the guest's email to the research prompt for identity
+   *  disambiguation in web_search. */
+  guestEmail?: string;
 }
 
 const POSTURE_TO_POS: Record<NonNullable<VoiceIntakeOverrides["privacyPosture"]>, number> = {
@@ -254,7 +257,10 @@ ARRIVAL CONTEXT:
 - guestId: ${body.guestId}
 - propertyId: ${body.propertyId}
 ${body.flightNumber ? `- flightNumber: ${body.flightNumber}` : "- no flight info provided"}
+${body.guestEmail ? `- email: ${body.guestEmail}` : "- email: not provided"}
 - generatedAt (use verbatim in Dossier): ${new Date().toISOString()}
+
+The email is a strong disambiguation signal — its domain often confirms the guest's company; use it in web_search queries when verifying identity (e.g. site:domain.tld, or "<name> <domain>").
 
 Run web_search, crm_cross_property${body.flightNumber ? ", and flight_lookup" : ""} as needed. Then synthesize the Dossier and wrap it in <dossier>...</dossier>.`;
 }
