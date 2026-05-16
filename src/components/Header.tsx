@@ -7,7 +7,7 @@ import { streamAgent } from "@/components/DemoLoader";
 import { useDossier } from "@/lib/dossierStore";
 import type { PropertyId } from "@/lib/types";
 
-const GUEST_ID = "lin-chen";
+const GUEST_ID = "ben";
 
 const PROPERTIES: { id: PropertyId; name: string; locale: string }[] = [
   { id: "sand-hill", name: "Rosewood Sand Hill", locale: "Menlo Park" },

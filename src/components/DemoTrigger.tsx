@@ -17,7 +17,7 @@ import { AgentHandoffPanel } from "@/components/AgentHandoffPanel";
 import { streamAgent } from "@/components/DemoLoader";
 import { useDossier, type RunPhase } from "@/lib/dossierStore";
 
-const DEFAULT_GUEST = "lin-chen";
+const DEFAULT_GUEST = "ben";
 
 export function DemoTrigger() {
   const phase = useDossier((s) => s.phase);

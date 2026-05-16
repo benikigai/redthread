@@ -13,23 +13,23 @@ import {
 } from "@/components/DiscretionDial";
 
 /**
- * Ms. Lin Chen's guest profile — the canonical guest-side surface where the
+ * Mr. Benjamin Shyong's guest profile — the canonical guest-side surface where the
  * Hold the Thread preference lives. The concierge dashboard mirrors this
  * setting read-only; only this page can save a change.
  *
  * For the hackathon: "Save" updates local state and POSTs a preview to
  * /api/agent so the change is round-tripped and visible. A real product
- * would persist to the guest record (PUT /api/guest/lin-chen).
+ * would persist to the guest record (PUT /api/guest/ben).
  */
 
-// Hard-coded for the demo. Real product would fetch /api/guest/lin-chen.
+// Hard-coded for the demo. Real product would fetch /api/guest/ben.
 const GUEST = {
-  id: "lin-chen",
-  honorific: "Ms.",
-  name: "Lin Chen",
-  privacyOpennessScore: 62, // matches data/guests/lin-chen.json
-  role: "Founder & CEO, Lattice Capital",
-  dietary: ["pescatarian"],
+  id: "ben",
+  honorific: "Mr.",
+  name: "Benjamin Shyong",
+  privacyOpennessScore: 55, // matches data/guests/ben.json
+  role: "Founder & CEO, OpenClaw / Injester",
+  dietary: ["vegetarian"],
 };
 
 export default function ProfilePage() {

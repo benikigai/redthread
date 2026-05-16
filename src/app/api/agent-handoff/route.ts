@@ -115,7 +115,7 @@ function sse(payload: unknown): Uint8Array {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  let guestId = "lin-chen";
+  let guestId = "ben";
   let propertyId = "hong-kong";
   try {
     const raw = await req.json();

@@ -1,0 +1,142 @@
+{
+  "dossier": {
+    "guestId": "ben",
+    "propertyId": "hong-kong",
+    "generatedAt": "2026-05-16T19:43:03.128Z",
+    "bio": "Mr. Benjamin Shyong — founder and CEO of OpenClaw / Injester, a returning guest at Rosewood Hong Kong on his third stay this year. Quiet, ritual-driven; an Affluential Explorer who tunes his rhythm to the city he's in.",
+    "conversationHooks": [
+      "Returning for FinTech Week again — he keynoted Oct 2025 (public). Treat as natural context, no need to introduce.",
+      "He's previously expressed interest in a private Lock Cha session with Selena Lai — he asked about it at checkout last visit."
+    ],
+    "handleWithCare": [
+      "Dietary: vegetarian (confirmed via direct intake; older 2024 CRM tag of pescatarian is stale).",
+      "Tree-nut allergy is a hard constraint — confirm with kitchen on every plated item, including amenity and turndown.",
+      "Prefers silence and quiet; no in-room music, no welcome playlist. Sandalwood scent is OK at low intensity; he doesn't mind it but didn't ask for it."
+    ],
+    "suppressed": [
+      {
+        "signal": "investor-meeting-specifics",
+        "reason": "Calendar overlay on past stays inferred deal-related meetings; below standard floor for staff context — keep as 'business focus' not specifics."
+      },
+      {
+        "signal": "prior-cross-property-amenity-response",
+        "reason": "Granular per-amenity reactions across properties feel surveillance-y; aggregate to 'returning, knows the brand' instead."
+      },
+      {
+        "signal": "social-graph-inference",
+        "reason": "Public-record co-investors and co-keynote speakers should not surface unprompted; private until guest raises."
+      }
+    ],
+    "actuators": {
+      "roomState": {
+        "climateC": 20,
+        "lighting": "ambient, low",
+        "scent": "neutral",
+        "audio": "silence",
+        "bedding": "down-free pillows; non-down duvet alternative",
+        "reasoning": [
+          "Voice / A2A intake confirmed roomTempC = 20 this season (CRM had 22°C default; the 20°C is fresher).",
+          "Prior HK stay (Mar 2025): requested down-free pillows on arrival — extend to bedding standard.",
+          "Stated preference: silence — suppress in-room music and welcome playlist.",
+          "Scent default reset to neutral per intake — sandalwood was a property default he didn't request.",
+          "Lighting kept at property default (ambient), dimmed for late afternoon arrival."
+        ]
+      },
+      "welcomeAmenity": {
+        "name": "Tea flight — three estates",
+        "source": "Lock Cha Tea House",
+        "dietary": ["vegan", "vegetarian"],
+        "story": "Curated by Lock Cha — Hong Kong's most respected tea master",
+        "reasoning": "Vegetarian, tree-nut-safe, and alcohol-free. Builds on his prior request (asked about a private Lock Cha session at last checkout) — pre-positioning this amenity quietly opens the door for the Wing Lee Street ceremony later in the stay. Relationship Hospitality, not a transaction."
+      },
+      "itinerary": [
+        {
+          "title": "Sunrise harbour walk + Bici filter coffee on return",
+          "category": "wellness",
+          "timeOfDay": "morning",
+          "whyHere": "Victoria Dockside boardwalk to Tsim Sha Tsui promenade — quiet at first light",
+          "vendorOrPlace": "Victoria Dockside boardwalk · in-suite filter coffee on return",
+          "time": "06:30",
+          "reasoning": "His standing morning ritual is a long walk + filter coffee. Pre-position the equipment in-suite (Chemex stocked at HK per concierge note); the walk uses the property's own front door."
+        },
+        {
+          "title": "Wing Lee Street private tea ceremony",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Preserved 1950s street; Lock Cha private session",
+          "vendorOrPlace": "Wing Lee Street, Sheung Wan · Selena Lai",
+          "time": "15:00",
+          "reasoning": "He asked about this at checkout last visit. Selena Lai (Lock Cha master, our Placemaker) confirmed availability. Honour the conversation he opened with us."
+        },
+        {
+          "title": "Vegetarian tasting at Chaat",
+          "category": "culinary",
+          "timeOfDay": "evening",
+          "whyHere": "Michelin-starred; full vegetarian Indian tasting on request",
+          "vendorOrPlace": "Chaat by Manav Tuli",
+          "time": "19:30",
+          "reasoning": "Vegetarian + tree-nut allergy both fit Chaat's regional Indian register — chef Manav Tuli (Placemaker) flagged. Discovery for a returning guest who's already done Henry's and Spring Moon."
+        },
+        {
+          "title": "Quiet workspace — Roof at Eight",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Members-only Sky Lounge with harbour view; quiet hours 14:00–17:00",
+          "vendorOrPlace": "The Manor Club · Roof at Eight",
+          "time": "14:00",
+          "reasoning": "He's on FinTech Week — expect 2-3 hours of focused work mid-afternoon. Pre-reserved table, no service interruptions unless he flags."
+        }
+      ]
+    },
+    "toolCalls": [
+      {
+        "tool": "crm_cross_property",
+        "status": "complete",
+        "args": { "guestId": "ben" },
+        "result": "3 prior stays: hong-kong, sand-hill, hong-kong",
+        "startedAt": "2026-05-16T19:43:07.254Z",
+        "finishedAt": "2026-05-16T19:43:07.255Z"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "Benjamin Shyong OpenClaw Injester AI infrastructure founder" },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "8 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "\"Benjamin Shyong\" \"Hong Kong FinTech Week\" 2025 keynote" },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "3 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "OpenClaw Series A announcement March 2026" },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "5 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "Benjamin Shyong Stanford GSB AI infrastructure" },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "2 results"
+      },
+      {
+        "tool": "flight_lookup",
+        "status": "complete",
+        "args": { "flightNumber": "UA857" },
+        "startedAt": "2026-05-16T19:44:01.100Z",
+        "finishedAt": "2026-05-16T19:44:01.100Z",
+        "result": "UA857 SFO→HKG · on-time (-18 min)"
+      }
+    ]
+  }
+}

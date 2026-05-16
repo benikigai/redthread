@@ -14,7 +14,7 @@ import { useSearchParams } from "next/navigation";
 import { useDossier } from "@/lib/dossierStore";
 import type { Dossier } from "@/lib/types";
 
-const DEFAULT_GUEST = "lin-chen";
+const DEFAULT_GUEST = "ben";
 
 interface IntakeOverrides {
   roomTempC?: number;

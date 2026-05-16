@@ -5,7 +5,7 @@ import { BriefMeButton, composeNarrationFromDossier } from "@/components/BriefMe
 import { useDossier } from "@/lib/dossierStore";
 
 const STATIC_NARRATION =
-  "Ms. Lin Chen — founder, fintech, first visit to Sand Hill. Room is set: nineteen degrees, warm dim, down-free pillows, sandalwood low. Welcome amenity is heirloom Bartlett pears with Bay Area honey, from Frog Hollow Farm, thirty minutes from property. Itinerary held: a seven AM private hike at Windy Hill; and a pescatarian tasting at The Sea by Alexander's. Conversation hooks. Closed Series B last month — congratulate without prying. The Discretion Layer suppressed three signals, auditable. The thread is held.";
+  "Mr. Benjamin Shyong — founder of OpenClaw, returning to Rosewood Hong Kong for FinTech Week. Room is set: twenty degrees, ambient low, down-free pillows, neutral scent. Welcome amenity is a Lock Cha tea flight, three estates. Itinerary held: a six-thirty harbour walk with filter coffee on return; a three o'clock private tea ceremony at Wing Lee Street with Selena Lai; and a vegetarian tasting at Chaat in the evening. Two conversation hooks. The Discretion Layer suppressed three signals, auditable. The thread is held.";
 
 export function TheBrief() {
   const dossier = useDossier((s) => s.dossier);
@@ -25,7 +25,7 @@ function BriefLive() {
     <div className="space-y-6">
       <div>
         <div className="caps mb-2 text-thread-deep">Returning guest · live</div>
-        <h3 className="font-display text-3xl leading-tight">Ms. Lin Chen</h3>
+        <h3 className="font-display text-3xl leading-tight">Mr. Benjamin Shyong</h3>
         <p className="font-display italic text-ink-mute text-lg mt-2 leading-snug">
           {dossier.bio}
         </p>
@@ -71,20 +71,20 @@ function BriefStatic() {
       <div>
         <div className="caps mb-2">Returning guest</div>
         <h3 className="font-display text-3xl leading-tight">
-          Ms. Lin Chen
-          <span className="text-ink-faint italic font-light text-base ml-2">/ HK ×2 · Phuket ×1</span>
+          Mr. Benjamin Shyong
+          <span className="text-ink-faint italic font-light text-base ml-2">/ HK ×2 · Sand Hill ×1</span>
         </h3>
         <p className="font-display italic text-ink-mute text-lg mt-2 leading-snug">
-          Founder, fintech. First visit to Sand Hill. Quiet luxury — has been everywhere.
+          Founder, OpenClaw / Injester. Returning to Rosewood Hong Kong for FinTech Week.
         </p>
       </div>
 
       <div>
         <div className="caps mb-2">Conversation hooks</div>
         <ul className="space-y-1.5 text-sm text-ink-mute">
-          <li>· Closed Series B last month — congratulate without prying</li>
-          <li>· Prior HK suite scent (sandalwood) — mention if asked</li>
-          <li>· Pescatarian; loved Henry&apos;s at HK — Sea by Alexander&apos;s noted</li>
+          <li>· FinTech Week keynote last October — reference only if he raises it</li>
+          <li>· Asked about Lock Cha private session at last checkout — Selena Lai is available</li>
+          <li>· Vegetarian (corrected from stale 2024 pescatarian tag); tree-nut allergy is hard</li>
         </ul>
       </div>
 

@@ -58,7 +58,7 @@ interface Props {
 }
 
 export function AgentHandoffPanel({
-  guestId = "lin-chen",
+  guestId = "ben",
   propertyId = "hong-kong",
   onClose,
 }: Props) {

@@ -1,0 +1,63 @@
+{
+  "id": "ben",
+  "name": "Benjamin Shyong",
+  "honorific": "Mr.",
+  "pronouns": "he/him",
+  "priorStays": [
+    {
+      "propertyId": "hong-kong",
+      "arrived": "2025-03-12",
+      "nights": 3,
+      "highlights": [
+        "Asian Financial Forum sidebar week — used harbor-view suite",
+        "Requested down-free pillows on arrival",
+        "Walked to M+ twice; declined Chaat the first night"
+      ],
+      "amenityResponses": [
+        { "name": "Mooncake from Kee Wah", "reaction": "neutral" }
+      ]
+    },
+    {
+      "propertyId": "sand-hill",
+      "arrived": "2025-07-22",
+      "nights": 2,
+      "highlights": [
+        "AI infrastructure investor meetings",
+        "Did the Filoli Gardens private docent tour",
+        "Requested vegetarian breakfast both mornings",
+        "Praised the Bici Coffee morning cycling provisioning"
+      ],
+      "amenityResponses": []
+    },
+    {
+      "propertyId": "hong-kong",
+      "arrived": "2025-10-29",
+      "nights": 2,
+      "highlights": [
+        "Hong Kong FinTech Week — keynote",
+        "Dinner at Chaat — pescatarian was an error in prior CRM, corrected to vegetarian",
+        "Asked Selena Lai about a private Lock Cha session before checkout"
+      ],
+      "amenityResponses": [
+        { "name": "Tea flight — three estates", "reaction": "loved" }
+      ]
+    }
+  ],
+  "dietary": ["vegetarian"],
+  "preferences": {
+    "roomTempC": 20,
+    "pillows": "down-free",
+    "scent": "neutral",
+    "audio": "silence"
+  },
+  "publicSignals": {
+    "role": "Founder & CEO",
+    "company": "OpenClaw / Injester (AI infrastructure)",
+    "recentEvents": [
+      "Series A announcement, OpenClaw, March 2026",
+      "Hong Kong FinTech Week keynote, October 2025",
+      "Stanford GSB visit, May 2026"
+    ]
+  },
+  "privacyOpennessScore": 55
+}

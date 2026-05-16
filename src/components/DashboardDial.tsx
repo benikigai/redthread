@@ -7,15 +7,15 @@ import { bandFor, posToUi, uiToPos, BAND_LABEL } from "./DiscretionDial";
 import { ThreadSlider } from "./ThreadSlider";
 
 /**
- * Dashboard banner — the concierge mirror of Ms. Chen's Hold the Thread
+ * Dashboard banner — the concierge mirror of Mr. Shyong's Hold the Thread
  * setting. Read-only "preview" semantics: staff can drag to see what other
  * levels look like; saving requires the guest's consent through /profile.
  *
  * Single source of truth for the saved value is the guest's profile; in this
- * hackathon scope we hard-code the starting value from data/guests/lin-chen.json
- * (POS=62 → 6/10). A real product would fetch /api/guest/lin-chen.
+ * hackathon scope we hard-code the starting value from data/guests/ben.json
+ * (POS=55 → 5/10). A real product would fetch /api/guest/ben.
  */
-const SAVED_POS = 62; // matches data/guests/lin-chen.json
+const SAVED_POS = 55; // matches data/guests/ben.json
 const SAVED_UI = posToUi(SAVED_POS);
 
 export function DashboardDial() {

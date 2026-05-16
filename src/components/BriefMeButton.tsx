@@ -14,7 +14,7 @@ type State = "idle" | "loading" | "playing" | "error";
 export function composeNarrationFromDossier(d: Dossier): string {
   const parts: string[] = [];
 
-  parts.push(`Ms. Lin Chen — ${trimBio(d.bio)}.`);
+  parts.push(`Mr. Benjamin Shyong — ${trimBio(d.bio)}.`);
 
   const rs = d.actuators.roomState;
   const roomLine = [

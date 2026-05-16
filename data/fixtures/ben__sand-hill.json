@@ -1,0 +1,134 @@
+{
+  "dossier": {
+    "guestId": "ben",
+    "propertyId": "sand-hill",
+    "generatedAt": "2026-05-16T19:43:03.132Z",
+    "bio": "Mr. Benjamin Shyong — founder and CEO of OpenClaw / Injester. Returning to Sand Hill after a July investor visit; on the Bay Area leg of a Hong Kong–to–SF rotation.",
+    "conversationHooks": [
+      "He's spoken publicly about OpenClaw's Series A in March — only reference if he raises it.",
+      "Last Sand Hill stay (Jul 2025): praised the Bici Coffee morning cycling provisioning; he may want it again."
+    ],
+    "handleWithCare": [
+      "Dietary: vegetarian. Tree-nut allergy — hard constraint, confirm with every kitchen.",
+      "Audio preference is silence. No in-room music on arrival; minimise lobby-to-suite chatter.",
+      "Two Hong Kong stays and one Sand Hill stay — returning Rosewood guest. Greet by name, not by script."
+    ],
+    "suppressed": [
+      {
+        "signal": "investor-meeting-overlay",
+        "reason": "Calendar-inferred meeting context from past stays — below standard floor; keep as 'business focus' not specifics."
+      },
+      {
+        "signal": "social-graph-inference",
+        "reason": "Public co-investors and Stanford GSB cohort relationships should not surface unprompted."
+      }
+    ],
+    "actuators": {
+      "roomState": {
+        "climateC": 20,
+        "lighting": "ambient, low",
+        "scent": "neutral",
+        "audio": "silence",
+        "bedding": "down-free pillows; non-down duvet alternative",
+        "reasoning": [
+          "Voice / A2A intake confirmed roomTempC = 20 this season.",
+          "Stated preference: silence — suppress in-room music and welcome playlist.",
+          "Scent reset to neutral per intake — Sand Hill's cedar default not requested.",
+          "Bedding down-free — CRM preference + Hong Kong precedent.",
+          "Lighting kept at Sand Hill default (ambient), dimmed for late-afternoon arrival."
+        ]
+      },
+      "welcomeAmenity": {
+        "name": "Heirloom Bartlett pears + Bay Area honey",
+        "source": "Frog Hollow Farm, Brentwood CA",
+        "dietary": ["vegan", "gluten-free", "vegetarian"],
+        "story": "30 min from property — orchard fruit that grew up under the same coastal fog",
+        "placemaker": "Maria Salvo",
+        "reasoning": "Vegetarian and tree-nut-safe by selection (no almonds, no walnuts). Bay Area provenance gives Maria Salvo a natural opening — he's a founder; orchard-and-supply-chain stories tend to land. Sense of Place: Bay Area orchard, not generic luxury fruit."
+      },
+      "itinerary": [
+        {
+          "title": "Sand Hill cycling loop with Bici provisions",
+          "category": "wellness",
+          "timeOfDay": "morning",
+          "whyHere": "His standing morning ritual — long walk or ride + filter coffee. Bici provisioning matches his prior request.",
+          "vendorOrPlace": "Sand Hill Road loop · Bici Coffee at property",
+          "time": "06:30",
+          "reasoning": "He praised this exact set-up on the July visit. Quiet, self-paced, no companion required — fits his stated ritual rhythm."
+        },
+        {
+          "title": "Vegetarian breakfast in-suite",
+          "category": "culinary",
+          "timeOfDay": "morning",
+          "whyHere": "His standing intake preference; no breakfast meetings before 9.",
+          "vendorOrPlace": "Madera kitchen · in-suite delivery",
+          "time": "09:00",
+          "reasoning": "He's explicit about morning protected time. Pre-position vegetarian breakfast service; don't book a table."
+        },
+        {
+          "title": "Cantor Arts Center private view, Stanford",
+          "category": "cultural",
+          "timeOfDay": "afternoon",
+          "whyHere": "Cantor's California modernism collection; quiet hours",
+          "vendorOrPlace": "Stanford Cantor Arts Center · Daniel Sotomayor (Placemaker)",
+          "time": "15:00",
+          "reasoning": "He visited GSB recently (public). A Cantor walk with Daniel Sotomayor extends the Stanford visit into something hospitality-shaped without manufacturing a tie."
+        },
+        {
+          "title": "Vegetarian tasting at The Sea",
+          "category": "culinary",
+          "timeOfDay": "evening",
+          "whyHere": "Quiet alcove available; full vegetarian tasting on advance request.",
+          "vendorOrPlace": "The Sea by Alexander's",
+          "time": "19:30",
+          "reasoning": "Vegetarian + tree-nut allergy both flag-able with this kitchen. Quiet alcove honours the silence preference. Travel day — confirm an alcohol-free pairing per intake."
+        }
+      ]
+    },
+    "arrivalLogistics": {
+      "flight": "UA857 (United) — confirm inbound segment with the guest's office; the public flight record shows an onward SFO→PVG leg, not an inbound."
+    },
+    "toolCalls": [
+      {
+        "tool": "flight_lookup",
+        "status": "complete",
+        "args": { "flightNumber": "UA857" },
+        "result": "UA857 segment found — verify inbound separately",
+        "startedAt": "2026-05-16T19:43:24.520Z",
+        "finishedAt": "2026-05-16T19:43:24.520Z"
+      },
+      {
+        "tool": "crm_cross_property",
+        "status": "complete",
+        "args": { "guestId": "ben" },
+        "result": "3 prior stays · HK ×2 · Sand Hill ×1",
+        "startedAt": "2026-05-16T19:43:24.521Z",
+        "finishedAt": "2026-05-16T19:43:24.521Z"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "Benjamin Shyong OpenClaw Injester AI infrastructure founder" },
+        "startedAt": "2026-05-16T19:44:01.099Z",
+        "finishedAt": "2026-05-16T19:44:01.099Z",
+        "result": "8 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "OpenClaw Series A announcement March 2026" },
+        "startedAt": "2026-05-16T19:44:01.100Z",
+        "finishedAt": "2026-05-16T19:44:01.100Z",
+        "result": "5 results"
+      },
+      {
+        "tool": "web_search",
+        "status": "complete",
+        "args": { "query": "Benjamin Shyong Stanford GSB AI infrastructure" },
+        "startedAt": "2026-05-16T19:44:01.100Z",
+        "finishedAt": "2026-05-16T19:44:01.100Z",
+        "result": "2 results"
+      }
+    ]
+  }
+}
