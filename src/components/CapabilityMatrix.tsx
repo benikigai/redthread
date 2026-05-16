@@ -45,6 +45,17 @@ const ROWS: CapabilityRow[] = [
     whatYouSee:
       "Your welcome includes a quiet note about your Series B. 7am at Windy Hill — matches your Hong Kong spa pattern. The Hong Kong butler is told so the thread continues. Still: no health, romance, family, or non-public sources.",
   },
+  {
+    band: "full",
+    range: "9 – 10",
+    whatWeKnow: [
+      "+ Weekly check-in for your rough next-90-days itinerary",
+      "+ Cross-property offers when your travel matches a Rosewood city",
+      "+ Placemaker invitations to events during your dates in a city",
+    ],
+    whatYouSee:
+      "Bangkok later this quarter? A quiet message from your Hong Kong butler: 10% off two nights at Rosewood Bangkok for your dates — and a Placemaker invite to a private dinner Rosewood Bangkok is hosting the night you arrive. Decline with one tap; we never repeat an unwanted offer.",
+  },
 ];
 
 interface CapabilityMatrixProps {
@@ -69,7 +80,7 @@ export function CapabilityMatrix({ value }: CapabilityMatrixProps) {
           What changes at each level
         </h3>
         <span className="text-[10px] tracking-[0.18em] uppercase text-ink-faint">
-          Your data, Ms. Chen
+          Your data, your dial
         </span>
       </header>
 

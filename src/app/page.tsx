@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { ContinuityOffers } from "@/components/ContinuityOffers";
 import { DashboardDial } from "@/components/DashboardDial";
 import { DemoLoader } from "@/components/DemoLoader";
 import { DemoTrigger } from "@/components/DemoTrigger";
@@ -27,6 +28,8 @@ export default function Home() {
           <ReservationIntake />
           {/* Read-only Hold-the-Thread band — guest controls this on /profile */}
           <DashboardDial />
+          {/* Continuity offers only render when activeGuestPos >= 90 (POS 9-10) */}
+          <ContinuityOffers />
           <DemoTrigger />
           <div className="mt-8 grid grid-cols-12 gap-6">
             <div className="col-span-12 lg:col-span-4">
