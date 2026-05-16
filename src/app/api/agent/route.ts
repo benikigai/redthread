@@ -45,6 +45,15 @@ interface SSEEvent {
   ts: string;
 }
 
+interface VoiceIntakeOverrides {
+  roomTempC?: number;
+  bedding?: "down" | "down-free" | "memory";
+  morningRitual?: string;
+  dietary?: string;
+  /** If provided, also derives a previewPos value when one isn't set explicitly. */
+  privacyPosture?: "minimal" | "standard" | "full";
+}
+
 interface RequestBody {
   guestId: string;
   propertyId: PropertyId;
@@ -53,6 +62,61 @@ interface RequestBody {
    *  0–100. Used by the "Hold the Thread" preview control on the dashboard
    *  and by the guest's profile save flow. */
   previewPos?: number;
+  /** Voice-intake extraction merged onto the dossier. Used by the live demo
+   *  flow where the guest's just-spoken preferences should be reflected in
+   *  the brief without re-running Claude. Sent by the client after
+   *  /api/voice/intake/complete returns. */
+  overrides?: VoiceIntakeOverrides;
+}
+
+const POSTURE_TO_POS: Record<NonNullable<VoiceIntakeOverrides["privacyPosture"]>, number> = {
+  minimal: 20,
+  standard: 55,
+  full: 85,
+};
+
+/** Apply voice-intake overrides onto a dossier in place. roomTempC/bedding
+ *  land on actuators.roomState; dietary lands on welcomeAmenity + handleWithCare;
+ *  morningRitual prepends a single itinerary mention. Idempotent. */
+function applyOverrides(d: Dossier, ov: VoiceIntakeOverrides): Dossier {
+  const cloned: Dossier = JSON.parse(JSON.stringify(d));
+  if (typeof ov.roomTempC === "number" && ov.roomTempC >= 16 && ov.roomTempC <= 24) {
+    cloned.actuators.roomState.climateC = Math.round(ov.roomTempC);
+    cloned.actuators.roomState.reasoning = [
+      `Voice intake: guest asked for ${Math.round(ov.roomTempC)}°C on arrival.`,
+      ...cloned.actuators.roomState.reasoning.filter((r) => !/thermostat|°C/i.test(r)),
+    ];
+  }
+  if (ov.bedding) {
+    const beddingMap = { down: "down pillows", "down-free": "down-free pillows", memory: "memory foam pillows" } as const;
+    cloned.actuators.roomState.bedding = beddingMap[ov.bedding];
+    cloned.actuators.roomState.reasoning = [
+      `Voice intake: guest requested ${cloned.actuators.roomState.bedding}.`,
+      ...cloned.actuators.roomState.reasoning.filter((r) => !/bedding|pillow|duvet|down/i.test(r)),
+    ];
+  }
+  if (ov.dietary) {
+    cloned.handleWithCare = [
+      `Dietary (per intake): ${ov.dietary}.`,
+      ...cloned.handleWithCare.filter((s) => !/dietary|aller/i.test(s)),
+    ];
+  }
+  if (ov.morningRitual) {
+    const morningEntry: (typeof cloned.actuators.itinerary)[number] = {
+      title: "Morning held — per intake",
+      category: "wellness",
+      timeOfDay: "morning",
+      whyHere: ov.morningRitual,
+      vendorOrPlace: "TBD",
+      time: "07:00",
+      reasoning: `Voice intake: "${ov.morningRitual}"`,
+    };
+    cloned.actuators.itinerary = [
+      morningEntry,
+      ...cloned.actuators.itinerary.filter((e) => e.timeOfDay !== "morning"),
+    ].slice(0, 4);
+  }
+  return cloned;
 }
 
 type Band = "minimal" | "standard" | "full";
@@ -421,10 +485,21 @@ export async function POST(req: Request): Promise<Response> {
         { status: 503 },
       );
     }
-    const effective =
+    // Apply voice-intake overrides first (substantive prefs land on the base),
+    // then band-reduce per POS (privacy filtering is the last layer).
+    const withOverrides = body.overrides
+      ? applyOverrides(fixture.dossier, body.overrides)
+      : fixture.dossier;
+    const effectivePos =
       body.previewPos !== undefined
-        ? bandReduceFixture(fixture.dossier, body.previewPos)
-        : fixture.dossier;
+        ? body.previewPos
+        : body.overrides?.privacyPosture
+          ? POSTURE_TO_POS[body.overrides.privacyPosture]
+          : undefined;
+    const effective =
+      effectivePos !== undefined
+        ? bandReduceFixture(withOverrides, effectivePos)
+        : withOverrides;
     if (!wantsSSE) {
       return Response.json(effective);
     }
