@@ -6,7 +6,6 @@ import type { PropertyId } from "@/lib/types";
 const PROPERTIES: { id: PropertyId; name: string; locale: string }[] = [
   { id: "sand-hill", name: "Rosewood Sand Hill", locale: "Menlo Park" },
   { id: "hong-kong", name: "Rosewood Hong Kong", locale: "Victoria Dockside" },
-  { id: "crillon", name: "Hôtel de Crillon", locale: "Paris" },
 ];
 
 export function Header() {
