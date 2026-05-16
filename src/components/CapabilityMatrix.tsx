@@ -49,12 +49,12 @@ const ROWS: CapabilityRow[] = [
     band: "full",
     range: "9 – 10",
     whatWeKnow: [
-      "+ Weekly check-in for your rough next-90-days itinerary",
+      "+ Weekly A2A check-in with your personal agent (calendar, no email)",
       "+ Cross-property offers when your travel matches a Rosewood city",
-      "+ Placemaker invitations to events during your dates in a city",
+      "+ Placemaker invitations to events during your dates in that city",
     ],
     whatYouSee:
-      "Bangkok later this quarter? A quiet message from your Hong Kong butler: 10% off two nights at Rosewood Bangkok for your dates — and a Placemaker invite to a private dinner Rosewood Bangkok is hosting the night you arrive. Decline with one tap; we never repeat an unwanted offer.",
+      "Once a week, your agent and Red Thread compare notes. Bangkok later this quarter? A quiet message from your Hong Kong butler: 10% off two nights at Rosewood Bangkok — and a Placemaker invite to a private dinner Rosewood Bangkok is hosting the night you arrive. Every offer one-tap-decline; we never repeat an unwanted one.",
   },
 ];
 
