@@ -181,7 +181,7 @@ export default function ProfilePage() {
 
           <div className="flex items-center justify-between gap-4">
             <p className="text-[12px] text-ink-faint">
-              Saving sends Ms. Chen&rsquo;s next dossier through the Discretion
+              Saving sends your next dossier through the Discretion
               Layer at this level.
               <br />
               Adjustable any time. Every removed signal is logged for your

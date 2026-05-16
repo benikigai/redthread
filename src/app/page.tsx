@@ -37,7 +37,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Hold the Thread — concierge mirror of Ms. Chen's saved POS */}
+      {/* Hold the Thread — concierge mirror of the guest's saved POS */}
       <DashboardDial />
 
       {/* Deep rose band — the live thread lives here. Clean transition, no red bar. */}

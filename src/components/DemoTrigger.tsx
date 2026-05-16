@@ -74,7 +74,7 @@ export function DemoTrigger() {
                 ? "Dossier rendered. Reset to run again, or take the voice intake."
                 : error
                   ? `Error: ${error}`
-                  : "Run the agent on Ms. Chen — Rosewood Hong Kong. Or step through the voice intake first."}
+                  : "Run the agent on Mr. Shyong — Rosewood Hong Kong. Or step through the voice intake first."}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">

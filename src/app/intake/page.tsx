@@ -5,10 +5,10 @@
 // When the conversation ends, the client hands the conversationId to
 // /api/voice/intake/complete, which pulls the extraction from ElevenLabs.
 //
-// UI surfaces the five questions Ms. Chen will be asked alongside a live
-// transcript so she can see what's being asked, follow along, and feel the
+// UI surfaces the five questions the guest will be asked alongside a live
+// transcript so they can see what's being asked, follow along, and feel the
 // thread populate. If the mic / network falls over, the visible scaffolding
-// stays — she still knows what we'd ask.
+// stays — they still know what we'd ask.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
@@ -29,28 +29,28 @@ const GUEST_VOICE_ID =
   process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_GUEST || "9BWtsMINqrJLrRacOk9x"; // Aria
 
 const DEMO_DIALOG: { speaker: "ai" | "you"; text: string; questionKey?: string }[] = [
-  { speaker: "ai", text: "Welcome back, Ms. Chen. Five quick things, in your voice." },
+  { speaker: "ai", text: "Welcome back, Mr. Shyong. Five quick things, in your voice." },
   { speaker: "ai", text: "First, the room — how would you like it set?", questionKey: "room" },
-  { speaker: "you", text: "Cool, around nineteen Celsius. Sandalwood scent — like Hong Kong." },
+  { speaker: "you", text: "Twenty Celsius. Lights low when I arrive. Neutral scent, please." },
   { speaker: "ai", text: "Bedding — any preference?", questionKey: "bedding" },
-  { speaker: "you", text: "Down-free pillows, please. I have a feather allergy." },
+  { speaker: "you", text: "Down-free pillows, same as last time." },
   { speaker: "ai", text: "And your morning rhythm?", questionKey: "morning" },
-  { speaker: "you", text: "A walk first, somewhere quiet. Then a slow breakfast — no meetings before ten." },
+  { speaker: "you", text: "A ride first — the Bici provisioning was right. Then a quiet vegetarian breakfast." },
   { speaker: "ai", text: "Anything we should know about food?", questionKey: "dietary" },
-  { speaker: "you", text: "Pescatarian. The kitchen can surprise me a little." },
+  { speaker: "you", text: "Vegetarian. Chaat got it right last visit — I trust the kitchen." },
   { speaker: "ai", text: "And how publicly may we draw on what's already known about you?", questionKey: "privacy" },
-  { speaker: "you", text: "Standard. The Series B is public. Otherwise, hold the thread close." },
-  { speaker: "ai", text: "Thank you, Ms. Chen. The thread is set." },
+  { speaker: "you", text: "Standard. The Series A and the FinTech Week keynote are public. Otherwise, hold the thread close." },
+  { speaker: "ai", text: "Thank you, Mr. Shyong. The thread is set." },
 ];
 
 // Hard-coded fixture overrides matching DEMO_DIALOG — what the agent receives
 // when the demo conversation finishes. Mirrors what /api/voice/intake/complete
 // would extract from a real ElevenLabs conversation.
 const DEMO_OVERRIDES = {
-  roomTempC: 19,
+  roomTempC: 20,
   bedding: "down-free" as const,
-  morningRitual: "walk first, then a slow breakfast",
-  dietary: "pescatarian",
+  morningRitual: "morning ride with Bici provisioning, then a quiet vegetarian breakfast",
+  dietary: "vegetarian",
   privacyPosture: "standard" as const,
 };
 
@@ -435,7 +435,7 @@ function IntakeInner() {
       <section className="flex-1 px-6 sm:px-8 py-12">
         <div className="mx-auto w-full max-w-[1080px]">
           <p className="text-ink-faint text-xs uppercase tracking-[0.22em] mb-3">
-            For Ms. Mei-Ling Chen
+            For Mr. Benjamin Shyong
           </p>
           <h1 className="font-display text-[clamp(2.25rem,4vw,3rem)] leading-[1.05] mb-4">
             Five quick questions to set your arrival.
