@@ -1,7 +1,7 @@
 # Yolo: Red Thread — Backend Services (Terminal 2)
 **Spec:** docs/specs/red-thread-backend.md
 
-- [ ] Task 1: System prompts module (src/lib/prompts.ts) — SIMPLE
+- [x] Task 1: System prompts module (src/lib/prompts.ts) — SIMPLE
 - [ ] Task 2: Expand seed data per T1's _t2_notes — MODERATE
 - [ ] Task 3: Mock CRM + flight tool (src/lib/{crm,flight}.ts) — SIMPLE
 - [ ] Task 4: Tool dispatcher + Claude tool declarations (src/lib/tools.ts) — MODERATE
