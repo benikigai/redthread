@@ -304,15 +304,18 @@ async function runResearchLoop(
         });
       }
       if (block.type === "web_search_tool_result") {
-        const count = Array.isArray(block.content) ? block.content.length : 0;
+        // Extract titles/hostnames from the actual search results so Zone I
+        // shows WHAT Claude found (not just "5 results"). Each result has
+        // { url, title, ... } per the Anthropic web_search server tool.
+        const summary = summarizeWebSearchResults(block.content);
         emit({
           phase: "research",
           type: "tool_use_complete",
-          payload: { tool: "web_search", summary: `${count} result${count === 1 ? "" : "s"}` },
+          payload: { tool: "web_search", summary },
         });
         const last = toolCalls[toolCalls.length - 1];
         if (last && last.tool === "web_search") {
-          last.result = `${count} result${count === 1 ? "" : "s"}`;
+          last.result = summary;
           last.finishedAt = new Date().toISOString();
         }
       }
@@ -466,6 +469,60 @@ function sseHeaders(): Headers {
 
 function formatSSE(event: SSEEvent): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`);
+}
+
+/** Turn a web_search_tool_result.content array into a one-line summary
+ *  that names what was actually found — "LinkedIn: 'Ben Shyong — OpenClaw'
+ *  · TechCrunch: 'OpenClaw raises…' · +3 more" — so Zone I shows real
+ *  findings instead of just "5 results". */
+function summarizeWebSearchResults(content: unknown): string {
+  if (!Array.isArray(content)) return "0 results";
+  const results = content as Array<{ url?: string; title?: string; type?: string }>;
+  if (results.length === 0) return "0 results";
+
+  const labeled = results
+    .map((r) => {
+      const title = (r.title ?? "").trim();
+      const host = hostnameOf(r.url ?? "");
+      const source = friendlySource(host);
+      if (!title) return source || host || "result";
+      const titleShort = title.length > 56 ? `${title.slice(0, 53)}…` : title;
+      return source ? `${source}: “${titleShort}”` : titleShort;
+    })
+    .filter(Boolean);
+
+  if (labeled.length === 0) return `${results.length} results`;
+  const head = labeled.slice(0, 2).join(" · ");
+  const rest = labeled.length - 2;
+  return rest > 0 ? `${head} · +${rest} more` : head;
+}
+
+function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function friendlySource(host: string): string {
+  if (!host) return "";
+  if (host.includes("linkedin.com")) return "LinkedIn";
+  if (host.includes("twitter.com") || host === "x.com") return "X";
+  if (host.includes("techcrunch.com")) return "TechCrunch";
+  if (host.includes("crunchbase.com")) return "Crunchbase";
+  if (host.includes("forbes.com")) return "Forbes";
+  if (host.includes("bloomberg.com")) return "Bloomberg";
+  if (host.includes("wsj.com")) return "WSJ";
+  if (host.includes("ft.com")) return "FT";
+  if (host.includes("github.com")) return "GitHub";
+  if (host.includes("medium.com") || host.endsWith(".medium.com")) return "Medium";
+  if (host.includes("substack.com") || host.endsWith(".substack.com")) return "Substack";
+  if (host.includes("youtube.com") || host === "youtu.be") return "YouTube";
+  // Strip everything but the main label
+  const parts = host.split(".");
+  if (parts.length >= 2) return parts[parts.length - 2];
+  return host;
 }
 
 export async function POST(req: Request): Promise<Response> {
