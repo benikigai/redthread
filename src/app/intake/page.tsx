@@ -164,8 +164,18 @@ function IntakeInner() {
       }
     },
     onError: (msg) => {
+      // eslint-disable-next-line no-console
+      console.error("[intake] convai error:", msg);
       setError(typeof msg === "string" ? msg : "Conversation error");
       setStage("error");
+    },
+    onDebug: (info) => {
+      // eslint-disable-next-line no-console
+      console.log("[intake] convai debug:", info);
+    },
+    onStatusChange: ({ status }) => {
+      // eslint-disable-next-line no-console
+      console.log("[intake] convai status:", status);
     },
   });
 
@@ -358,7 +368,9 @@ function IntakeInner() {
           );
         });
       }
-      await conversation.startSession({ agentId: AGENT_ID });
+      // WebRTC instead of WebSocket — friendlier to firewalls and gives
+      // cleaner audio in browsers that throttle WS audio.
+      await conversation.startSession({ agentId: AGENT_ID, connectionType: "webrtc" });
     } catch (err) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
