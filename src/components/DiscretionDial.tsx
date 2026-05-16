@@ -34,6 +34,16 @@ export const BAND_LABEL: Record<DialBand, string> = {
   full: "Fully held",
 };
 
+/** Benefit framing — "what the guest gets" at each level, in their own
+ *  words. Surfaced alongside BAND_LABEL on /profile and DashboardDial so
+ *  the dial reads as something the guest is TUNING (toward an experience)
+ *  rather than something they're GIVING UP. */
+export const BAND_BENEFIT: Record<DialBand, string> = {
+  minimal: "Reserved arrival",
+  standard: "Familiar service",
+  full: "Fully bespoke experience",
+};
+
 interface DiscretionDialProps {
   /** Current value, 0–10 integer. */
   value: number;
