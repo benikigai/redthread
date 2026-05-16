@@ -7,8 +7,6 @@ import { streamAgent } from "@/components/DemoLoader";
 import { useDossier } from "@/lib/dossierStore";
 import type { PropertyId } from "@/lib/types";
 
-const GUEST_ID = "ben";
-
 const PROPERTIES: { id: PropertyId; name: string; locale: string }[] = [
   { id: "sand-hill", name: "Rosewood Sand Hill", locale: "Menlo Park" },
   { id: "hong-kong", name: "Rosewood Hong Kong", locale: "Victoria Dockside" },
@@ -17,7 +15,8 @@ const PROPERTIES: { id: PropertyId; name: string; locale: string }[] = [
 export function Header() {
   const active = useDossier((s) => s.activeProperty);
   const phase = useDossier((s) => s.phase);
-  const dossier = useDossier((s) => s.dossier);
+  const activeGuestId = useDossier((s) => s.activeGuestId);
+  const activeGuestPos = useDossier((s) => s.activeGuestPos);
   const setActiveProperty = useDossier((s) => s.setActiveProperty);
   const aborterRef = useRef<AbortController | null>(null);
 
@@ -30,20 +29,25 @@ export function Header() {
   const onSwitch = async (next: PropertyId) => {
     if (next === active) return;
     setActiveProperty(next);
-    // Only re-run if something is already rendered/streaming. First visit
-    // leaves the eyebrow + zones in static mode until "Run agent" is clicked.
-    const hasDossier = !!dossier;
-    if (!hasDossier && !running) return;
 
     aborterRef.current?.abort();
     const store = useDossier.getState();
     store.clear();
     store.setActiveProperty(next); // clear() resets activeProperty; re-set
+    store.setActiveGuestPos(activeGuestPos); // re-arm
     store.startRun("manual");
     const ac = new AbortController();
     aborterRef.current = ac;
     try {
-      await streamAgent({ guestId: GUEST_ID, propertyId: next }, ac.signal);
+      // No `live: true` — hits DEMO_MODE on the server and serves the
+      // per-guest fixture for whichever property is selected
+      // (data/fixtures/<guestId>__<propertyId>.json). Switching properties
+      // instantly renders the guest's "previous stay" at that property
+      // without burning a live Claude run.
+      await streamAgent(
+        { guestId: activeGuestId, propertyId: next, previewPos: activeGuestPos },
+        ac.signal,
+      );
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       const msg = err instanceof Error ? err.message : String(err);
