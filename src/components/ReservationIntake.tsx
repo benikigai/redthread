@@ -457,6 +457,7 @@ async function streamArrivalChain(reservation: Reservation, signal: AbortSignal)
       guestId: reservation.guestId,
       propertyId: reservation.propertyId,
       flightNumber: reservation.flightNumber,
+      checkIn: reservation.checkIn,
     }),
     signal,
   });

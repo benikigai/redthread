@@ -35,10 +35,51 @@ interface RequestBody {
   propertyId?: PropertyId;
   flightNumber?: string;
   nationality?: string;
+  /** ISO date "YYYY-MM-DD" — the reservation check-in. Used to anchor the
+   *  flight landing time-of-day onto the actual arrival date instead of
+   *  today (AviationStack returns same-day data). */
+  checkIn?: string;
 }
 
 function sse(payload: unknown): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+/** AviationStack returns same-day data. Project the time-of-day onto the
+ *  reservation's check-in date in the property's local timezone, so the
+ *  demo's narrative date matches the inputs. */
+function projectLandingToCheckIn(
+  flightIso: string,
+  checkInDate: string | undefined,
+  timezone: string,
+): string {
+  if (!checkInDate) return flightIso;
+  // Render the flight's hour:minute in the property's local timezone.
+  const flight = new Date(flightIso);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(flight);
+  const hh = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0", 10);
+  const mm = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0", 10);
+  // Build an ISO string that represents "checkInDate at hh:mm in property TZ".
+  // Trick: format the wall-clock string, parse via timezone-aware Date.
+  // Easiest correct path: compute the UTC offset of timezone at the target
+  // date by stamping checkInDate noon UTC and reading its local-render offset.
+  const noonUtc = new Date(`${checkInDate}T12:00:00Z`);
+  const tzAtNoon = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(noonUtc);
+  const localNoonHour = parseInt(tzAtNoon.find((p) => p.type === "hour")?.value ?? "12", 10);
+  const offsetHours = 12 - localNoonHour; // hours to subtract from local → UTC
+  const utcHour = hh + offsetHours;
+  const projected = new Date(`${checkInDate}T00:00:00Z`);
+  projected.setUTCHours(utcHour, mm, 0, 0);
+  return projected.toISOString();
 }
 
 /** Run a streaming Haiku call and emit one step_thinking event per delta. */
@@ -151,7 +192,15 @@ export async function POST(req: Request): Promise<Response> {
           ts: new Date().toISOString(),
         });
         const flight = await flightLookup(flightNumber);
-        const landingIso = flight.estimatedArrival;
+        // AviationStack returns same-day flight data. For a future reservation
+        // (e.g. May 29) anchor the landing time-of-day to the reservation
+        // check-in date so the narrative reads "lands May 29 18:55" instead
+        // of "lands today 06:09."
+        const landingIso = projectLandingToCheckIn(
+          flight.estimatedArrival,
+          body.checkIn,
+          TRANSIT_MIN[propertyId].timezone,
+        );
         const landingLocal = new Date(landingIso).toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
