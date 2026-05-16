@@ -1,4 +1,7 @@
+import { Suspense } from "react";
+
 import { DashboardDial } from "@/components/DashboardDial";
+import { DemoLoader } from "@/components/DemoLoader";
 import { Header } from "@/components/Header";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
@@ -8,6 +11,10 @@ import { LiveThread } from "@/components/zones/LiveThread";
 export default function Home() {
   return (
     <div className="flex-1 flex flex-col">
+      {/* Reads ?fromIntake=1 + sessionStorage, fetches /api/agent, populates store. */}
+      <Suspense fallback={null}>
+        <DemoLoader />
+      </Suspense>
       <Header />
 
       {/* Warm cream desk — header + eyebrow + zones float as paper sheets on it */}

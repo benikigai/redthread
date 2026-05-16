@@ -1,26 +1,72 @@
+"use client";
+
 import { ZoneShell } from "./ZoneShell";
+import { useDossier } from "@/lib/dossierStore";
+import type { Dossier } from "@/lib/types";
 
 export function Actuators() {
+  const dossier = useDossier((s) => s.dossier);
   return (
     <ZoneShell label="Zone III" title="Actuators" hint="What the system commits to. Action + reasoning.">
-      <div className="space-y-4">
-        <Card
-          label="Room state"
-          headline="19°C · warm dim · sandalwood"
-          because="HK stays: thermostat 19°C twice. Late arrival — lighting pre-set wind-down."
-        />
-        <Card
-          label="Welcome amenity"
-          headline="Frog Hollow heirloom pears + Bay Area honey"
-          because="30 min from property. Pescatarian-safe. Sand Hill native — refuses the cookie-cutter macaron."
-        />
-        <Card
-          label="Itinerary held"
-          headline="07:00 Windy Hill · 19:00 The Sea by Alexander&apos;s"
-          because="Morning ritual matches HK spa pattern. Dinner echoes Henry&apos;s register."
-        />
-      </div>
+      {dossier ? <ActuatorsLive dossier={dossier} /> : <ActuatorsStatic />}
     </ZoneShell>
+  );
+}
+
+function ActuatorsLive({ dossier }: { dossier: Dossier }) {
+  const { roomState, welcomeAmenity, itinerary } = dossier.actuators;
+  const roomHeadline = [
+    `${roomState.climateC}°C`,
+    roomState.lighting,
+    roomState.scent,
+    roomState.bedding,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const itineraryHeadline = itinerary
+    .slice(0, 2)
+    .map((e) => `${e.time} ${e.title}`)
+    .join(" · ");
+  return (
+    <div className="space-y-4">
+      <Card
+        label="Room state · live"
+        headline={roomHeadline}
+        because={roomState.reasoning[0] ?? "—"}
+      />
+      <Card
+        label="Welcome amenity · live"
+        headline={welcomeAmenity.name}
+        because={welcomeAmenity.reasoning}
+      />
+      <Card
+        label="Itinerary held · live"
+        headline={itineraryHeadline || "—"}
+        because={itinerary[0]?.reasoning ?? "—"}
+      />
+    </div>
+  );
+}
+
+function ActuatorsStatic() {
+  return (
+    <div className="space-y-4">
+      <Card
+        label="Room state"
+        headline="19°C · warm dim · sandalwood"
+        because="HK stays: thermostat 19°C twice. Late arrival — lighting pre-set wind-down."
+      />
+      <Card
+        label="Welcome amenity"
+        headline="Frog Hollow heirloom pears + Bay Area honey"
+        because="30 min from property. Pescatarian-safe. Sand Hill native — refuses the cookie-cutter macaron."
+      />
+      <Card
+        label="Itinerary held"
+        headline="07:00 Windy Hill · 19:00 The Sea by Alexander&apos;s"
+        because="Morning ritual matches HK spa pattern. Dinner echoes Henry&apos;s register."
+      />
+    </div>
   );
 }
 
