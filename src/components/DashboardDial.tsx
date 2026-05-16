@@ -3,13 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import {
-  DiscretionDial,
-  bandFor,
-  posToUi,
-  uiToPos,
-  BAND_LABEL,
-} from "./DiscretionDial";
+import { bandFor, posToUi, uiToPos, BAND_LABEL } from "./DiscretionDial";
+import { ThreadSlider } from "./ThreadSlider";
 
 /**
  * Dashboard banner — the concierge mirror of Ms. Chen's Hold the Thread
@@ -58,18 +53,14 @@ export function DashboardDial() {
               {BAND_LABEL[band]}
             </span>
           </div>
-          <input
-            type="range"
-            min={0}
-            max={10}
-            step={1}
+          <ThreadSlider
             value={value}
-            onChange={(e) => setValue(Number(e.currentTarget.value))}
-            className="w-full accent-thread"
-            aria-label="Hold the Thread (preview)"
-            aria-valuetext={`${value} of 10 — ${BAND_LABEL[band]}`}
+            onChange={setValue}
+            compact
+            ariaLabel="Hold the Thread (preview)"
+            ariaValueText={`${value} of 10 — ${BAND_LABEL[band]}`}
           />
-          <div className="mt-1 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+          <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
             <span>Loosely</span>
             <span aria-hidden="true">·</span>
             <span>Fully</span>

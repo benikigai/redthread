@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { ThreadSlider } from "./ThreadSlider";
 
 /**
  * Hold the Thread — the guest's discretion control.
@@ -55,36 +55,30 @@ export function DiscretionDial({
   variant = "guest",
   readOnly = false,
 }: DiscretionDialProps) {
-  const id = useId();
   const band = bandFor(uiToPos(value));
 
   if (variant === "concierge") {
     return (
       <div className="border border-rule rounded-sm bg-paper-soft px-4 py-3">
         <div className="flex items-baseline justify-between gap-3">
-          <label
-            htmlFor={id}
-            className="text-[10px] tracking-[0.18em] uppercase text-ink-faint font-medium"
-          >
+          <span className="text-[10px] tracking-[0.18em] uppercase text-ink-faint font-medium">
             Hold the Thread · {value}
-          </label>
+          </span>
           <span className="text-[10px] text-ink-faint italic">
             guest preference · preview
           </span>
         </div>
-        <input
-          id={id}
-          type="range"
-          min={0}
-          max={10}
-          step={1}
-          value={value}
-          disabled={readOnly}
-          onChange={(e) => onChange(Number(e.currentTarget.value))}
-          className="w-full mt-2 accent-thread"
-          aria-valuetext={`${value} of 10 — ${BAND_LABEL[band]}`}
-        />
-        <p className="mt-1 text-[11px] leading-snug text-ink-faint">
+        <div className="mt-3">
+          <ThreadSlider
+            value={value}
+            onChange={onChange}
+            disabled={readOnly}
+            compact
+            ariaLabel="Hold the Thread (preview)"
+            ariaValueText={`${value} of 10 — ${BAND_LABEL[band]}`}
+          />
+        </div>
+        <p className="mt-2 text-[11px] leading-snug text-ink-faint">
           Mirrors Ms. Chen&rsquo;s saved value. Drag to preview other levels.
           Saving requires consent through her profile.
         </p>
@@ -123,22 +117,16 @@ export function DiscretionDial({
       ) : null}
 
       <div className="mt-6">
-        <input
-          id={id}
-          type="range"
-          min={0}
-          max={10}
-          step={1}
+        <ThreadSlider
           value={value}
+          onChange={onChange}
           disabled={readOnly}
-          onChange={(e) => onChange(Number(e.currentTarget.value))}
-          className="w-full accent-thread"
-          aria-label="Hold the Thread"
-          aria-valuetext={`${value} of 10 — ${BAND_LABEL[band]}`}
+          ariaLabel="Hold the Thread"
+          ariaValueText={`${value} of 10 — ${BAND_LABEL[band]}`}
         />
 
-        {/* Tick labels under the slider */}
-        <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+        {/* Pole labels under the thread */}
+        <div className="mt-4 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
           <span>Loosely</span>
           <span aria-hidden="true">·</span>
           <span>Fully</span>
