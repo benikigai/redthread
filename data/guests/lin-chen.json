@@ -21,14 +21,26 @@
       "propertyId": "hong-kong",
       "arrived": "2026-02-04",
       "nights": 2,
-      "highlights": ["Used spa twice — morning ritual", "Requested down-free pillows"],
+      "highlights": [
+        "Used spa twice — morning ritual",
+        "Requested down-free pillows",
+        "Asked about Wong Kar-wai film locations"
+      ],
       "amenityResponses": []
     },
     {
-      "propertyId": "crillon",
-      "arrived": "TODO — T2 to confirm if Phuket lives in v1",
-      "nights": 0,
-      "highlights": []
+      "propertyId": "phuket",
+      "arrived": "2025-03-18",
+      "nights": 4,
+      "highlights": [
+        "Beachfront villa — declined alcohol throughout stay",
+        "6 AM beach walks every morning",
+        "Booked a private vegetarian Thai cooking class",
+        "Praised the property's quiet"
+      ],
+      "amenityResponses": [
+        { "name": "Lemongrass-infused honey tasting set", "reaction": "loved" }
+      ]
     }
   ],
   "dietary": ["pescatarian"],
@@ -41,8 +53,11 @@
   "publicSignals": {
     "role": "Founder & CEO",
     "company": "Lattice Capital (fintech)",
-    "recentEvents": ["Series B announcement, Apr 2026", "Stanford GSB visit, May 2026"]
+    "recentEvents": [
+      "Series B announcement, Apr 2026",
+      "Stanford GSB visit, May 2026",
+      "Keynote at HK FinTech Week 2025"
+    ]
   },
-  "privacyOpennessScore": 62,
-  "_t2_notes": "Add Phuket prior stay + 1-2 more signals if richer. Keep Series B as the public hook."
+  "privacyOpennessScore": 62
 }

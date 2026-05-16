@@ -2,12 +2,12 @@
   "id": "crillon",
   "name": "Hôtel de Crillon, A Rosewood Hotel",
   "locale": "Place de la Concorde, Paris",
-  "senseOfPlace": "18th-century palace turned Rosewood. Karl Lagerfeld suites, Les Ambassadeurs, Sense spa. Restraint and craft — no imposed Rosewood template; the building leads.",
+  "senseOfPlace": "18th-century palace turned Rosewood. Karl Lagerfeld suites, Les Ambassadeurs, Sense spa. Restraint and craft — no imposed Rosewood template; the building leads. Marie Antoinette's piano lessons, Hemingway's letters, modern haute couture next door.",
   "amenityOptions": [
     {
       "name": "Macarons, single flight",
       "source": "Pierre Hermé, rue Cambon",
-      "dietary": [],
+      "dietary": ["vegetarian"],
       "story": "Hermé's atelier two blocks from the property; same morning batch"
     },
     {
@@ -19,8 +19,26 @@
     {
       "name": "Le Pain Quotidien tartine board",
       "source": "Le Pain Quotidien, Saint-Germain",
-      "dietary": ["vegan"],
+      "dietary": ["vegan", "pescatarian"],
       "story": "Belgian-Parisian breakfast institution — quiet, communal table register"
+    },
+    {
+      "name": "Yann Couvreur dark chocolate bonbons",
+      "source": "Yann Couvreur, 11e arrondissement",
+      "dietary": ["vegetarian"],
+      "story": "Couvreur's atelier in the 11e; the artisan pastry voice of contemporary Paris"
+    },
+    {
+      "name": "Du Pain et des Idées pastry box",
+      "source": "Du Pain et des Idées, 10e arrondissement",
+      "dietary": ["vegetarian"],
+      "story": "Escargot pistache and pain des amis from Christophe Vasseur's lauded boulangerie"
+    },
+    {
+      "name": "Maison Plisson seasonal preserves",
+      "source": "Maison Plisson, Boulevard Beaumarchais",
+      "dietary": ["vegan", "pescatarian"],
+      "story": "The grocer-restaurant Parisians treat as a private pantry"
     }
   ],
   "signatureExperiences": [
@@ -44,6 +62,41 @@
       "timeOfDay": "evening",
       "whyHere": "Restored Marie-Antoinette dining room; pescatarian tasting on request",
       "vendorOrPlace": "Les Ambassadeurs by Jérôme Banctel"
+    },
+    {
+      "title": "Marais antique scarves with curator",
+      "category": "shopping",
+      "timeOfDay": "afternoon",
+      "whyHere": "Rue Vieille du Temple ateliers; a haute couture archivist guides",
+      "vendorOrPlace": "Le Marais, 4e arrondissement"
+    },
+    {
+      "title": "Seine sunrise barge breakfast",
+      "category": "culinary",
+      "timeOfDay": "morning",
+      "whyHere": "Private barge between Pont Neuf and Pont des Arts; first light over the bridges",
+      "vendorOrPlace": "Seine, central reaches"
+    },
+    {
+      "title": "Palais Garnier rehearsal access",
+      "category": "cultural",
+      "timeOfDay": "evening",
+      "whyHere": "Working rehearsal at the Opéra; the back-of-house view",
+      "vendorOrPlace": "Palais Garnier"
+    },
+    {
+      "title": "Père Lachaise literary walk",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "Wilde, Proust, Colette — a guided walk among the writers who chose this city",
+      "vendorOrPlace": "Père Lachaise Cemetery, 20e arrondissement"
+    },
+    {
+      "title": "Pierre Hermé private pastry course",
+      "category": "culinary",
+      "timeOfDay": "morning",
+      "whyHere": "Two-block walk; a one-pastry class with a senior pâtissier",
+      "vendorOrPlace": "Pierre Hermé atelier, rue Cambon"
     }
   ],
   "roomDefaults": {
@@ -57,7 +110,11 @@
       "name": "Inès Marchand",
       "domain": "Paris museum private access",
       "bio": "Curator-trained Parisian guide; arranges pre-opening visits and atelier tours."
+    },
+    {
+      "name": "Claire Beaudouin",
+      "domain": "Belle Époque and contemporary Paris",
+      "bio": "Sorbonne-trained art historian; private gallery and atelier walks with patient depth."
     }
-  ],
-  "_t2_notes": "Crillon is the brand-restraint counterpoint — keep amenities understated; the building does the work."
+  ]
 }

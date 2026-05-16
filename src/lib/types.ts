@@ -1,7 +1,9 @@
 // ─── Red Thread — shared type contracts (T1 / T2 boundary) ─────────────────
 // Keep this file additive. Breaking changes require coordination.
 
-export type PropertyId = "sand-hill" | "hong-kong" | "crillon";
+// Active properties have full data files under data/properties/.
+// "phuket" exists only as a prior-stay reference (Ms. Chen's history).
+export type PropertyId = "sand-hill" | "hong-kong" | "crillon" | "phuket";
 
 export interface Guest {
   id: string;

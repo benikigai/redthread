@@ -1,0 +1,37 @@
+{
+  "id": "bellandi",
+  "name": "Aldo Bellandi",
+  "honorific": "Mr.",
+  "pronouns": "he/him",
+  "priorStays": [
+    {
+      "propertyId": "crillon",
+      "arrived": "2025-09-21",
+      "nights": 2,
+      "highlights": [
+        "Ordered a Bordeaux flight at Les Ambassadeurs",
+        "Walked to rue Cambon both mornings",
+        "Requested a quiet room facing the courtyard"
+      ],
+      "amenityResponses": [
+        { "name": "Macarons, single flight", "reaction": "neutral" }
+      ]
+    }
+  ],
+  "dietary": [],
+  "preferences": {
+    "roomTempC": 20,
+    "pillows": "down",
+    "scent": "rose absolute",
+    "audio": "silence"
+  },
+  "publicSignals": {
+    "role": "Founder",
+    "company": "Bellandi Selezioni (Italian wine importer)",
+    "recentEvents": [
+      "Decanter feature, Mar 2026",
+      "Quoted in Wine Spectator on Brunello vintage"
+    ]
+  },
+  "privacyOpennessScore": 48
+}

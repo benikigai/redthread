@@ -2,25 +2,43 @@
   "id": "hong-kong",
   "name": "Rosewood Hong Kong",
   "locale": "Victoria Dockside, Tsim Sha Tsui",
-  "senseOfPlace": "The soaring city estate — harbour view, cultural centerpiece. Asaya wellness, Henry's, Chaat. Tailored elegance and verticality.",
+  "senseOfPlace": "The soaring city estate — harbour view, cultural centerpiece of the Cheng family's Victoria Dockside complex. Asaya wellness, Henry's, Chaat. East-meets-West, tailored elegance and verticality.",
   "amenityOptions": [
     {
       "name": "Mooncake — single, hand-painted",
       "source": "Kee Wah Bakery, Kowloon",
-      "dietary": [],
+      "dietary": ["vegetarian"],
       "story": "Hong Kong's mooncake tradition — Kee Wah has made them since 1938"
     },
     {
       "name": "Tea flight — three estates",
       "source": "Lock Cha Tea House",
-      "dietary": ["vegan"],
+      "dietary": ["vegan", "pescatarian", "vegetarian"],
       "story": "Curated by Lock Cha — Hong Kong's most respected tea master"
     },
     {
       "name": "Egg tarts, still warm",
       "source": "Tai Cheong Bakery, Central",
-      "dietary": [],
+      "dietary": ["vegetarian"],
       "story": "Chris Patten's favourite — a Hong Kong civic memory in pastry form"
+    },
+    {
+      "name": "XO sauce — single jar",
+      "source": "Spring Moon kitchen, the property",
+      "dietary": ["pescatarian"],
+      "story": "Spring Moon's house XO; the recipe predates the building"
+    },
+    {
+      "name": "Almond cookies, hand-folded",
+      "source": "Lo Hong Ka, Wan Chai",
+      "dietary": ["vegetarian"],
+      "story": "Made since 1962; a quiet Wan Chai institution, never franchised"
+    },
+    {
+      "name": "Jasmine-infused Pat Chun vinegar set",
+      "source": "Pat Chun, Hong Kong",
+      "dietary": ["vegan", "pescatarian"],
+      "story": "Pat Chun's family vinegar house — the table condiment of Cantonese kitchens"
     }
   ],
   "signatureExperiences": [
@@ -44,6 +62,48 @@
       "timeOfDay": "afternoon",
       "whyHere": "Adjacent to property; Asian contemporary art at scale",
       "vendorOrPlace": "M+ Museum, West Kowloon"
+    },
+    {
+      "title": "Cat Street antiques crawl with curator",
+      "category": "shopping",
+      "timeOfDay": "morning",
+      "whyHere": "Sheung Wan's antique row; a Hong Kong design historian leads",
+      "vendorOrPlace": "Cat Street (Upper Lascar Row)"
+    },
+    {
+      "title": "Dragon's Back hike with guide",
+      "category": "nature",
+      "timeOfDay": "morning",
+      "whyHere": "Shek O ridgeline — the city's quietest morning view",
+      "vendorOrPlace": "Dragon's Back trail"
+    },
+    {
+      "title": "Wong Kar-wai film locations walk",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "Mong Kok / Central in WKW's frames — a guest-requested past favourite",
+      "vendorOrPlace": "Hong Kong Island and Kowloon, guided"
+    },
+    {
+      "title": "Yat Lok roast goose private dinner",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Michelin-starred roast goose at a 14-seat Central institution",
+      "vendorOrPlace": "Yat Lok, Stanley Street"
+    },
+    {
+      "title": "Big Wave Bay sunrise SUP",
+      "category": "wellness",
+      "timeOfDay": "morning",
+      "whyHere": "Hong Kong's surf cove; SUP rental and instructor at first light",
+      "vendorOrPlace": "Big Wave Bay, Shek O"
+    },
+    {
+      "title": "Wing Lee Street tea ceremony",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "Preserved 1950s street; a Lock Cha private tea ceremony",
+      "vendorOrPlace": "Wing Lee Street, Sheung Wan"
     }
   ],
   "roomDefaults": {
@@ -57,7 +117,11 @@
       "name": "Selena Lai",
       "domain": "Hong Kong tea ceremony",
       "bio": "Third-generation Lock Cha master; private tastings for Rosewood guests."
+    },
+    {
+      "name": "Manav Tuli",
+      "domain": "Indian regional cooking, Hong Kong register",
+      "bio": "Executive chef at Chaat; trained at Indian Accent Delhi. Brings Indian regional traditions to the Victoria Dockside harbour."
     }
-  ],
-  "_t2_notes": "Expand with more amenities and a Phuket counterpart if scope allows."
+  ]
 }

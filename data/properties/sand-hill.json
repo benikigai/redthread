@@ -7,20 +7,38 @@
     {
       "name": "Heirloom Bartlett pears + Bay Area honey",
       "source": "Frog Hollow Farm, Brentwood CA",
-      "dietary": ["vegan", "gluten-free"],
+      "dietary": ["vegan", "gluten-free", "pescatarian"],
       "story": "30 min from property — orchard fruit that grew up under the same coastal fog"
     },
     {
       "name": "Sonoma olive oil + buckwheat crackers",
       "source": "McEvoy Ranch, Petaluma",
-      "dietary": ["vegan"],
+      "dietary": ["vegan", "pescatarian"],
       "story": "California's first commercial olive oil; orchard tour available via Placemaker"
     },
     {
       "name": "Tartine sourdough boule + cultured butter",
       "source": "Tartine Bakery, San Francisco",
-      "dietary": [],
+      "dietary": ["vegetarian"],
       "story": "Stanford grad's bakery — the bread that started the Bay Area sourdough movement"
+    },
+    {
+      "name": "Cowgirl Creamery cheese flight",
+      "source": "Cowgirl Creamery, Marshall CA",
+      "dietary": ["vegetarian", "pescatarian"],
+      "story": "Point Reyes cheesemakers; the Bay Area dairy revival in one tasting board"
+    },
+    {
+      "name": "Recchiuti chocolate truffles",
+      "source": "Recchiuti Confections, SF Ferry Building",
+      "dietary": ["vegetarian"],
+      "story": "Michael Recchiuti's atelier; the chocolate that defined the city's pastry shift"
+    },
+    {
+      "name": "Equator Coffee — single-origin Bay Area roast",
+      "source": "Equator Coffees, San Rafael",
+      "dietary": ["vegan", "pescatarian"],
+      "story": "Marin-based, direct-trade — the coffee Bici Coffee serves at the property"
     }
   ],
   "signatureExperiences": [
@@ -44,6 +62,48 @@
       "timeOfDay": "evening",
       "whyHere": "Echoes the register of Henry's at HK; quiet alcove available",
       "vendorOrPlace": "The Sea by Alexander's"
+    },
+    {
+      "title": "Filoli Gardens private docent tour",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "1917 estate; English-garden contrast to the oak woodland",
+      "vendorOrPlace": "Filoli Historic House & Garden"
+    },
+    {
+      "title": "Anchor & Hope oyster bar, Half Moon Bay",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Coast 35 min; pescatarian-led, low-ceremony",
+      "vendorOrPlace": "Anchor & Hope, Half Moon Bay"
+    },
+    {
+      "title": "Computer History Museum after-hours visit",
+      "category": "cultural",
+      "timeOfDay": "evening",
+      "whyHere": "The actual Sense of Place — Silicon Valley as a museum subject",
+      "vendorOrPlace": "Computer History Museum, Mountain View"
+    },
+    {
+      "title": "Sand Hill cycling loop with Bici provisions",
+      "category": "wellness",
+      "timeOfDay": "morning",
+      "whyHere": "The bike-and-coffee local ritual; the property's own café provisions the ride",
+      "vendorOrPlace": "Sand Hill Road loop · Bici Coffee at property"
+    },
+    {
+      "title": "Cantor Arts Center private view, Stanford",
+      "category": "cultural",
+      "timeOfDay": "afternoon",
+      "whyHere": "Rodin garden; Cantor's California modernism collection",
+      "vendorOrPlace": "Stanford Cantor Arts Center"
+    },
+    {
+      "title": "Madera tasting menu, the property",
+      "category": "culinary",
+      "timeOfDay": "evening",
+      "whyHere": "Michelin-starred; the on-property anchor for guests who want to stay close",
+      "vendorOrPlace": "Madera at Rosewood Sand Hill"
     }
   ],
   "roomDefaults": {
@@ -57,7 +117,11 @@
       "name": "Maria Salvo",
       "domain": "Bay Area orchard producers",
       "bio": "Third-generation Brentwood orchardist; sources Sand Hill's amenity programme."
+    },
+    {
+      "name": "Daniel Sotomayor",
+      "domain": "Bay Area mid-century modernism",
+      "bio": "Cantor Arts Center curator; walks Rosewood guests through Eichler and the Stanford architectural lineage."
     }
-  ],
-  "_t2_notes": "Expand to 5-7 amenityOptions and 8-12 experiences for the agent to pick from."
+  ]
 }
