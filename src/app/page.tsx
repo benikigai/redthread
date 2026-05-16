@@ -65,24 +65,16 @@ export default function Home() {
 
 function Eyebrow() {
   return (
-    <div className="mt-10 flex items-end justify-between gap-8 flex-wrap">
-      <div className="max-w-[60ch]">
+    <div className="mt-8 flex items-end justify-between gap-8 flex-wrap">
+      <div>
         <div className="caps flex items-center gap-3">
           <span className="inline-block w-6 h-px bg-thread" />
           Live dossier
         </div>
-        <h1
-          className="font-display font-normal text-[clamp(2.5rem,5vw,4.25rem)] leading-[1.02] tracking-tight mt-5"
-          style={{ letterSpacing: "-0.014em" }}
-        >
-          A sense of place,
-          <br />
-          <em className="italic text-thread font-normal">threaded</em> through every guest.
-        </h1>
+        <p className="font-display italic text-ink-mute text-lg mt-3 leading-snug max-w-[48ch]">
+          Pre-arrival research streaming · held with discretion, returned with intention.
+        </p>
       </div>
-      <p className="text-ink-mute max-w-[48ch] mt-2" style={{ fontSize: "1.05rem", lineHeight: 1.7 }}>
-        Pre-arrival, on-property, post-stay — held with discretion, returned with intention.
-      </p>
     </div>
   );
 }
