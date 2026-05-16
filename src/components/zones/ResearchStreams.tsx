@@ -41,6 +41,14 @@ const TOOL_META: Record<string, { label: string; tech: string }> = {
     label: "Discretion Layer",
     tech: "Claude Haiku 4.5 — second-pass principled redaction",
   },
+  voice_intake: {
+    label: "Voice intake",
+    tech: "ElevenLabs Convai · 5-question pre-arrival briefing",
+  },
+  agent_handoff: {
+    label: "Agent handoff",
+    tech: "A2A protocol · /.well-known/agent.json",
+  },
 };
 
 const STATIC_STREAMS: ToolCallTrace[] = [

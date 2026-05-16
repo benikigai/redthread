@@ -81,6 +81,28 @@ interface DossierStore {
   activeGuestId: "ben" | "lin-chen";
   setActiveGuestId: (id: "ben" | "lin-chen") => void;
 
+  /** Merge voice-intake overrides into the existing dossier (additive
+   *  enrichment, not replacement). Used after the guest finishes the
+   *  /intake conversation — we update actuators.roomState, append a
+   *  voice-confirmed conversation hook, and push a `voice_intake` tool
+   *  call so it surfaces in Zone I. If no dossier is loaded yet, no-op
+   *  (DemoLoader handles the fresh-run path). */
+  mergeIntake: (overrides: {
+    roomTempC?: number;
+    bedding?: "down" | "down-free" | "memory";
+    morningRitual?: string;
+    dietary?: string;
+    privacyPosture?: "minimal" | "standard" | "full";
+  }) => void;
+
+  /** Merge an agent-to-agent handoff payload into the existing dossier
+   *  (additive enrichment). Used after AgentHandoffPanel resolves. */
+  mergeHandoff: (payload: {
+    sourceAgent?: string;
+    preferences?: Record<string, unknown>;
+    note?: string;
+  }) => void;
+
   /** Live arrival-research chain. Each step streams reasoning tokens; UI
    *  surfaces the typing reasoning + final value. LiveThread (Zone IV) also
    *  reads from this to render the pre-arrival timeline beats live. */
@@ -254,6 +276,84 @@ export const useDossier = create<DossierStore>((set) => ({
 
   setDossier: (dossier) =>
     set({ dossier, loading: false, phase: "done", error: null }),
+
+  mergeIntake: (overrides) =>
+    set((state) => {
+      if (!state.dossier) return state;
+      const summaryParts: string[] = [];
+      if (overrides.roomTempC !== undefined) summaryParts.push(`${overrides.roomTempC}°C`);
+      if (overrides.bedding) summaryParts.push(overrides.bedding);
+      if (overrides.morningRitual)
+        summaryParts.push(`morning: ${overrides.morningRitual.slice(0, 36)}`);
+      if (overrides.dietary) summaryParts.push(overrides.dietary);
+      if (overrides.privacyPosture) summaryParts.push(`POS: ${overrides.privacyPosture}`);
+      const summary =
+        summaryParts.length > 0
+          ? `${summaryParts.length} preferences captured · ${summaryParts.join(" · ")}`
+          : "voice intake completed (no overrides)";
+
+      const room = state.dossier.actuators.roomState;
+      const newHooks: string[] = [];
+      if (overrides.morningRitual)
+        newHooks.push(`Morning rhythm — confirmed by voice: ${overrides.morningRitual}`);
+      if (overrides.dietary)
+        newHooks.push(`Dietary — confirmed by voice: ${overrides.dietary}`);
+
+      return {
+        dossier: {
+          ...state.dossier,
+          conversationHooks: [...state.dossier.conversationHooks, ...newHooks],
+          actuators: {
+            ...state.dossier.actuators,
+            roomState: {
+              ...room,
+              climateC: overrides.roomTempC ?? room.climateC,
+              bedding: overrides.bedding ?? room.bedding,
+              reasoning: [
+                ...(room.reasoning ?? []),
+                `Confirmed by voice intake at ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+              ],
+            },
+          },
+        },
+        liveToolCalls: [
+          ...state.liveToolCalls,
+          {
+            tool: "voice_intake",
+            status: "complete",
+            args: overrides,
+            result: summary,
+            startedAt: new Date().toISOString(),
+            finishedAt: new Date().toISOString(),
+          },
+        ],
+      };
+    }),
+
+  mergeHandoff: (payload) =>
+    set((state) => {
+      if (!state.dossier) return state;
+      const sourceAgent = payload.sourceAgent ?? "guest agent";
+      const summary = payload.note ?? `preferences received from ${sourceAgent}`;
+      const newHook = `Received from ${sourceAgent} via A2A handoff — preferences logged with provenance.`;
+      return {
+        dossier: {
+          ...state.dossier,
+          conversationHooks: [...state.dossier.conversationHooks, newHook],
+        },
+        liveToolCalls: [
+          ...state.liveToolCalls,
+          {
+            tool: "agent_handoff",
+            status: "complete",
+            args: payload as unknown,
+            result: summary,
+            startedAt: new Date().toISOString(),
+            finishedAt: new Date().toISOString(),
+          },
+        ],
+      };
+    }),
 
   setError: (error) => set({ error, loading: false, phase: "error" }),
 
