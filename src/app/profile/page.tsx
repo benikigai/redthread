@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import {
   BAND_LABEL,
+  BAND_BENEFIT,
   bandFor,
   posToUi,
   uiToPos,
@@ -14,15 +15,15 @@ import {
 import { ThreadHashScale } from "@/components/ThreadHashScale";
 import { useDossier } from "@/lib/dossierStore";
 
-// Guest-facing guidance per band — what the dashboard will (and won't) do
-// at this level. Mirrors the concierge-facing copy on DashboardDial but
-// addressed to the guest.
+// Guest-facing benefit framing — what YOU GET at each level, in positive
+// terms. The dial isn't about giving up privacy; it's about tuning the
+// experience you receive.
 const GUEST_GUIDANCE: Record<"minimal" | "standard" | "full", string> = {
   minimal:
-    "We acknowledge only what you've shared. No public signals, no inferred context — strict need-to-know.",
+    "A fresh-eye welcome. We treat each arrival as if we're meeting you for the first time — nothing assumed, nothing volunteered. The room is set to your saved preferences; the rest is yours to direct.",
   standard:
-    "We may use public signals — press, events, prior stays — as quiet conversation starters. Private context stays private.",
-  full: "We may anticipate from your public and professional context, and surface proactively. Every detail is marked with provenance.",
+    "Familiar without intrusion. The butler remembers Henry's at Hong Kong, the pescatarian dinner is held at a quiet table, and the welcome amenity is sourced to a place you've loved before. Private context stays private.",
+  full: "A fully bespoke experience. Every detail anticipated; every offer surfaced with provenance. Your Hong Kong butler knows about your Bangkok trip. Your favorite Placemaker is on standby. Weekly check-ins for what's next. This is the thread at its full reach — and you can drop it back down at any time.",
 };
 
 /**
@@ -232,17 +233,22 @@ export default function ProfilePage() {
                     : "— your saved preference"}
                 </span>
               </div>
-              <span
-                className={`text-[10px] tracking-[0.22em] uppercase font-medium ${
-                  band === "minimal"
-                    ? "text-ink-faint"
-                    : band === "standard"
-                      ? "text-thread-deep"
-                      : "text-thread"
-                }`}
-              >
-                {BAND_LABEL[band]}
-              </span>
+              <div className="flex flex-col items-end gap-0.5">
+                <span
+                  className={`text-[10px] tracking-[0.22em] uppercase font-medium ${
+                    band === "minimal"
+                      ? "text-ink-faint"
+                      : band === "standard"
+                        ? "text-thread-deep"
+                        : "text-thread"
+                  }`}
+                >
+                  {BAND_LABEL[band]}
+                </span>
+                <span className="text-[12px] italic text-ink-mute">
+                  {BAND_BENEFIT[band]}
+                </span>
+              </div>
             </div>
 
             <ThreadHashScale

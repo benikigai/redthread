@@ -3,18 +3,18 @@
 import Link from "next/link";
 
 import { useDossier } from "@/lib/dossierStore";
-import { bandFor, posToUi, BAND_LABEL } from "./DiscretionDial";
+import { bandFor, posToUi, BAND_LABEL, BAND_BENEFIT } from "./DiscretionDial";
 import { ThreadHashScale } from "./ThreadHashScale";
 
-// What the concierge is permitted to do at each level — one short line so
-// staff can act without leaving the dashboard. These are the same three
-// bands as DiscretionDial's bandFor, just framed for staff (not the guest).
+// What the concierge is permitted to do at each level, framed as the
+// experience the guest is receiving (not just permission rules). Staff
+// still need actionable guidance, but the verb is "anticipate" not "ingest".
 const CONCIERGE_GUIDANCE: Record<"minimal" | "standard" | "full", string> = {
   minimal:
-    "Acknowledge only what the guest has shared. No volunteered context, no inferred preferences.",
+    "Reserved arrival — treat as a fresh-eye welcome. Acknowledge only what the guest has shared; nothing volunteered, nothing inferred.",
   standard:
-    "Use public signals — press, events, prior stays — as quiet starters. Hold private context.",
-  full: "Anticipate from public + professional signals. Surface proactively; mark provenance on every detail.",
+    "Familiar service — use public signals (press, events, prior stays) as quiet conversation starters. Private context stays private.",
+  full: "Fully bespoke — every detail anticipated, every offer surfaced with provenance. Public + professional context in scope; mark sources on each item.",
 };
 
 /**
@@ -51,11 +51,16 @@ export function DashboardDial() {
                 — guest&rsquo;s saved preference
               </span>
             </div>
-            <span
-              className={`text-[10px] tracking-[0.22em] uppercase font-medium ${bandColor}`}
-            >
-              {BAND_LABEL[band]}
-            </span>
+            <div className="flex flex-col items-end gap-0.5">
+              <span
+                className={`text-[10px] tracking-[0.22em] uppercase font-medium ${bandColor}`}
+              >
+                {BAND_LABEL[band]}
+              </span>
+              <span className="text-[11px] italic text-ink-mute">
+                {BAND_BENEFIT[band]}
+              </span>
+            </div>
           </div>
 
           {/* Hash-mark scale 0..10 — read-only on the concierge surface */}
