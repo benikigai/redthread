@@ -38,10 +38,14 @@ src/
   app/
     layout.tsx              # Cormorant Garamond + Inter, dark rose red theme
     page.tsx                # 4-zone dashboard
+    profile/page.tsx        # Ms. Chen's guest profile — Hold the Thread control
     globals.css             # theme tokens (--paper, --thread, --ink…)
-    api/agent/route.ts      # T2 — agent loop (currently returns static Dossier stub)
+    api/agent/route.ts      # T2 — agent loop (Opus 4.7 research + Haiku 4.5 Discretion)
+    api/voice/route.ts      # T2 — ElevenLabs TTS proxy for "Brief me"
   components/
     Header.tsx              # wordmark + property switcher
+    DiscretionDial.tsx      # Hold the Thread — 0-10 slider, guest + concierge variants
+    CapabilityMatrix.tsx    # "What changes at each level" — three-band disclosure
     zones/
       ZoneShell.tsx         # editorial card frame
       ResearchStreams.tsx   # Zone I
@@ -85,9 +89,12 @@ Run the agentic research + discretion pipeline and return a `Dossier`. See `src/
 {
   "guestId": "lin-chen",
   "propertyId": "sand-hill",
-  "flightNumber": "UA857"
+  "flightNumber": "UA857",
+  "previewPos": 60
 }
 ```
+
+`previewPos` (optional, 0–100) overrides `guest.privacyOpennessScore` for the Discretion Layer pass only. Used by the **Hold the Thread** control on `/profile` (guest-side save) and the concierge dashboard preview widget. In `DEMO_MODE`, the fixture is band-reduced to simulate the same shift without re-invoking Claude on every slider tick.
 
 **Response — JSON (default)**
 

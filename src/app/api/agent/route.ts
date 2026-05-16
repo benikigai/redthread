@@ -1,9 +1,14 @@
 // Red Thread — the real agent loop. Replaces T1's static stub.
 //
-// POST /api/agent  body: { guestId, propertyId, flightNumber? }
+// POST /api/agent  body: { guestId, propertyId, flightNumber?, previewPos? }
 //
 // Default response: application/json — a full Dossier matching T1's contract.
 // Opt-in streaming: when Accept: text/event-stream, returns SSE events per phase.
+//
+// previewPos (0–100): optional override of guest.privacyOpennessScore for the
+// Discretion Layer pass only. Drives the "Hold the Thread" guest control —
+// concierge dashboard mirrors the guest's saved value; profile screen saves it.
+// In DEMO_MODE, fixture is band-reduced to simulate the discretion change.
 //
 // DEMO_MODE=1 short-circuits the Claude calls and replays a captured fixture
 // from data/fixtures/<guestId>__<propertyId>.json — insurance against demo-day
@@ -44,6 +49,64 @@ interface RequestBody {
   guestId: string;
   propertyId: PropertyId;
   flightNumber?: string;
+  /** Override guest.privacyOpennessScore for this call's Discretion pass only.
+   *  0–100. Used by the "Hold the Thread" preview control on the dashboard
+   *  and by the guest's profile save flow. */
+  previewPos?: number;
+}
+
+type Band = "minimal" | "standard" | "full";
+
+function bandFor(pos: number): Band {
+  if (pos < 31) return "minimal";
+  if (pos < 70) return "standard";
+  return "full";
+}
+
+/** Demo-only: reduce a fixture Dossier to simulate what the Discretion Layer
+ *  would emit at the target POS. Mirrors the band logic in
+ *  DISCRETION_LAYER_SYSTEM (src/lib/prompts.ts) closely enough for the dial
+ *  to read as live without re-invoking Claude on every slider tick. */
+function bandReduceFixture(d: Dossier, pos: number): Dossier {
+  const band = bandFor(pos);
+  if (band === "full") return d;
+
+  const cloned: Dossier = JSON.parse(JSON.stringify(d));
+  const extraSuppressed: { signal: string; reason: string }[] = [];
+
+  if (band === "minimal") {
+    for (const h of cloned.conversationHooks ?? []) {
+      const label = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "hook";
+      extraSuppressed.push({
+        signal: `conversation-hook: ${String(label).slice(0, 60)}`,
+        reason: "Below POS standard floor — minimal band suppresses all conversation hooks",
+      });
+    }
+    cloned.conversationHooks = [];
+    cloned.handleWithCare = [
+      "Guest is privacy-conscious. Standard luxury service. No personalized references.",
+    ];
+  } else {
+    // STANDARD: drop hooks that read as personal/recent-life, keep professional.
+    const before = cloned.conversationHooks ?? [];
+    const after = before.filter((h) => {
+      const text = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "";
+      const personal = /(family|wife|husband|partner|son|daughter|child|kids|wedding|engagement|breakup|illness|diagnosis|recovery|therapy|treatment)/i;
+      return !personal.test(text);
+    });
+    for (const h of before) {
+      if (after.includes(h)) continue;
+      const label = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "hook";
+      extraSuppressed.push({
+        signal: `conversation-hook: ${String(label).slice(0, 60)}`,
+        reason: "Standard band — personal/non-professional reference removed",
+      });
+    }
+    cloned.conversationHooks = after;
+  }
+
+  cloned.suppressed = [...(cloned.suppressed ?? []), ...extraSuppressed];
+  return cloned;
 }
 
 type Emit = (event: Omit<SSEEvent, "ts">) => void;
@@ -63,20 +126,29 @@ function loadFixture(guestId: string, propertyId: PropertyId): Fixture | null {
 
 async function streamFixture(
   fixture: Fixture,
+  effectiveDossier: Dossier,
   emit: Emit,
   controller: ReadableStreamDefaultController<Uint8Array>,
 ): Promise<void> {
   if (fixture.events && fixture.events.length > 0) {
     for (const { event, delayMs } of fixture.events) {
       if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
-      emit(event);
+      // Swap the canonical dossier for the band-reduced one when this event
+      // carries a dossier payload (so previewPos changes visibly even in SSE).
+      const swapped =
+        event.type === "dossier"
+          ? { ...event, payload: effectiveDossier }
+          : event.phase === "discretion" && event.type === "complete"
+            ? { ...event, payload: { suppressed: effectiveDossier.suppressed.length } }
+            : event;
+      emit(swapped);
     }
   } else {
     // Fallback synthetic timeline when fixture only has dossier
     emit({ phase: "verify", type: "start" });
     await new Promise((r) => setTimeout(r, 200));
     emit({ phase: "research", type: "start" });
-    for (const tc of fixture.dossier.toolCalls) {
+    for (const tc of effectiveDossier.toolCalls) {
       emit({ phase: "research", type: "tool_use_start", payload: { tool: tc.tool } });
       await new Promise((r) => setTimeout(r, 250));
       emit({
@@ -90,9 +162,9 @@ async function streamFixture(
     emit({
       phase: "discretion",
       type: "complete",
-      payload: { suppressed: fixture.dossier.suppressed.length },
+      payload: { suppressed: effectiveDossier.suppressed.length },
     });
-    emit({ phase: "done", type: "dossier", payload: fixture.dossier });
+    emit({ phase: "done", type: "dossier", payload: effectiveDossier });
   }
   controller.close();
 }
@@ -284,10 +356,16 @@ async function runDiscretionPass(
 
 async function runAgent(body: RequestBody, emit: Emit): Promise<Dossier> {
   const guest = getGuest(body.guestId);
+  const pos = body.previewPos ?? guest.privacyOpennessScore;
   emit({
     phase: "verify",
     type: "start",
-    payload: { guestId: body.guestId, propertyId: body.propertyId, pos: guest.privacyOpennessScore },
+    payload: {
+      guestId: body.guestId,
+      propertyId: body.propertyId,
+      pos,
+      posSource: body.previewPos !== undefined ? "preview" : "guest-profile",
+    },
   });
 
   const toolCalls: ToolCallTrace[] = [];
@@ -295,7 +373,7 @@ async function runAgent(body: RequestBody, emit: Emit): Promise<Dossier> {
   const candidate = await runResearchLoop(body, emit, toolCalls);
   emit({ phase: "synthesize", type: "complete" });
 
-  const final = await runDiscretionPass(candidate, guest.privacyOpennessScore, emit);
+  const final = await runDiscretionPass(candidate, pos, emit);
   final.toolCalls = toolCalls;
 
   emit({ phase: "done", type: "dossier", payload: final });
@@ -334,7 +412,7 @@ export async function POST(req: Request): Promise<Response> {
   const wantsSSE =
     (req.headers.get("accept") ?? "").toLowerCase().includes("text/event-stream");
 
-  // Demo mode — replay fixture
+  // Demo mode — replay fixture, optionally band-reduced for previewPos
   if (process.env.DEMO_MODE === "1") {
     const fixture = loadFixture(body.guestId, body.propertyId);
     if (!fixture) {
@@ -343,15 +421,19 @@ export async function POST(req: Request): Promise<Response> {
         { status: 503 },
       );
     }
+    const effective =
+      body.previewPos !== undefined
+        ? bandReduceFixture(fixture.dossier, body.previewPos)
+        : fixture.dossier;
     if (!wantsSSE) {
-      return Response.json(fixture.dossier);
+      return Response.json(effective);
     }
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const emit: Emit = (e) => {
           controller.enqueue(formatSSE({ ...e, ts: new Date().toISOString() }));
         };
-        await streamFixture(fixture, emit, controller);
+        await streamFixture(fixture, effective, emit, controller);
       },
     });
     return new Response(stream, { headers: sseHeaders() });
