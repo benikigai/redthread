@@ -48,7 +48,6 @@ export function DemoLoader() {
     fired.current = true;
 
     const store = useDossier.getState();
-    store.startRun("intake");
 
     let overrides: IntakeOverrides | undefined;
     try {
@@ -58,9 +57,21 @@ export function DemoLoader() {
       // ignore — proceed without overrides
     }
 
+    // Additive enrichment path: if a dossier is already loaded (the user
+    // ran Begin briefing first, THEN took the voice intake), merge the
+    // voice overrides into the existing dossier instead of replacing it.
+    // Zone 1 gets a new "voice_intake" card, Zone 2 appends hooks, Zone 3
+    // roomState updates with reasoning citing voice intake.
+    if (store.dossier && overrides) {
+      store.mergeIntake(overrides);
+      try { sessionStorage.removeItem("redthread:intake"); } catch {}
+      return;
+    }
+
+    // Cold-start path: no dossier yet — kick the full agent loop with
+    // the overrides as initial context, same as before.
+    store.startRun("intake");
     const controller = new AbortController();
-    // Pull the selected property from the store — Header writes it, store
-    // defaults to "hong-kong" so intake-only flows still work unchanged.
     const propertyId = useDossier.getState().activeProperty;
     streamAgent(
       { guestId: DEFAULT_GUEST, propertyId, overrides },
