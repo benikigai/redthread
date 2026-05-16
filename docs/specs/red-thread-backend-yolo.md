@@ -9,4 +9,4 @@
 - [x] Task 6: ElevenLabs voice route (src/app/api/voice/route.ts) — SIMPLE
 - [x] Task 7: agent.json static file (public/.well-known/agent.json) — SIMPLE
 - [x] Task 8: Pre-cached fixtures + DEMO_MODE wiring — SIMPLE
-- [ ] Task 9: README delta — backend contract section — SIMPLE
+- [x] Task 9: README delta — backend contract section — SIMPLE

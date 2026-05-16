@@ -71,3 +71,77 @@ public/
 - **Affluential Explorers** — Rosewood's target guest. Use the term.
 - **Discovery** — the 2025 rebrand keyword. Microcopy: "Threading the dossier…" not "Loading…"
 - **No cookie-cutter** — the property switcher is the demo of this principle.
+
+## API Contract (T2 → T1)
+
+Backend surfaces and their shapes — what T1's UI fetches.
+
+### `POST /api/agent`
+
+Run the agentic research + discretion pipeline and return a `Dossier`. See `src/lib/types.ts` for the full shape.
+
+**Request body**
+```json
+{
+  "guestId": "lin-chen",
+  "propertyId": "sand-hill",
+  "flightNumber": "UA857"
+}
+```
+
+**Response — JSON (default)**
+
+`Content-Type: application/json`. One `Dossier` object — same shape as T1's original stub, including `actuators` (roomState, welcomeAmenity, itinerary), `suppressed[]` (Discretion Layer log), and `toolCalls[]` (one entry per `crm_cross_property`/`flight_lookup`/`web_search` block observed during the loop).
+
+**Response — SSE (opt-in)**
+
+If the request includes `Accept: text/event-stream`, the body is `text/event-stream` with one JSON-encoded event per `data:` line:
+
+```ts
+type SSEEvent = {
+  phase: "verify" | "research" | "synthesize" | "discretion" | "done" | "error";
+  type: string;        // e.g. "start", "tool_use_start", "tool_use_complete", "dossier"
+  payload?: unknown;   // shape varies by type — final "done" event carries the full Dossier
+  ts: string;          // ISO timestamp
+};
+```
+
+Phases stream in order: `verify` → `research` (with nested `tool_use_start` / `tool_use_complete` / `tool_use_error` per tool call) → `synthesize` → `discretion` → `done`. Errors emit `phase: "error"` then close the stream.
+
+### `POST /api/voice`
+
+ElevenLabs TTS proxy for the "Brief me" ritual.
+
+**Request body**
+```json
+{ "text": "Ms. Chen lands at three. The suite is set.", "voiceId": "Xb7hH8MSUJpSbSDYk0k2" }
+```
+
+`voiceId` is optional. Default: `process.env.ELEVENLABS_VOICE_ID` or Alice (`Xb7hH8MSUJpSbSDYk0k2`, calm British female, the Rosewood concierge register).
+
+**Response** `audio/mpeg` stream. Identical `(voiceId, text)` requests are cached on disk at `/tmp/voice-cache/<sha256>.mp3` — repeat plays return in ~5ms.
+
+### `GET /.well-known/agent.json`
+
+Static handoff manifest for the 2030 agent-to-agent protocol layer. Includes `principles[]`, `schemas`, `endpoints`, and the privacy policies.
+
+### `DEMO_MODE=1`
+
+When the dev server is started with `DEMO_MODE=1`, `/api/agent` short-circuits the Claude calls and replays from `data/fixtures/<guestId>__<propertyId>.json`. JSON requests return the saved Dossier; SSE requests stream synthetic events reconstructed from `Dossier.toolCalls[]` with realistic per-event delays. Missing fixture → 503.
+
+This is the demo-day insurance: if Wi-Fi at Rosewood Sand Hill fails mid-pitch, flip the env var and the demo continues.
+
+Three fixtures are captured: `lin-chen × { sand-hill, hong-kong, crillon }`. Regenerate with:
+```bash
+bun scripts/capture-fixture.ts lin-chen sand-hill UA857
+```
+
+### Local dev with secrets from 1Password
+
+The repo ships a `.env.example`; copy to `.env.local` and fill in real keys. If you use the 1Password CLI, you can pull keys at runtime instead:
+
+```bash
+op run -- bun dev
+```
+
+Required env: `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`. Optional: `AVIATIONSTACK_API_KEY` (mock fallback runs without it), `ELEVENLABS_VOICE_ID` (overrides Alice default), `DEMO_MODE` (set to `1` for fixture replay).
