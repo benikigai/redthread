@@ -13,6 +13,18 @@ import { useEffect, useRef, useState } from "react";
 import { streamAgent } from "@/components/DemoLoader";
 import { useDossier } from "@/lib/dossierStore";
 
+// ── Voice pairing ──────────────────────────────────────────────────────
+// Distinct voices so the audio handoff is unmistakable.
+const VOICE_ID: Record<"threadkeeper" | "elias", string> = {
+  threadkeeper: "Xb7hH8MSUJpSbSDYk0k2", // Alice — British female, calm
+  elias: "JBFqnCBsd6RMkjVDRZzb",         // George — British male, warm
+};
+
+interface AudioJob {
+  role: "threadkeeper" | "elias";
+  text: string;
+}
+
 type Role = "threadkeeper" | "elias";
 
 interface Message {
@@ -69,8 +81,56 @@ export function AgentHandoffPanel({
     "streaming",
   );
   const [error, setError] = useState<string | null>(null);
+  const [speaking, setSpeaking] = useState<Role | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const startedRef = useRef(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const audioQueueRef = useRef<AudioJob[]>([]);
+  const playingRef = useRef(false);
+
+  // Voice queue — every incoming message gets pushed; one plays at a time.
+  // Different voice per role; cached on /tmp by hash so repeat demos warm.
+  const enqueueAudio = (job: AudioJob) => {
+    if (!voiceEnabled) return;
+    audioQueueRef.current.push(job);
+    void drainAudio();
+  };
+
+  const drainAudio = async () => {
+    if (playingRef.current) return;
+    playingRef.current = true;
+    while (audioQueueRef.current.length > 0) {
+      const job = audioQueueRef.current.shift()!;
+      try {
+        setSpeaking(job.role);
+        const res = await fetch("/api/voice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: job.text, voiceId: VOICE_ID[job.role] }),
+        });
+        if (!res.ok) throw new Error(`/api/voice ${res.status}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        await new Promise<void>((resolve) => {
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+          };
+          audio.play().catch(() => resolve());
+        });
+      } catch {
+        // swallow — keep the UX going even if one TTS call fails
+      } finally {
+        setSpeaking(null);
+      }
+    }
+    playingRef.current = false;
+  };
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -86,6 +146,8 @@ export function AgentHandoffPanel({
       onMessage: (msg) => {
         setTyping(null);
         setMessages((prev) => [...prev, msg]);
+        // Voice each turn in the role's voice — audio plays sequentially.
+        enqueueAudio(msg as AudioJob);
       },
       onManifest: (m) => setManifest(m),
       onComplete: async (overrides) => {
@@ -131,15 +193,39 @@ export function AgentHandoffPanel({
             {phase === "error" && (error ?? "Handoff error.")}
           </p>
         </div>
-        {onClose && (
+        <div className="flex items-center gap-3">
+          {speaking && (
+            <span className="caps text-thread flex items-center gap-2">
+              <span className="relative inline-flex w-2 h-2">
+                <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-75" />
+                <span className="relative inline-flex w-2 h-2 rounded-full bg-thread" />
+              </span>
+              {speaking === "threadkeeper" ? "Threadkeeper · Alice" : "elias · George"}
+            </span>
+          )}
           <button
             type="button"
-            onClick={onClose}
-            className="caps text-ink-faint hover:text-thread-deep text-[10px] tracking-[0.18em]"
+            onClick={() => setVoiceEnabled((v) => !v)}
+            className={[
+              "caps border hairline px-2 py-1 transition-colors text-[10px] tracking-[0.18em]",
+              voiceEnabled
+                ? "text-ink hover:text-thread-deep"
+                : "text-ink-faint hover:text-ink",
+            ].join(" ")}
+            aria-pressed={voiceEnabled}
           >
-            Close
+            Voice {voiceEnabled ? "on" : "off"}
           </button>
-        )}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="caps text-ink-faint hover:text-thread-deep text-[10px] tracking-[0.18em]"
+            >
+              Close
+            </button>
+          )}
+        </div>
       </div>
 
       <div

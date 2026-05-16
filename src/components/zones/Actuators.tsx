@@ -8,7 +8,7 @@ export function Actuators() {
   const dossier = useDossier((s) => s.dossier);
   return (
     <ZoneShell label="Zone III" title="Actuators" hint="What the system commits to. Action + reasoning.">
-      {dossier ? <ActuatorsLive dossier={dossier} /> : <ActuatorsStatic />}
+      {dossier ? <ActuatorsLive dossier={dossier} /> : <ActuatorsEmpty />}
     </ZoneShell>
   );
 }
@@ -44,6 +44,17 @@ function ActuatorsLive({ dossier }: { dossier: Dossier }) {
         headline={itineraryHeadline || "—"}
         because={itinerary[0]?.reasoning ?? "—"}
       />
+    </div>
+  );
+}
+
+function ActuatorsEmpty() {
+  return (
+    <div className="py-10 text-center space-y-2">
+      <div className="caps text-ink-faint">Awaiting briefing</div>
+      <p className="font-display italic text-ink-mute text-sm leading-snug max-w-[32ch] mx-auto">
+        Room state, welcome amenity, and itinerary commit here once the dossier completes.
+      </p>
     </div>
   );
 }

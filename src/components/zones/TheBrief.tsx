@@ -12,7 +12,7 @@ export function TheBrief() {
 
   return (
     <ZoneShell label="Zone II" title="The brief" hint="Desk view. What the concierge actually sees.">
-      {dossier ? <BriefLive /> : <BriefStatic />}
+      {dossier ? <BriefLive /> : <BriefEmpty />}
     </ZoneShell>
   );
 }
@@ -61,6 +61,17 @@ function BriefLive() {
       </div>
 
       <BriefMeButton narration={narration} />
+    </div>
+  );
+}
+
+function BriefEmpty() {
+  return (
+    <div className="py-10 text-center space-y-2">
+      <div className="caps text-ink-faint">Awaiting briefing</div>
+      <p className="font-display italic text-ink-mute text-base leading-snug max-w-[36ch] mx-auto">
+        Submit the reservation above and the brief will compose here from the live research.
+      </p>
     </div>
   );
 }

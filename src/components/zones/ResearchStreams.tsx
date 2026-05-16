@@ -80,14 +80,31 @@ export function ResearchStreams() {
   const phase = useDossier((s) => s.phase);
 
   // Prefer streaming-live state while the run is in flight; fall back to the
-  // dossier's final toolCalls once complete; static demo otherwise.
+  // dossier's final toolCalls once complete; empty otherwise (dashboard
+  // is blank until the user submits the reservation form above).
   const running = phase !== "idle" && phase !== "error";
   const streams: ToolCallTrace[] =
     liveToolCalls.length > 0
       ? liveToolCalls
       : dossier
         ? dossier.toolCalls
-        : STATIC_STREAMS;
+        : [];
+  if (streams.length === 0) {
+    return (
+      <ZoneShell
+        label="Zone I"
+        title="Research streams"
+        hint="Parallel tool calls, gated by Privacy Openness Score."
+      >
+        <div className="py-10 text-center space-y-2">
+          <div className="caps text-ink-faint">Awaiting briefing</div>
+          <p className="font-display italic text-ink-mute text-sm leading-snug max-w-[34ch] mx-auto">
+            Tool calls will stream here as the agent works — flight, CRM, web search, Discretion Layer.
+          </p>
+        </div>
+      </ZoneShell>
+    );
+  }
 
   return (
     <ZoneShell
