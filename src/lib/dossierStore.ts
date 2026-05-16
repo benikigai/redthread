@@ -8,6 +8,26 @@ import { create } from "zustand";
 
 import type { Dossier, PropertyId, ToolCallTrace } from "@/lib/types";
 
+// ─── Arrival-chain step slice ────────────────────────────────────────────
+export interface ArrivalStep {
+  id: string;
+  label: string;
+  status: "pending" | "thinking" | "complete" | "error";
+  reasoning: string;          // streaming Claude text as it arrives
+  value?: string;             // final output value
+  summary?: string;           // one-line summary on completion
+  data?: Record<string, unknown>;
+}
+
+export interface ArrivalSummary {
+  landingLocal?: string;
+  etaLocal?: string;
+  customsMinutes?: number;
+  luggageMinutes?: number;
+  transitMinutes?: number;
+  flight?: { number: string; status: string; origin: string; destination: string };
+}
+
 export type RunPhase =
   | "idle"
   | "verify"
@@ -32,6 +52,20 @@ interface DossierStore {
   activeProperty: PropertyId;
   setActiveProperty: (id: PropertyId) => void;
 
+  /** Live arrival-research chain. Each step streams reasoning tokens; UI
+   *  surfaces the typing reasoning + final value. LiveThread (Zone IV) also
+   *  reads from this to render the pre-arrival timeline beats live. */
+  arrivalSteps: ArrivalStep[];
+  arrivalRunning: boolean;
+  arrivalSummary: ArrivalSummary | null;
+  arrivalReservation: { guestName: string; reservationNumber: string; checkIn: string; checkOut: string; propertyId: PropertyId } | null;
+  startArrival: (reservation: NonNullable<DossierStore["arrivalReservation"]>) => void;
+  pushArrivalStepStart: (id: string, label: string) => void;
+  pushArrivalStepDelta: (id: string, delta: string) => void;
+  pushArrivalStepComplete: (id: string, payload: { value?: string; summary?: string; data?: Record<string, unknown> }) => void;
+  setArrivalSummary: (s: ArrivalSummary) => void;
+  setArrivalRunning: (r: boolean) => void;
+
   startRun: (source: "intake" | "manual") => void;
   setPhase: (phase: RunPhase) => void;
   pushToolStart: (tool: string, args?: unknown) => void;
@@ -52,6 +86,37 @@ export const useDossier = create<DossierStore>((set) => ({
 
   activeProperty: "hong-kong",
   setActiveProperty: (activeProperty) => set({ activeProperty }),
+
+  arrivalSteps: [],
+  arrivalRunning: false,
+  arrivalSummary: null,
+  arrivalReservation: null,
+  startArrival: (reservation) =>
+    set({ arrivalReservation: reservation, arrivalSteps: [], arrivalSummary: null, arrivalRunning: true }),
+  pushArrivalStepStart: (id, label) =>
+    set((state) => {
+      if (state.arrivalSteps.some((s) => s.id === id)) return state;
+      return {
+        arrivalSteps: [
+          ...state.arrivalSteps,
+          { id, label, status: "thinking", reasoning: "" },
+        ],
+      };
+    }),
+  pushArrivalStepDelta: (id, delta) =>
+    set((state) => ({
+      arrivalSteps: state.arrivalSteps.map((s) =>
+        s.id === id ? { ...s, reasoning: s.reasoning + delta } : s,
+      ),
+    })),
+  pushArrivalStepComplete: (id, { value, summary, data }) =>
+    set((state) => ({
+      arrivalSteps: state.arrivalSteps.map((s) =>
+        s.id === id ? { ...s, status: "complete", value, summary, data } : s,
+      ),
+    })),
+  setArrivalSummary: (arrivalSummary) => set({ arrivalSummary, arrivalRunning: false }),
+  setArrivalRunning: (arrivalRunning) => set({ arrivalRunning }),
 
   startRun: (source) =>
     set({
@@ -139,5 +204,9 @@ export const useDossier = create<DossierStore>((set) => ({
       liveToolCalls: [],
       error: null,
       source: null,
+      arrivalSteps: [],
+      arrivalRunning: false,
+      arrivalSummary: null,
+      arrivalReservation: null,
     }),
 }));

@@ -4,6 +4,7 @@ import { DashboardDial } from "@/components/DashboardDial";
 import { DemoLoader } from "@/components/DemoLoader";
 import { DemoTrigger } from "@/components/DemoTrigger";
 import { Header } from "@/components/Header";
+import { ReservationIntake } from "@/components/ReservationIntake";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
 import { Actuators } from "@/components/zones/Actuators";
@@ -22,6 +23,7 @@ export default function Home() {
       <section className="bg-paper-canvas">
         <div className="mx-auto w-full max-w-[1480px] px-8 pb-12">
           <Eyebrow />
+          <ReservationIntake />
           <DemoTrigger />
           <div className="mt-8 grid grid-cols-12 gap-6">
             <div className="col-span-12 lg:col-span-4">
