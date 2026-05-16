@@ -53,6 +53,7 @@
 
   --font-serif: var(--font-cormorant);
   --font-sans: var(--font-inter);
+  --font-han: var(--font-noto-serif-sc);
 }
 
 html, body { background: var(--paper); color: var(--ink); }

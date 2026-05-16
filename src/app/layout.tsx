@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -17,25 +17,28 @@ const inter = Inter({
   display: "swap",
 });
 
+const notoSerifSC = Noto_Serif_SC({
+  variable: "--font-noto-serif-sc",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Red Thread — agentic operating system for luxury hospitality",
   description:
     "A Sense of Place, threaded through every guest. Pre-arrival, on-property, post-stay — one thread.",
   metadataBase: new URL("https://redthread.boutique"),
   icons: {
-    icon: [
-      { url: "/redthread-mark-64.jpg", sizes: "64x64", type: "image/jpeg" },
-      { url: "/redthread-mark-128.jpg", sizes: "128x128", type: "image/jpeg" },
-      { url: "/redthread-mark.png", sizes: "256x256", type: "image/png" },
-    ],
-    apple: "/redthread-mark.png",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
   openGraph: {
     title: "Red Thread",
     description: "A Sense of Place, threaded through every guest.",
     url: "https://redthread.boutique",
     type: "website",
-    images: ["/redthread-mark.png"],
+    images: ["/logo.png"],
   },
 };
 
@@ -45,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${inter.variable} ${notoSerifSC.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper-soft text-ink">{children}</body>
     </html>

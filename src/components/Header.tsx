@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import type { PropertyId } from "@/lib/types";
 
@@ -11,22 +12,39 @@ const PROPERTIES: { id: PropertyId; name: string; locale: string }[] = [
 export function Header() {
   const [active, setActive] = useState<PropertyId>("sand-hill");
   return (
-    <header className="mx-auto w-full max-w-[1480px] px-8 pt-8 pb-2 flex items-center justify-between gap-6">
+    <header className="mx-auto w-full max-w-[1480px] px-8 pt-6 pb-3 flex items-center justify-between gap-6">
       <a
         href="https://redthread.boutique"
-        className="group flex items-center gap-3 font-display text-xl tracking-wide text-ink no-underline transition-opacity hover:opacity-80"
+        className="lockup group flex items-center gap-3 text-ink no-underline transition-opacity hover:opacity-85"
         aria-label="Red Thread — home"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/redthread-mark-128.jpg"
+        <Image
+          src="/logo.png"
           alt=""
-          width={32}
-          height={32}
-          className="mark-knot"
+          width={36}
+          height={36}
+          priority
+          className="lockup-mark"
           aria-hidden="true"
         />
-        Red Thread
+        <span className="lockup-text flex flex-col leading-none">
+          <span
+            className="font-display text-[1.35rem] leading-none"
+            style={{ letterSpacing: "0.02em" }}
+          >
+            Red Thread
+          </span>
+          <span
+            className="mt-1 text-[0.72rem] text-brass"
+            style={{
+              fontFamily: "var(--font-noto-serif-sc), var(--font-cormorant), serif",
+              fontWeight: 400,
+              letterSpacing: "0.15em",
+            }}
+          >
+            紅線
+          </span>
+        </span>
       </a>
       <nav aria-label="Property switcher" className="flex items-center gap-1 text-xs">
         <span className="caps mr-3 hidden sm:inline">Property</span>
@@ -53,7 +71,7 @@ export function Header() {
           })}
         </ul>
       </nav>
-      <div className="caps hidden md:block">紅線 · Est. 2026</div>
+      <div className="caps hidden md:block">Est. 2026</div>
     </header>
   );
 }
