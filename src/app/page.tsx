@@ -24,6 +24,8 @@ export default function Home() {
         <div className="mx-auto w-full max-w-[1480px] px-8 pb-12">
           <Eyebrow />
           <ReservationIntake />
+          {/* Read-only Hold-the-Thread band — guest controls this on /profile */}
+          <DashboardDial />
           <DemoTrigger />
           <div className="mt-8 grid grid-cols-12 gap-6">
             <div className="col-span-12 lg:col-span-4">
@@ -38,9 +40,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Hold the Thread — concierge mirror of the guest's saved POS */}
-      <DashboardDial />
 
       {/* Deep rose band — the live thread lives here. Clean transition, no red bar. */}
       <section className="bg-rose-deep text-on-dark">
