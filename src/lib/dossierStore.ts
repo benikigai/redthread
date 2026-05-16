@@ -6,7 +6,7 @@
 
 import { create } from "zustand";
 
-import type { Dossier, ToolCallTrace } from "@/lib/types";
+import type { Dossier, PropertyId, ToolCallTrace } from "@/lib/types";
 
 export type RunPhase =
   | "idle"
@@ -27,6 +27,11 @@ interface DossierStore {
   error: string | null;
   source: "intake" | "manual" | null;
 
+  /** Currently selected property — single source of truth shared by Header,
+   *  DemoLoader, DemoTrigger, and any future re-run trigger. */
+  activeProperty: PropertyId;
+  setActiveProperty: (id: PropertyId) => void;
+
   startRun: (source: "intake" | "manual") => void;
   setPhase: (phase: RunPhase) => void;
   pushToolStart: (tool: string, args?: unknown) => void;
@@ -44,6 +49,9 @@ export const useDossier = create<DossierStore>((set) => ({
   liveToolCalls: [],
   error: null,
   source: null,
+
+  activeProperty: "hong-kong",
+  setActiveProperty: (activeProperty) => set({ activeProperty }),
 
   startRun: (source) =>
     set({

@@ -15,7 +15,6 @@ import { useDossier } from "@/lib/dossierStore";
 import type { Dossier } from "@/lib/types";
 
 const DEFAULT_GUEST = "lin-chen";
-const DEFAULT_PROPERTY = "hong-kong";
 
 interface IntakeOverrides {
   roomTempC?: number;
@@ -60,12 +59,16 @@ export function DemoLoader() {
     }
 
     const controller = new AbortController();
-    streamAgent({ guestId: DEFAULT_GUEST, propertyId: DEFAULT_PROPERTY, overrides }, controller.signal).catch(
-      (err) => {
-        const msg = err instanceof Error ? err.message : String(err);
-        useDossier.getState().setError(msg);
-      },
-    );
+    // Pull the selected property from the store — Header writes it, store
+    // defaults to "hong-kong" so intake-only flows still work unchanged.
+    const propertyId = useDossier.getState().activeProperty;
+    streamAgent(
+      { guestId: DEFAULT_GUEST, propertyId, overrides },
+      controller.signal,
+    ).catch((err) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      useDossier.getState().setError(msg);
+    });
     return () => controller.abort();
   }, [params]);
 

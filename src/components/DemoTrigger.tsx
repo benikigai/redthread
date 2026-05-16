@@ -18,7 +18,6 @@ import { streamAgent } from "@/components/DemoLoader";
 import { useDossier, type RunPhase } from "@/lib/dossierStore";
 
 const DEFAULT_GUEST = "lin-chen";
-const DEFAULT_PROPERTY = "hong-kong";
 
 export function DemoTrigger() {
   const phase = useDossier((s) => s.phase);
@@ -35,12 +34,14 @@ export function DemoTrigger() {
 
   const runDemo = async () => {
     const store = useDossier.getState();
+    const propertyId = store.activeProperty; // capture before clear() to be safe
     store.clear();
+    store.setActiveProperty(propertyId);
     store.startRun("manual");
     const ac = new AbortController();
     setAborter(ac);
     try {
-      await streamAgent({ guestId: DEFAULT_GUEST, propertyId: DEFAULT_PROPERTY }, ac.signal);
+      await streamAgent({ guestId: DEFAULT_GUEST, propertyId }, ac.signal);
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       const msg = err instanceof Error ? err.message : String(err);
