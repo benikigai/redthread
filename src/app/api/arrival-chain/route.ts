@@ -133,6 +133,61 @@ const TRANSIT_SYSTEM = `You estimate minutes by taxi/car from an airport to a lu
 
 Output ≤120 words of reasoning citing: route geography, day-of-week, time-of-day, typical congestion patterns, and any known disruptions. End with a <value>...</value> tag containing the integer minutes.`;
 
+/** Run a Claude call with the web_search server tool enabled. Streams text
+ *  reasoning tokens through emit(); also surfaces the queries Claude
+ *  actually ran (server_tool_use blocks). Returns the assembled reasoning. */
+async function streamWebResearch(
+  stepId: string,
+  userPrompt: string,
+  emit: (e: unknown) => void,
+  maxUses: number = 2,
+): Promise<{ text: string; queries: string[]; resultCount: number }> {
+  const client = anthropic();
+  let full = "";
+  const queries: string[] = [];
+  let resultCount = 0;
+  const response = await client.messages.create({
+    model: MODELS.discretion,
+    max_tokens: 600,
+    system:
+      "You are a research assistant. Use the web_search tool to find what you're asked about. After running the searches, write ≤120 words summarizing the most relevant findings with source citations. Be specific: cite article titles, dates, profile URLs.",
+    tools: [{ type: "web_search_20260209", name: "web_search", max_uses: maxUses }],
+    messages: [{ role: "user", content: userPrompt }],
+  });
+
+  for (const block of response.content) {
+    if (block.type === "server_tool_use" && block.name === "web_search") {
+      const input = block.input as { query?: string };
+      const q = input.query;
+      if (q) {
+        queries.push(q);
+        emit({
+          type: "step_thinking",
+          payload: { id: stepId, delta: `\n→ searching: "${q}"\n` },
+          ts: new Date().toISOString(),
+        });
+      }
+    } else if (block.type === "web_search_tool_result") {
+      const list = Array.isArray(block.content) ? block.content : [];
+      resultCount += list.length;
+      emit({
+        type: "step_thinking",
+        payload: { id: stepId, delta: `   ${list.length} result${list.length === 1 ? "" : "s"}\n` },
+        ts: new Date().toISOString(),
+      });
+    } else if (block.type === "text") {
+      const txt = block.text;
+      full += txt;
+      emit({
+        type: "step_thinking",
+        payload: { id: stepId, delta: txt },
+        ts: new Date().toISOString(),
+      });
+    }
+  }
+  return { text: full, queries, resultCount };
+}
+
 export async function POST(req: Request): Promise<Response> {
   let body: RequestBody = {};
   try {
@@ -185,7 +240,71 @@ export async function POST(req: Request): Promise<Response> {
           ts: new Date().toISOString(),
         });
 
-        // ── Step 02 — Flight lookup ──────────────────────────────────
+        // ── Step 02 — LinkedIn deep research ─────────────────────────
+        emit({
+          type: "step_start",
+          payload: { id: "linkedin", label: "Web research · LinkedIn" },
+          ts: new Date().toISOString(),
+        });
+        const linkedinPrompt = `Find ${guest.name}'s LinkedIn profile and recent professional activity.
+Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
+Run a LinkedIn-targeted search and a follow-up if needed. Summarize role, employer, and any recent posts or career events.`;
+        const li = await streamWebResearch("linkedin", linkedinPrompt, emit, 2);
+        emit({
+          type: "step_complete",
+          payload: {
+            id: "linkedin",
+            value: `${li.queries.length} ${li.queries.length === 1 ? "query" : "queries"} · ${li.resultCount} results`,
+            summary: li.text.slice(0, 200),
+            data: { queries: li.queries },
+          },
+          ts: new Date().toISOString(),
+        });
+
+        // ── Step 03 — Twitter / X deep research ──────────────────────
+        emit({
+          type: "step_start",
+          payload: { id: "twitter", label: "Web research · X / Twitter" },
+          ts: new Date().toISOString(),
+        });
+        const twitterPrompt = `Find ${guest.name}'s X (Twitter) presence and recent public posts.
+Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
+Run an X / Twitter-targeted search (try "site:twitter.com" or "site:x.com"). Summarize handle, recent posts, and tone.`;
+        const tw = await streamWebResearch("twitter", twitterPrompt, emit, 2);
+        emit({
+          type: "step_complete",
+          payload: {
+            id: "twitter",
+            value: `${tw.queries.length} ${tw.queries.length === 1 ? "query" : "queries"} · ${tw.resultCount} results`,
+            summary: tw.text.slice(0, 200),
+            data: { queries: tw.queries },
+          },
+          ts: new Date().toISOString(),
+        });
+
+        // ── Step 04 — Press / company research ───────────────────────
+        emit({
+          type: "step_start",
+          payload: { id: "press", label: "Web research · Press + company" },
+          ts: new Date().toISOString(),
+        });
+        const recent = (guest.publicSignals.recentEvents ?? []).slice(0, 2).join(" · ") || "general press";
+        const pressPrompt = `Find recent press / public coverage about ${guest.name} or ${guest.publicSignals.company ?? "their company"}.
+Hints from CRM: ${recent}.
+Run targeted press / news searches; summarize the most recent two or three items with dates.`;
+        const pr = await streamWebResearch("press", pressPrompt, emit, 2);
+        emit({
+          type: "step_complete",
+          payload: {
+            id: "press",
+            value: `${pr.queries.length} ${pr.queries.length === 1 ? "query" : "queries"} · ${pr.resultCount} results`,
+            summary: pr.text.slice(0, 200),
+            data: { queries: pr.queries },
+          },
+          ts: new Date().toISOString(),
+        });
+
+        // ── Step 05 — Flight lookup ──────────────────────────────────
         emit({
           type: "step_start",
           payload: { id: "flight", label: `Flight lookup — ${flightNumber}` },
