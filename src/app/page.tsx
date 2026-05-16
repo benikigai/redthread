@@ -1,3 +1,4 @@
+import { DashboardDial } from "@/components/DashboardDial";
 import { Header } from "@/components/Header";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
@@ -26,6 +27,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Hold the Thread — concierge mirror of Ms. Chen's saved POS */}
+      <DashboardDial />
 
       {/* Full-bleed red thread bar — the literal divider */}
       <div
