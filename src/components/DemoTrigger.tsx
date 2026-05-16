@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { AgentHandoffPanel } from "@/components/AgentHandoffPanel";
 import { streamAgent } from "@/components/DemoLoader";
 import { useDossier, type RunPhase } from "@/lib/dossierStore";
 
@@ -25,6 +26,7 @@ export function DemoTrigger() {
   const liveToolCalls = useDossier((s) => s.liveToolCalls);
   const error = useDossier((s) => s.error);
   const [aborter, setAborter] = useState<AbortController | null>(null);
+  const [showHandoff, setShowHandoff] = useState(false);
 
   useEffect(() => () => aborter?.abort(), [aborter]);
 
@@ -51,6 +53,12 @@ export function DemoTrigger() {
   const reset = () => {
     aborter?.abort();
     useDossier.getState().clear();
+    setShowHandoff(false);
+  };
+
+  const startHandoff = () => {
+    useDossier.getState().clear();
+    setShowHandoff(true);
   };
 
   return (
@@ -86,6 +94,14 @@ export function DemoTrigger() {
           </Link>
           <button
             type="button"
+            disabled={running || showHandoff}
+            onClick={startHandoff}
+            className="caps text-ink hover:text-thread-deep border hairline px-4 py-2 transition-colors disabled:opacity-50"
+          >
+            Agent handoff
+          </button>
+          <button
+            type="button"
             disabled={running}
             onClick={runDemo}
             className="caps bg-rose-deep text-on-dark px-5 py-2 disabled:opacity-50 hover:bg-rose-darker transition-colors"
@@ -94,6 +110,9 @@ export function DemoTrigger() {
           </button>
         </div>
       </div>
+      {showHandoff && (
+        <AgentHandoffPanel onClose={() => setShowHandoff(false)} />
+      )}
     </div>
   );
 }
