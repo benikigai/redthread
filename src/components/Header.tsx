@@ -13,7 +13,11 @@ export function Header() {
   const [active, setActive] = useState<PropertyId>("sand-hill");
   return (
     <header className="mx-auto w-full max-w-[1480px] px-8 pt-8 pb-2 flex items-center justify-between gap-6">
-      <div className="flex items-center gap-3 font-display text-xl tracking-wide">
+      <a
+        href="https://redthread.boutique"
+        className="group flex items-center gap-3 font-display text-xl tracking-wide text-ink no-underline transition-opacity hover:opacity-80"
+        aria-label="Red Thread — home"
+      >
         <svg
           className="mark-thread-svg text-thread"
           viewBox="0 0 56 12"
@@ -31,7 +35,7 @@ export function Header() {
           />
         </svg>
         Red Thread
-      </div>
+      </a>
       <nav aria-label="Property switcher" className="flex items-center gap-1 text-xs">
         <span className="caps mr-3 hidden sm:inline">Property</span>
         <ul className="flex items-center gap-1 border hairline rounded-sm overflow-hidden">
