@@ -31,30 +31,38 @@ type PresetId = "ben" | "lin-chen";
 
 interface Preset extends Reservation {
   departureDate: string;
+  email: string;
+  privacyOpennessScore: number;  // mirrored from data/guests/<id>.json
 }
 
 // Two demo guests — each preset reads its own data/guests/*.json (the "right
 // database") when the chain runs. User can edit any field after selecting.
+// The privacyOpennessScore mirrors data/guests/<id>.json so the bottom-of-
+// dashboard "Hold the Thread" dial reads the right saved value per guest.
 const PRESETS: Record<PresetId, Preset> = {
   ben: {
     guestId: "ben",
     guestName: "Benjamin Shyong",
+    email: "ben@openclaw.dev",
     reservationNumber: "A123",
     propertyId: "hong-kong",
     flightNumber: "CX872",
     departureDate: "2026-05-28",
     checkIn: "2026-05-29",
     checkOut: "2026-05-31",
+    privacyOpennessScore: 55,
   },
   "lin-chen": {
     guestId: "lin-chen",
     guestName: "Ms. Lin Chen",
+    email: "lchen@latticecapital.hk",
     reservationNumber: "B456",
     propertyId: "hong-kong",
     flightNumber: "CX700",
     departureDate: "2026-05-30",
     checkIn: "2026-05-31",
     checkOut: "2026-06-03",
+    privacyOpennessScore: 62,
   },
 };
 
@@ -67,6 +75,7 @@ export function ReservationIntake() {
   const [presetId, setPresetId] = useState<PresetId>("ben");
   const initial = PRESETS[presetId];
   const [guestName, setGuestName] = useState(initial.guestName);
+  const [email, setEmail] = useState(initial.email);
   const [reservationNumber, setReservationNumber] = useState(initial.reservationNumber);
   const [flightNumber, setFlightNumber] = useState(initial.flightNumber);
   const [departureDate, setDepartureDate] = useState(initial.departureDate);
@@ -79,12 +88,16 @@ export function ReservationIntake() {
     setPresetId(id);
     const p = PRESETS[id];
     setGuestName(p.guestName);
+    setEmail(p.email);
     setReservationNumber(p.reservationNumber);
     setFlightNumber(p.flightNumber);
     setDepartureDate(p.departureDate);
     setCheckIn(p.checkIn);
     setCheckOut(p.checkOut);
     setPropertyId(p.propertyId);
+    // Update the store immediately so the bottom dial reflects this guest's
+    // saved POS even before the briefing runs.
+    useDossier.getState().setActiveGuestPos(p.privacyOpennessScore);
   };
 
   useEffect(() => () => aborter.current?.abort(), []);
@@ -106,6 +119,7 @@ export function ReservationIntake() {
     const store = useDossier.getState();
     store.clear();
     store.setActiveProperty(reservation.propertyId);
+    store.setActiveGuestPos(PRESETS[presetId].privacyOpennessScore);
     store.startArrival({
       guestName: reservation.guestName,
       reservationNumber: reservation.reservationNumber,
@@ -127,6 +141,7 @@ export function ReservationIntake() {
           guestId: reservation.guestId,
           propertyId: reservation.propertyId,
           flightNumber: reservation.flightNumber,
+          guestEmail: email,
           live: true,
         },
         ac.signal,
@@ -155,6 +170,8 @@ export function ReservationIntake() {
           selectPreset={selectPreset}
           guestName={guestName}
           setGuestName={setGuestName}
+          email={email}
+          setEmail={setEmail}
           reservationNumber={reservationNumber}
           setReservationNumber={setReservationNumber}
           flightNumber={flightNumber}
@@ -183,6 +200,8 @@ function IntakeForm({
   selectPreset,
   guestName,
   setGuestName,
+  email,
+  setEmail,
   reservationNumber,
   setReservationNumber,
   flightNumber,
@@ -198,6 +217,8 @@ function IntakeForm({
   selectPreset: (id: PresetId) => void;
   guestName: string;
   setGuestName: (s: string) => void;
+  email: string;
+  setEmail: (s: string) => void;
   reservationNumber: string;
   setReservationNumber: (s: string) => void;
   flightNumber: string;
@@ -233,7 +254,7 @@ function IntakeForm({
         })}
       </div>
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-4">
+        <div className="col-span-12 md:col-span-3">
           <label className="caps text-ink-faint block mb-1.5">Guest name</label>
           <input
             type="text"
@@ -242,7 +263,16 @@ function IntakeForm({
             className="w-full border hairline bg-paper px-3 py-2 font-display text-lg text-ink focus:outline-none focus:ring-1 focus:ring-thread-deep"
           />
         </div>
-        <div className="col-span-6 md:col-span-3">
+        <div className="col-span-12 md:col-span-3">
+          <label className="caps text-ink-faint block mb-1.5">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border hairline bg-paper px-3 py-2 font-mono text-base text-ink focus:outline-none focus:ring-1 focus:ring-thread-deep"
+          />
+        </div>
+        <div className="col-span-6 md:col-span-2">
           <label className="caps text-ink-faint block mb-1.5">Reservation #</label>
           <input
             type="text"
@@ -261,7 +291,7 @@ function IntakeForm({
             className="w-full border hairline bg-paper px-3 py-2 font-mono text-lg text-ink focus:outline-none focus:ring-1 focus:ring-thread-deep"
           />
         </div>
-        <div className="col-span-12 md:col-span-3">
+        <div className="col-span-12 md:col-span-2">
           <label className="caps text-ink-faint block mb-1.5">Departure date</label>
           <input
             type="date"
