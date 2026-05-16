@@ -14,7 +14,22 @@ export function Header() {
   return (
     <header className="mx-auto w-full max-w-[1480px] px-8 pt-8 pb-2 flex items-center justify-between gap-6">
       <div className="flex items-center gap-3 font-display text-xl tracking-wide">
-        <span className="mark-thread" aria-hidden="true" />
+        <svg
+          className="mark-thread-svg text-thread"
+          viewBox="0 0 56 12"
+          width="56"
+          height="12"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M 2 8 L 14 8 C 14 8 14 2 18 2 C 22 2 22 8 18 8 L 54 8"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
         Red Thread
       </div>
       <nav aria-label="Property switcher" className="flex items-center gap-1 text-xs">

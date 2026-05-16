@@ -82,15 +82,21 @@ body {
 }
 .hairline { border-color: var(--rule); }
 
-/* The literal red thread mark — wordmark accent */
-.mark-thread {
-  width: 28px; height: 1.5px;
-  background: var(--thread);
-  display: inline-block;
-  box-shadow: 0 0 10px rgba(200,16,46,0.35);
-  animation: thread-pulse 4.5s ease-in-out infinite;
+/* The literal red thread mark — single-stroke loop SVG */
+.mark-thread-svg {
+  filter: drop-shadow(0 0 4px rgba(200, 16, 46, 0.35));
+  overflow: visible;
 }
-@keyframes thread-pulse {
-  0%, 100% { opacity: .8; }
-  50%      { opacity: 1; }
+.mark-thread-svg path {
+  stroke-dasharray: 90;
+  stroke-dashoffset: 90;
+  animation: thread-draw 2.2s cubic-bezier(.5, 0, .25, 1) forwards .25s,
+             thread-glow  4.5s ease-in-out 2.5s infinite;
+}
+@keyframes thread-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes thread-glow {
+  0%, 100% { opacity: .9; }
+  50%      { opacity: 1;  }
 }
