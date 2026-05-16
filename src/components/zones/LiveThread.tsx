@@ -1,7 +1,12 @@
 "use client";
 
 import { ZoneShell } from "./ZoneShell";
-import { useDossier, type ArrivalStep, type ArrivalSummary } from "@/lib/dossierStore";
+import {
+  useDossier,
+  type ArrivalStep,
+  type ArrivalSummary,
+  type InStayEvent,
+} from "@/lib/dossierStore";
 
 const STATIC_BEATS = [
   { t: "−02:14", phase: "pre", note: "Thread cast — dossier complete, room set, amenity sourced" },
@@ -27,7 +32,6 @@ function arrivalBeats(steps: ArrivalStep[], summary: ArrivalSummary | null): Bea
     }
   }
   if (summary?.etaLocal) {
-    // Make sure the final ETA beat is the last "pre" beat
     if (!beats.some((b) => b.note.includes(summary.etaLocal!))) {
       beats.push({ t: "ETA", phase: "arrive", note: `Porte cochère ${summary.etaLocal}` });
     }
@@ -54,27 +58,53 @@ function beatTimeFor(stepId: string): string {
   }
 }
 
+function inStayBeats(events: InStayEvent[]): Beat[] {
+  return events.map((e) => ({
+    t: formatClock(e.at),
+    phase: "on",
+    note: e.detail ? `${e.label} · ${e.detail}` : e.label,
+  }));
+}
+
+function formatClock(epoch: number): string {
+  const d = new Date(epoch);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
 export function LiveThread() {
   const arrivalSteps = useDossier((s) => s.arrivalSteps);
   const arrivalSummary = useDossier((s) => s.arrivalSummary);
   const arrivalRunning = useDossier((s) => s.arrivalRunning);
+  const inStayEvents = useDossier((s) => s.inStayEvents);
 
-  // While the arrival chain is running or complete, render its beats instead
-  // of the static narrative.
-  const liveBeats = arrivalBeats(arrivalSteps, arrivalSummary);
-  const usingLive = arrivalRunning || liveBeats.length > 0;
-  const beats: Beat[] = usingLive ? padOnPostStay(liveBeats) : STATIC_BEATS;
+  const arrival = arrivalBeats(arrivalSteps, arrivalSummary);
+  const inStay = inStayBeats(inStayEvents);
+  const hasLive = arrivalRunning || arrival.length > 0 || inStay.length > 0;
+
+  // When live data exists, merge: arrival → in-stay → post-stay placeholders.
+  // When nothing is live, fall back to the static narrative.
+  let beats: Beat[];
+  if (hasLive) {
+    beats = padToSix([...arrival, ...inStay]);
+  } else {
+    beats = STATIC_BEATS;
+  }
+
+  const titleSuffix = inStay.length > 0 ? "· in-stay" : arrival.length > 0 || arrivalRunning ? "· arrival" : "";
+  const hint = hasLive
+    ? inStay.length > 0
+      ? "Live signals — arrival, room service, spa, front desk, late checkout."
+      : "Live arrival tracking — flight, customs, transit, ETA."
+    : "One continuous narrative — pre-arrival to next stay.";
 
   return (
     <ZoneShell
       tone="dark"
       label="Movement IV"
-      title={usingLive ? "The live thread · arrival" : "The live thread"}
-      hint={
-        usingLive
-          ? "Live arrival tracking — flight, customs, transit, ETA."
-          : "One continuous narrative — pre-arrival to next stay."
-      }
+      title={`The live thread ${titleSuffix}`.trim()}
+      hint={hint}
     >
       <div className="relative pt-2 pb-4">
         <div
@@ -109,10 +139,8 @@ export function LiveThread() {
   );
 }
 
-// While the arrival chain is live, keep two "post" placeholder beats on the
-// right so the rail doesn't look truncated.
-function padOnPostStay(live: Beat[]): Beat[] {
-  if (live.length >= 6) return live.slice(0, 6);
+function padToSix(live: Beat[]): Beat[] {
+  if (live.length >= 6) return live.slice(-6);
   const padded = [...live];
   while (padded.length < 6) {
     padded.push({

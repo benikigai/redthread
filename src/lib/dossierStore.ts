@@ -19,6 +19,23 @@ export interface ArrivalStep {
   data?: Record<string, unknown>;
 }
 
+// ─── In-stay event slice — live signals from the hotel during the guest's stay
+export type InStayCategory =
+  | "room-service"
+  | "spa"
+  | "front-desk"
+  | "late-checkout"
+  | "amenity"
+  | "custom";
+
+export interface InStayEvent {
+  id: string;
+  category: InStayCategory;
+  label: string;
+  detail?: string;
+  at: number;
+}
+
 export interface ArrivalSummary {
   landingLocal?: string;
   etaLocal?: string;
@@ -59,6 +76,11 @@ interface DossierStore {
   activeGuestPos: number;
   setActiveGuestPos: (pos: number) => void;
 
+  /** Which guest preset is active. /profile reads this to know which guest
+   *  to render. ReservationIntake's selectPreset writes it. */
+  activeGuestId: "ben" | "lin-chen";
+  setActiveGuestId: (id: "ben" | "lin-chen") => void;
+
   /** Live arrival-research chain. Each step streams reasoning tokens; UI
    *  surfaces the typing reasoning + final value. LiveThread (Zone IV) also
    *  reads from this to render the pre-arrival timeline beats live. */
@@ -72,6 +94,15 @@ interface DossierStore {
   pushArrivalStepComplete: (id: string, payload: { value?: string; summary?: string; data?: Record<string, unknown> }) => void;
   setArrivalSummary: (s: ArrivalSummary) => void;
   setArrivalRunning: (r: boolean) => void;
+
+  /** In-stay events streamed from hotel systems (POS, spa booking, front-desk
+   *  calls, late-checkout requests). LiveThread renders these as beats on the
+   *  red thread between arrival and post-stay. For the hackathon demo a small
+   *  injector panel lets staff click presets — a real product would pipe these
+   *  in from the property PMS / POS / spa booking systems via webhook. */
+  inStayEvents: InStayEvent[];
+  pushInStayEvent: (event: Omit<InStayEvent, "id" | "at">) => void;
+  clearInStayEvents: () => void;
 
   startRun: (source: "intake" | "manual") => void;
   setPhase: (phase: RunPhase) => void;
@@ -96,6 +127,9 @@ export const useDossier = create<DossierStore>((set) => ({
 
   activeGuestPos: 55,  // ben.json default; ReservationIntake updates on preset change
   setActiveGuestPos: (activeGuestPos) => set({ activeGuestPos }),
+
+  activeGuestId: "ben",
+  setActiveGuestId: (activeGuestId) => set({ activeGuestId }),
 
   arrivalSteps: [],
   arrivalRunning: false,
@@ -127,6 +161,23 @@ export const useDossier = create<DossierStore>((set) => ({
     })),
   setArrivalSummary: (arrivalSummary) => set({ arrivalSummary, arrivalRunning: false }),
   setArrivalRunning: (arrivalRunning) => set({ arrivalRunning }),
+
+  inStayEvents: [],
+  pushInStayEvent: (event) =>
+    set((state) => ({
+      inStayEvents: [
+        ...state.inStayEvents,
+        {
+          id:
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `evt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          at: Date.now(),
+          ...event,
+        },
+      ],
+    })),
+  clearInStayEvents: () => set({ inStayEvents: [] }),
 
   startRun: (source) =>
     set({
@@ -218,5 +269,6 @@ export const useDossier = create<DossierStore>((set) => ({
       arrivalRunning: false,
       arrivalSummary: null,
       arrivalReservation: null,
+      inStayEvents: [],
     }),
 }));

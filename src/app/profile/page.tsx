@@ -11,32 +11,56 @@ import {
   posToUi,
   uiToPos,
 } from "@/components/DiscretionDial";
+import { useDossier } from "@/lib/dossierStore";
 
 /**
- * Mr. Benjamin Shyong's guest profile — the canonical guest-side surface where the
- * Hold the Thread preference lives. The concierge dashboard mirrors this
- * setting read-only; only this page can save a change.
+ * Guest-side profile — canonical surface for the Hold the Thread dial. The
+ * concierge dashboard's DashboardDial mirrors this read-only via the shared
+ * zustand store: when the guest hits Save here, setActiveGuestPos writes to
+ * the store and the dashboard updates LIVE without a page reload.
  *
- * For the hackathon: "Save" updates local state and POSTs a preview to
- * /api/agent so the change is round-tripped and visible. A real product
- * would persist to the guest record (PUT /api/guest/ben).
+ * Which guest is shown is driven by activeGuestId in the store, set by the
+ * ReservationIntake preset on the dashboard. Default: Ben.
  */
 
-// Hard-coded for the demo. Real product would fetch /api/guest/ben.
-const GUEST = {
-  id: "ben",
-  honorific: "Mr.",
-  name: "Benjamin Shyong",
-  privacyOpennessScore: 55, // matches data/guests/ben.json
-  role: "Founder & CEO, OpenClaw / Injester",
-  dietary: ["vegetarian"],
-};
+const GUESTS = {
+  ben: {
+    id: "ben",
+    honorific: "Mr.",
+    name: "Benjamin Shyong",
+    role: "Founder & CEO, OpenClaw / Injester",
+    dietary: ["vegetarian"],
+    defaultPos: 55,
+  },
+  "lin-chen": {
+    id: "lin-chen",
+    honorific: "Ms.",
+    name: "Lin Chen",
+    role: "Founder & CEO, Lattice Capital",
+    dietary: ["pescatarian"],
+    defaultPos: 62,
+  },
+} as const;
 
 export default function ProfilePage() {
-  const initialUi = posToUi(GUEST.privacyOpennessScore);
-  const [savedUi, setSavedUi] = useState(initialUi);
-  const [value, setValue] = useState(initialUi);
+  // The active guest comes from the store — set by the dashboard's
+  // ReservationIntake preset toggle. Default Ben on a cold visit.
+  const activeGuestId = useDossier((s) => s.activeGuestId);
+  const activeGuestPos = useDossier((s) => s.activeGuestPos);
+  const setActiveGuestPos = useDossier((s) => s.setActiveGuestPos);
+  const GUEST = GUESTS[activeGuestId];
+
+  const [savedUi, setSavedUi] = useState(() => posToUi(activeGuestPos));
+  const [value, setValue] = useState(() => posToUi(activeGuestPos));
   const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
+
+  // Sync local state if the active guest changes while /profile is open
+  // (e.g. via a multi-tab demo or another route writing the store).
+  useEffect(() => {
+    const ui = posToUi(activeGuestPos);
+    setSavedUi(ui);
+    setValue(ui);
+  }, [activeGuestId, activeGuestPos]);
 
   // Clear the "saved" pill once the user starts editing again
   useEffect(() => {
@@ -50,20 +74,29 @@ export default function ProfilePage() {
   async function save() {
     setStatus("saving");
     const snapshot = value;
+    const newPos = uiToPos(snapshot);
     try {
-      // Round-trip through /api/agent so the demo can immediately show what
-      // the dossier looks like at the new POS. In DEMO_MODE this is the
-      // band-reduced fixture; live, it re-invokes the Discretion Layer.
+      // 1. Push the new saved value to the shared store FIRST. The dashboard's
+      //    DashboardDial subscribes via zustand and will re-render live the
+      //    moment this lands — no page reload needed, no manual notification.
+      setActiveGuestPos(newPos);
+      setSavedUi(snapshot);
+
+      // 2. Round-trip through /api/agent (preview) so the demo can immediately
+      //    show what the dossier looks like at the new level. Best-effort —
+      //    we don't undo the saved value if the preview fetch fails.
       await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guestId: GUEST.id,
           propertyId: "sand-hill",
-          previewPos: pos,
+          previewPos: newPos,
         }),
+      }).catch(() => {
+        // network failure doesn't roll back the user's intent
       });
-      setSavedUi(snapshot);
+
       setStatus("saved");
     } catch {
       setStatus("idle");
@@ -138,7 +171,7 @@ export default function ProfilePage() {
           and the place to the next stay. You decide how tightly we hold it.
         </p>
 
-        {/* Voice intake CTA — five-minute briefing she gives us by voice */}
+        {/* Voice intake CTA — five-minute briefing in their voice */}
         <section
           aria-label="Pre-arrival voice briefing"
           className="mt-10 bg-paper border border-rule p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
@@ -182,7 +215,8 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between gap-4">
             <p className="text-[12px] text-ink-faint">
               Saving sends your next dossier through the Discretion
-              Layer at this level.
+              Layer at this level. The concierge dashboard updates live —
+              no email, no notification, no delay.
               <br />
               Adjustable any time. Every removed signal is logged for your
               review.
@@ -204,10 +238,10 @@ export default function ProfilePage() {
                 disabled={!isDirty || status === "saving"}
                 onClick={save}
                 className={
-                  "text-[12px] tracking-[0.16em] uppercase px-5 py-2.5 transition-colors " +
+                  "text-[12px] tracking-[0.16em] uppercase font-medium px-5 py-2.5 transition-colors " +
                   (!isDirty || status === "saving"
                     ? "bg-paper-soft text-ink-faint border border-rule cursor-not-allowed"
-                    : "bg-thread text-on-dark border border-thread hover:bg-thread-deep hover:border-thread-deep")
+                    : "bg-rose-deep text-paper hover:bg-rose-darker")
                 }
                 style={{ fontFamily: "var(--font-inter), sans-serif" }}
               >

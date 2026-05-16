@@ -5,17 +5,27 @@ import Link from "next/link";
 import { useDossier } from "@/lib/dossierStore";
 import { bandFor, posToUi, BAND_LABEL } from "./DiscretionDial";
 
+// What the concierge is permitted to do at each level — one short line so
+// staff can act without leaving the dashboard. These are the same three
+// bands as DiscretionDial's bandFor, just framed for staff (not the guest).
+const CONCIERGE_GUIDANCE: Record<"minimal" | "standard" | "full", string> = {
+  minimal:
+    "Acknowledge only what the guest has shared. No volunteered context, no inferred preferences.",
+  standard:
+    "Use public signals — press, events, prior stays — as quiet starters. Hold private context.",
+  full: "Anticipate from public + professional signals. Surface proactively; mark provenance on every detail.",
+};
+
 /**
  * Dashboard banner — concierge-side READ-ONLY mirror of the active guest's
- * "Hold the Thread" setting. The value is set by the guest through /profile;
- * concierge staff can see the level + band label here but cannot change it.
- * No drag, no input semantics — just a visible report of where the dial sits.
+ * "Hold the Thread" setting. Shows 11 hash marks (0..10) with the saved
+ * level marked by a glowing red knot; below, the band name + a one-line
+ * concierge action guide for that band.
  */
 export function DashboardDial() {
   const savedPos = useDossier((s) => s.activeGuestPos);
   const savedUi = posToUi(savedPos);
   const band = bandFor(savedPos);
-  const fillPct = (savedUi / 10) * 100;
 
   const bandColor =
     band === "minimal"
@@ -30,9 +40,9 @@ export function DashboardDial() {
       className="mt-6 bg-paper-soft border hairline px-5 py-4"
     >
       <div className="grid grid-cols-12 gap-6 items-center">
-        {/* Left: label + read-only visual bar */}
+        {/* Left: label + hash-mark scale */}
         <div className="col-span-12 lg:col-span-7">
-          <div className="flex items-baseline justify-between gap-3 mb-2.5">
+          <div className="flex items-baseline justify-between gap-3 mb-3">
             <div className="caps flex items-center gap-2">
               <span className="inline-block w-4 h-px bg-thread" />
               Hold the Thread · {savedUi} of 10
@@ -40,44 +50,92 @@ export function DashboardDial() {
                 — guest&rsquo;s saved preference
               </span>
             </div>
-            <span className={`text-[10px] tracking-[0.22em] uppercase font-medium ${bandColor}`}>
+            <span
+              className={`text-[10px] tracking-[0.22em] uppercase font-medium ${bandColor}`}
+            >
               {BAND_LABEL[band]}
             </span>
           </div>
 
-          {/* Read-only bar — visually presents the level, no drag affordance */}
+          {/* Hash-mark scale 0..10 with the saved level marked */}
           <div
             role="img"
             aria-label={`${savedUi} of 10 — ${BAND_LABEL[band]}`}
-            className="relative h-px bg-rule"
+            className="relative h-7"
           >
+            {/* Continuous baseline */}
+            <div className="absolute top-1/2 left-0 right-0 h-px bg-rule -translate-y-1/2" />
+            {/* Filled portion from 0 to current */}
             <div
-              className="absolute left-0 top-0 h-px bg-thread"
-              style={{ width: `${fillPct}%`, opacity: 0.85 }}
+              className="absolute top-1/2 left-0 h-px bg-thread -translate-y-1/2"
+              style={{ width: `${(savedUi / 10) * 100}%`, opacity: 0.85 }}
               aria-hidden="true"
             />
+            {/* 11 hash marks */}
+            {Array.from({ length: 11 }, (_, i) => {
+              const isActive = i === savedUi;
+              const isFilled = i <= savedUi;
+              return (
+                <span
+                  key={i}
+                  className="absolute top-1/2 w-px h-3 -translate-y-1/2"
+                  style={{
+                    left: `${(i / 10) * 100}%`,
+                    background: isFilled ? "var(--thread)" : "var(--rule)",
+                    opacity: isActive ? 0 : isFilled ? 0.85 : 0.7,
+                  }}
+                  aria-hidden="true"
+                />
+              );
+            })}
+            {/* Numerals 0..10 below */}
+            <div className="absolute top-[calc(50%+10px)] left-0 right-0 flex justify-between text-[9px] font-mono text-ink-faint">
+              {Array.from({ length: 11 }, (_, i) => (
+                <span
+                  key={i}
+                  className={
+                    i === savedUi
+                      ? "text-thread-deep font-medium"
+                      : ""
+                  }
+                  style={{
+                    width: 0,
+                    transform: `translateX(${i === 0 ? 0 : i === 10 ? -100 : -50}%)`,
+                  }}
+                >
+                  {i}
+                </span>
+              ))}
+            </div>
+            {/* Active knot */}
             <span
-              className="absolute -top-[5px] w-[10px] h-[10px] rounded-full bg-thread"
+              className="absolute top-1/2 w-[12px] h-[12px] rounded-full bg-thread -translate-y-1/2"
               style={{
-                left: `calc(${fillPct}% - 5px)`,
-                boxShadow: "0 0 10px rgba(200,16,46,0.55)",
+                left: `calc(${(savedUi / 10) * 100}% - 6px)`,
+                boxShadow: "0 0 12px rgba(200,16,46,0.65)",
               }}
               aria-hidden="true"
             />
           </div>
 
-          <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+          <div className="mt-6 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
             <span>Loosely</span>
             <span aria-hidden="true">·</span>
             <span>Fully</span>
           </div>
         </div>
 
-        {/* Right: copy + link to /profile */}
-        <div className="col-span-12 lg:col-span-5 text-[12px] leading-relaxed text-ink-mute lg:text-right">
-          <p>
-            Set by the guest through their profile. Concierge cannot change
-            this — every dossier honors the saved level.
+        {/* Right: concierge guidance + link to /profile */}
+        <div className="col-span-12 lg:col-span-5">
+          <p className="text-[12px] leading-relaxed text-ink">
+            <span className={`font-medium ${bandColor}`}>
+              At {BAND_LABEL[band]}:
+            </span>{" "}
+            {CONCIERGE_GUIDANCE[band]}
+          </p>
+          <p className="mt-3 text-[11px] text-ink-faint">
+            Set by the guest. Concierge cannot change this — every dossier
+            honors the saved level.
           </p>
           <p className="mt-2">
             <Link

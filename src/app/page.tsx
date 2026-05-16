@@ -4,6 +4,7 @@ import { DashboardDial } from "@/components/DashboardDial";
 import { DemoLoader } from "@/components/DemoLoader";
 import { DemoTrigger } from "@/components/DemoTrigger";
 import { Header } from "@/components/Header";
+import { InStayEventInjector } from "@/components/InStayEventInjector";
 import { ReservationIntake } from "@/components/ReservationIntake";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
@@ -44,6 +45,8 @@ export default function Home() {
       {/* Deep rose band — the live thread lives here. Clean transition, no red bar. */}
       <section className="bg-rose-deep text-on-dark">
         <div className="mx-auto w-full max-w-[1480px] px-8 py-14">
+          {/* Hotel-system signal injector — feeds in-stay beats into LiveThread */}
+          <InStayEventInjector />
           <LiveThread />
         </div>
       </section>
