@@ -39,6 +39,20 @@ interface RequestBody {
    *  flight landing time-of-day onto the actual arrival date instead of
    *  today (AviationStack returns same-day data). */
   checkIn?: string;
+  /** Guest's Hold-the-Thread Privacy Openness Score (0–100). Gates the
+   *  deep-web-research steps:
+   *    0–30  → all three skipped, surfaced as "gated · minimal band"
+   *    31–69 → only press/company research runs (skip LinkedIn + Twitter)
+   *    70+   → all three run */
+  previewPos?: number;
+}
+
+type ResearchBand = "minimal" | "standard" | "full";
+function researchBand(pos: number | undefined): ResearchBand {
+  if (typeof pos !== "number") return "standard";
+  if (pos < 31) return "minimal";
+  if (pos < 70) return "standard";
+  return "full";
 }
 
 function sse(payload: unknown): Uint8Array {
@@ -240,69 +254,134 @@ export async function POST(req: Request): Promise<Response> {
           ts: new Date().toISOString(),
         });
 
-        // ── Step 02 — LinkedIn deep research ─────────────────────────
+        // Hold-the-Thread band — gates which web-research steps actually run.
+        const band = researchBand(body.previewPos);
+        const runLinkedIn = band === "full";
+        const runTwitter = band === "full";
+        const runPress = band === "full" || band === "standard";
+
+        const gatedNote = (label: string): string =>
+          band === "minimal"
+            ? `Suppressed — guest set Hold the Thread to minimal. ${label} not run.`
+            : `Suppressed — standard band keeps only press/company research. ${label} not run.`;
+
+        // ── Step 02 — LinkedIn deep research (full band only) ────────
         emit({
           type: "step_start",
           payload: { id: "linkedin", label: "Web research · LinkedIn" },
           ts: new Date().toISOString(),
         });
-        const linkedinPrompt = `Find ${guest.name}'s LinkedIn profile and recent professional activity.
+        if (!runLinkedIn) {
+          emit({
+            type: "step_thinking",
+            payload: { id: "linkedin", delta: gatedNote("LinkedIn lookup") },
+            ts: new Date().toISOString(),
+          });
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "linkedin",
+              value: `gated · ${band} band`,
+              summary: gatedNote("LinkedIn lookup"),
+              data: { gated: true, band },
+            },
+            ts: new Date().toISOString(),
+          });
+        } else {
+          const linkedinPrompt = `Find ${guest.name}'s LinkedIn profile and recent professional activity.
 Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
 Run a LinkedIn-targeted search and a follow-up if needed. Summarize role, employer, and any recent posts or career events.`;
-        const li = await streamWebResearch("linkedin", linkedinPrompt, emit, 2);
-        emit({
-          type: "step_complete",
-          payload: {
-            id: "linkedin",
-            value: `${li.queries.length} ${li.queries.length === 1 ? "query" : "queries"} · ${li.resultCount} results`,
-            summary: li.text.slice(0, 200),
-            data: { queries: li.queries },
-          },
-          ts: new Date().toISOString(),
-        });
+          const li = await streamWebResearch("linkedin", linkedinPrompt, emit, 2);
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "linkedin",
+              value: `${li.queries.length} ${li.queries.length === 1 ? "query" : "queries"} · ${li.resultCount} results`,
+              summary: li.text.slice(0, 200),
+              data: { queries: li.queries },
+            },
+            ts: new Date().toISOString(),
+          });
+        }
 
-        // ── Step 03 — Twitter / X deep research ──────────────────────
+        // ── Step 03 — Twitter / X (full band only) ───────────────────
         emit({
           type: "step_start",
           payload: { id: "twitter", label: "Web research · X / Twitter" },
           ts: new Date().toISOString(),
         });
-        const twitterPrompt = `Find ${guest.name}'s X (Twitter) presence and recent public posts.
+        if (!runTwitter) {
+          emit({
+            type: "step_thinking",
+            payload: { id: "twitter", delta: gatedNote("X / Twitter lookup") },
+            ts: new Date().toISOString(),
+          });
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "twitter",
+              value: `gated · ${band} band`,
+              summary: gatedNote("X / Twitter lookup"),
+              data: { gated: true, band },
+            },
+            ts: new Date().toISOString(),
+          });
+        } else {
+          const twitterPrompt = `Find ${guest.name}'s X (Twitter) presence and recent public posts.
 Known context: ${guest.publicSignals.role ?? "founder"} at ${guest.publicSignals.company ?? "unknown company"}.
 Run an X / Twitter-targeted search (try "site:twitter.com" or "site:x.com"). Summarize handle, recent posts, and tone.`;
-        const tw = await streamWebResearch("twitter", twitterPrompt, emit, 2);
-        emit({
-          type: "step_complete",
-          payload: {
-            id: "twitter",
-            value: `${tw.queries.length} ${tw.queries.length === 1 ? "query" : "queries"} · ${tw.resultCount} results`,
-            summary: tw.text.slice(0, 200),
-            data: { queries: tw.queries },
-          },
-          ts: new Date().toISOString(),
-        });
+          const tw = await streamWebResearch("twitter", twitterPrompt, emit, 2);
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "twitter",
+              value: `${tw.queries.length} ${tw.queries.length === 1 ? "query" : "queries"} · ${tw.resultCount} results`,
+              summary: tw.text.slice(0, 200),
+              data: { queries: tw.queries },
+            },
+            ts: new Date().toISOString(),
+          });
+        }
 
-        // ── Step 04 — Press / company research ───────────────────────
+        // ── Step 04 — Press / company research (standard + full) ─────
         emit({
           type: "step_start",
           payload: { id: "press", label: "Web research · Press + company" },
           ts: new Date().toISOString(),
         });
-        const recent = (guest.publicSignals.recentEvents ?? []).slice(0, 2).join(" · ") || "general press";
-        const pressPrompt = `Find recent press / public coverage about ${guest.name} or ${guest.publicSignals.company ?? "their company"}.
+        if (!runPress) {
+          emit({
+            type: "step_thinking",
+            payload: { id: "press", delta: gatedNote("Press / company lookup") },
+            ts: new Date().toISOString(),
+          });
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "press",
+              value: `gated · ${band} band`,
+              summary: gatedNote("Press / company lookup"),
+              data: { gated: true, band },
+            },
+            ts: new Date().toISOString(),
+          });
+        } else {
+          const recent = (guest.publicSignals.recentEvents ?? []).slice(0, 2).join(" · ") || "general press";
+          const pressPrompt = `Find recent press / public coverage about ${guest.name} or ${guest.publicSignals.company ?? "their company"}.
 Hints from CRM: ${recent}.
 Run targeted press / news searches; summarize the most recent two or three items with dates.`;
-        const pr = await streamWebResearch("press", pressPrompt, emit, 2);
-        emit({
-          type: "step_complete",
-          payload: {
-            id: "press",
-            value: `${pr.queries.length} ${pr.queries.length === 1 ? "query" : "queries"} · ${pr.resultCount} results`,
-            summary: pr.text.slice(0, 200),
-            data: { queries: pr.queries },
-          },
-          ts: new Date().toISOString(),
-        });
+          const pr = await streamWebResearch("press", pressPrompt, emit, 2);
+          emit({
+            type: "step_complete",
+            payload: {
+              id: "press",
+              value: `${pr.queries.length} ${pr.queries.length === 1 ? "query" : "queries"} · ${pr.resultCount} results`,
+              summary: pr.text.slice(0, 200),
+              data: { queries: pr.queries },
+            },
+            ts: new Date().toISOString(),
+          });
+        }
 
         // ── Step 05 — Flight lookup ──────────────────────────────────
         emit({
