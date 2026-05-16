@@ -82,7 +82,7 @@ export function AgentHandoffPanel({
   );
   const [error, setError] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState<Role | null>(null);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const startedRef = useRef(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const audioQueueRef = useRef<AudioJob[]>([]);
