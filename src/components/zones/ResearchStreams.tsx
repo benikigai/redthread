@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { ZoneShell } from "./ZoneShell";
 import { useDossier } from "@/lib/dossierStore";
 import type { ToolCallTrace } from "@/lib/types";
@@ -125,45 +127,117 @@ export function ResearchStreams() {
       }
     >
       <ul className="space-y-3">
-        {streams.map((s, i) => {
-          const meta = TOOL_META[s.tool] ?? { label: s.tool, tech: "internal" };
-          const argSummary = formatArgs(s.args);
-          return (
-            <li
-              key={`${s.tool}-${i}`}
-              className="border hairline bg-paper-soft px-4 py-3"
-              style={{
-                opacity: s.status === "queued" ? 0.55 : 1,
-                transition: "opacity 200ms",
-              }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[11px] tracking-[0.22em] uppercase font-medium text-ink-mute">
-                    {meta.label}
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-[10px] text-brass">
-                    <span className="inline-block w-1 h-1 rounded-full bg-brass" />
-                    <span className="italic">{meta.tech}</span>
-                  </div>
-                </div>
-                <StatusBadge status={s.status} />
-              </div>
-
-              {argSummary && (
-                <div className="mt-2 text-[11px] text-ink-faint font-mono leading-snug">
-                  → {argSummary}
-                </div>
-              )}
-
-              {s.result && (
-                <ResultList result={s.result} />
-              )}
-            </li>
-          );
-        })}
+        {streams.map((s, i) => (
+          <StreamCard key={`${s.tool}-${i}`} trace={s} index={i} />
+        ))}
       </ul>
     </ZoneShell>
+  );
+}
+
+function StreamCard({ trace, index }: { trace: ToolCallTrace; index: number }) {
+  const [open, setOpen] = useState(false);
+  const meta = TOOL_META[trace.tool] ?? { label: trace.tool, tech: "internal" };
+  const argSummary = formatArgs(trace.args);
+  const expandable =
+    !!trace.args || !!trace.result || !!trace.startedAt || !!trace.finishedAt;
+  const duration =
+    trace.startedAt && trace.finishedAt
+      ? Math.max(
+          0,
+          new Date(trace.finishedAt).getTime() - new Date(trace.startedAt).getTime(),
+        )
+      : null;
+
+  return (
+    <li
+      className="border hairline bg-paper-soft"
+      style={{
+        opacity: trace.status === "queued" ? 0.55 : 1,
+        transition: "opacity 200ms",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => expandable && setOpen((v) => !v)}
+        className="w-full text-left px-4 py-3 cursor-pointer disabled:cursor-default"
+        disabled={!expandable}
+        aria-expanded={open}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[11px] tracking-[0.22em] uppercase font-medium text-ink-mute flex items-center gap-2">
+              <span className="text-ink-faint">{String(index + 1).padStart(2, "0")}</span>
+              {meta.label}
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-[10px] text-brass">
+              <span className="inline-block w-1 h-1 rounded-full bg-brass" />
+              <span className="italic">{meta.tech}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <StatusBadge status={trace.status} />
+            {expandable && (
+              <span
+                className="text-ink-faint text-[10px] tracking-[0.18em]"
+                aria-hidden="true"
+              >
+                {open ? "−" : "+"}
+              </span>
+            )}
+          </div>
+        </div>
+        {argSummary && (
+          <div className="mt-2 text-[11px] text-ink-faint font-mono leading-snug">
+            → {argSummary}
+          </div>
+        )}
+        {trace.result && <ResultList result={trace.result} />}
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-1 border-t border-rule-soft space-y-3 text-[12px] leading-relaxed">
+          {trace.args ? (
+            <div>
+              <div className="caps text-ink-faint mb-1">Input</div>
+              <pre className="font-mono text-[11px] text-ink-mute leading-snug whitespace-pre-wrap bg-paper border border-rule-soft px-3 py-2">
+{JSON.stringify(trace.args, null, 2)}
+              </pre>
+            </div>
+          ) : null}
+          {trace.result && (
+            <div>
+              <div className="caps text-ink-faint mb-1">Result</div>
+              <p className="text-ink leading-snug">{trace.result}</p>
+            </div>
+          )}
+          <div>
+            <div className="caps text-ink-faint mb-1">Provenance</div>
+            <p className="text-ink-mute leading-snug">
+              <span className="italic">{meta.tech}</span>
+              {duration !== null && (
+                <>
+                  <span className="mx-1">·</span>
+                  <span>{(duration / 1000).toFixed(2)}s</span>
+                </>
+              )}
+              {trace.startedAt && (
+                <>
+                  <span className="mx-1">·</span>
+                  <span className="font-mono text-[10px] text-ink-faint">
+                    {new Date(trace.startedAt).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: false,
+                    })}
+                  </span>
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+    </li>
   );
 }
 
