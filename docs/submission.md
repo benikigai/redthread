@@ -40,7 +40,9 @@ The demo move is the **property switcher.** One guest — Ms. Lin Chen — acros
 
 Same guest, same history, same agent loop — radically different bespoke arrival. That's **A Sense of Place** made operational instead of aspirational.
 
-Underneath everything: the **Discretion Layer.** A second model (Claude Haiku 4.5) runs after the research pass with one job: remove things. Lin Chen has a `privacyOpennessScore` of 62 → standard band → professional accomplishments and stay preferences kept; family, wealth, romance, health, and any surveillance-feeling content stripped. Every removal is logged into `Dossier.suppressed[]` so the property can audit what the system chose *not* to show.
+The guest controls the depth of all this through one slider — **Hold the Thread** — on her own profile screen at `/profile`. Ten positions, three bands: *Loosely held* (dietary + room only), *Held* (professional accomplishments), *Fully held* (with calendar adjacency and cross-property continuity). The dial is in the guest's hand; the concierge dashboard *mirrors* the current setting read-only with a preview affordance for training. The floor of what we refuse to surface — health, romance, family, non-public sources — never moves with the dial. **The guest trades anticipation depth, not safety.**
+
+Underneath everything: the **Discretion Layer.** A second model (Claude Haiku 4.5) runs after the research pass with one job: honor the dial and remove what crosses the line. Lin Chen has Hold the Thread set to *Held* (POS 62) → professional accomplishments and stay preferences kept; family, wealth, romance, health, and any surveillance-feeling content stripped. Every removal is logged into `Dossier.suppressed[]` — the guest reads her own log; the property reads its own audit trail; same data, two compliance stories.
 
 And as a 2030 forward bet, we publish `/.well-known/agent.json` — a static manifest describing how a guest's personal agent can hand off preferences to the property's agent, so the next generation of guests don't have to fill out forms.
 
@@ -114,10 +116,11 @@ We assumed it would fail. `DEMO_MODE=1` + pre-captured fixtures + a backup video
 ## Accomplishments we're proud of
 
 - **The property switcher works.** Same guest, three radically different bespoke arrivals — generated live. The anti-cookie-cutter promise is on screen.
+- **Hold the Thread — the dial in the guest's hand.** A single slider on the guest's profile decides the depth of every dossier. Drag it on stage and the dossier visibly breathes; the Discretion Layer enforces the setting, the audit log records every removal, the floor of refused content never moves. The slider IS the proof of the privacy posture.
 - **The Discretion Layer is a first-class data field, not a hand-wave.** `Dossier.suppressed[]` ships with every dossier. Auditability is the product, not the disclaimer.
 - **Two-terminal parallel build under a written contract.** No merge conflicts, no rework. Working agreement in `README.md`; type contract in `src/lib/types.ts`; commit log proves both sides shipped continuously.
 - **Forward-compatible agent-to-agent manifest.** `/.well-known/agent.json` is a real artifact at a real URL, not a slide.
-- **Brand fidelity.** Every term we use — *A Sense of Place*, *Relationship Hospitality*, *Affluential Explorer*, *Discovery* — is Rosewood's own language. The microcopy reads *"Threading the dossier…"* instead of *"Loading…"*
+- **Brand fidelity.** Every term we use — *A Sense of Place*, *Relationship Hospitality*, *Affluential Explorer*, *Discovery*, *Hold the Thread* — is Rosewood's own language or a faithful extension of it. The microcopy reads *"Threading the dossier…"* instead of *"Loading…"*
 
 ---
 
@@ -135,10 +138,11 @@ We assumed it would fail. `DEMO_MODE=1` + pre-captured fixtures + a backup video
 
 ## What's next for Red Thread
 
+- **Concierge mirror in the dashboard.** The dial is shipped on the guest side at `/profile`; the concierge variant (read-only mirror with preview affordance) is built and ready to drop into Zone II of the dashboard — *"Hold the Thread · 6 (Ms. Chen's preference · preview)."*
 - **In-stay signal capture.** Today the thread is "cast" (pre-arrival) and "continues" (post-stay). Movement II — held on-property — is wired in the UI but needs a real ingest layer: housekeeping notes, F&B orders, spa bookings.
 - **Property-portable rollout.** The architecture is already property-agnostic; the path is one JSON file per property + one auth scope per property manager.
-- **Agent-to-agent handoff, end-to-end.** `/.well-known/agent.json` is the manifest. Next is the actual negotiation flow with a reference guest-side agent.
-- **EU AI Act + GDPR conformance evidence pack.** The audit trail is already in `Dossier.suppressed[]`. Wrap it in a compliance-grade report and the regulatory story writes itself.
+- **Agent-to-agent handoff, end-to-end.** `/.well-known/agent.json` is the manifest. Next is the actual negotiation flow with a reference guest-side agent — including the guest agent declaring its principal's Hold the Thread setting up front, so the property can pre-honor it before any data is exchanged.
+- **EU AI Act + GDPR conformance evidence pack.** The audit trail is already in `Dossier.suppressed[]`; the guest-controlled dial is the consent surface. Wrap them in a compliance-grade report and the regulatory story writes itself.
 - **Multi-property guests as a graph.** Lin Chen at Hong Kong, then Sand Hill, then Crillon — the thread is a graph, not a list. Surface that explicitly: "she'll see Lock Cha's protégé at the Crillon because she loved Lock Cha in Hong Kong."
 
 ---
@@ -153,10 +157,11 @@ We assumed it would fail. `DEMO_MODE=1` + pre-captured fixtures + a backup video
 
 - **Marketing:** [redthread.boutique](https://redthread.boutique)
 - **Live dossier:** [app.redthread.boutique](https://app.redthread.boutique)
+- **Ms. Chen's profile (the dial):** [app.redthread.boutique/profile](https://app.redthread.boutique/profile)
 - **GitHub:** [link to be added]
 - **Agent manifest:** [app.redthread.boutique/.well-known/agent.json](https://app.redthread.boutique/.well-known/agent.json)
 
-Switch between Sand Hill, Hong Kong, and the Crillon. Watch the same Ms. Chen get three completely different bespoke arrivals.
+Switch between Sand Hill, Hong Kong, and the Crillon — watch the same Ms. Chen get three completely different bespoke arrivals. Then open her profile and drag *Hold the Thread* from 6 → 2 → 9; watch the dossier breathe in real time.
 
 ---
 

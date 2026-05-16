@@ -29,6 +29,31 @@ Run in order. Tick each box.
     -d '{"guestId":"lin-chen","propertyId":"sand-hill"}' | jq -e '.actuators.welcomeAmenity.name'
   ```
   Expect a Bay Area amenity name (Frog Hollow pears, Tartine, etc.). **Repeat for `hong-kong` and `crillon`.** If any property errors → triage now, not on stage.
+
+- [ ] **Hold the Thread (dial) smoke test** — three POS bands:
+  ```bash
+  # Minimal — expect conversationHooks: []
+  curl -fsS -X POST http://localhost:3000/api/agent \
+    -H 'Content-Type: application/json' \
+    -d '{"guestId":"lin-chen","propertyId":"sand-hill","previewPos":20}' \
+    | jq '{hooks: (.conversationHooks | length), suppressed: (.suppressed | length)}'
+  # Standard — expect 2-3 hooks (professional only)
+  curl -fsS -X POST http://localhost:3000/api/agent -H 'Content-Type: application/json' \
+    -d '{"guestId":"lin-chen","propertyId":"sand-hill","previewPos":60}' \
+    | jq '{hooks: (.conversationHooks | length), suppressed: (.suppressed | length)}'
+  # Full — expect hooks expand, suppressed shrinks
+  curl -fsS -X POST http://localhost:3000/api/agent -H 'Content-Type: application/json' \
+    -d '{"guestId":"lin-chen","propertyId":"sand-hill","previewPos":90}' \
+    | jq '{hooks: (.conversationHooks | length), suppressed: (.suppressed | length)}'
+  ```
+  Hook count must increase as POS rises. If band changes don't fire → the dial demo is dead; investigate before going on stage.
+
+- [ ] **`/profile` page smoke test**:
+  - Open `http://localhost:3000/profile` (or `app.redthread.boutique/profile`).
+  - Slider starts at **6 / 10** with caption "your saved preference: 6 of 10".
+  - Slide to 2 → active band card moves to "0–3 Loosely held ← you are here"; band copy reads *"Red Thread keeps to your dietary, room, and bedding preferences."*
+  - Slide to 9 → active band moves to "7–10 Fully held"; band copy mentions Series B, calendar adjacency, cross-property continuity.
+  - Save button enables when dirty; clicking it round-trips through `/api/agent` and the button settles on "SAVED".
 - [ ] **DEMO_MODE smoke test** (kill wifi, then):
   ```bash
   DEMO_MODE=1 bun dev
@@ -89,25 +114,39 @@ Run in order. Tick each box.
 
 **Do:** click the switcher again → **Hôtel de Crillon, Paris**. Narrate briefly: *"Pierre Hermé macarons. Musée d'Orsay pre-opening. Les Ambassadeurs pescatarian tasting. The thread continues."*
 
-### Beat 4 (1:15–1:45) — Discretion Layer
+### Beat 4 (1:15–1:50) — Hold the Thread (the dial money shot)
 
-**Say:** *"Now look at what's NOT here. Lin Chen's Privacy Openness Score is 62. There's a second model — Claude Haiku 4.5 — whose only job is to remove things. Family details, wealth speculation, anything surveillance-feeling. Every removal is logged in the suppressed array so the property can audit what the system chose not to surface. This is the GDPR and EU AI Act answer. It's the answer to 'how do I make sure this doesn't get me sued or fired.'"*
+**Say:** *"Now — who decides what shows up here? Not us. Ms. Chen does. This is her own profile."*
 
-**Do:** hover or click the Discretion Layer log in Zone II. Show one or two suppressed entries.
+**Do:** open `app.redthread.boutique/profile` in the same tab (or a pre-staged tab). Land on the slider at **6 of 10**.
 
-### Beat 5 (1:45–2:05) — Voice brief moment
+**Say:** *"She has one control — Hold the Thread. Right now she's at six of ten, which we call 'Held' — the system anticipates her professional life and her room preferences, but never speculates about family, health, or anything she hasn't shared publicly. Watch what happens when she dials it down."*
+
+**Do:** drag the slider to **2**. The active band moves to *Loosely held*. Pause one beat.
+
+**Say:** *"At two of ten — Loosely held — the conversation hooks evaporate. The brief reads 'guest is privacy-conscious. Standard luxury service.' We keep her dietary, her bedding, her room temperature. Nothing else."*
+
+**Do:** drag the slider to **9**. The active band moves to *Fully held*. Pause one beat.
+
+**Say:** *"At nine — Fully held — we anticipate fully. Her Series B announcement surfaces as a conversation opener. The Hong Kong butler is told so the thread continues to her next stay. And the floor — no health, no romance, no family, no non-public sources — never moves with the slider. **She trades anticipation depth. Never safety.** Every signal we remove is logged for her review. This is the GDPR and EU AI Act answer made tangible — the dial is in her hand."*
+
+**Do:** drag the slider back to **6**. Click back to the dashboard.
+
+*Optional add (if 5+ min slot):* point out the *concierge mirror* widget on the dashboard reading "Hold the Thread · 6 (Ms. Chen's preference · preview)" — **"the dial is read-only for staff. Only she can save a change."***
+
+### Beat 5 (1:50–2:10) — Voice brief moment
 
 **Say:** *"The front desk concierge gets a 20-second voice brief on the way to the door. Listen."*
 
 **Do:** click "Brief me." Play the ElevenLabs Alice voice. **Wait the full clip in silence — don't talk over the voice.**
 
-### Beat 6 (2:05–2:20) — agent.json forward bet
+### Beat 6 (2:10–2:25) — agent.json forward bet
 
 **Say:** *"Hospitality 2030. We ship a static agent-to-agent handoff manifest at slash-dot-well-known-slash-agent-dot-json. When the guest's own agent eventually wants to negotiate dietary and itinerary preferences with the property's agent, this is the endpoint. We're the first implementation other properties will point to."*
 
 **Do:** optional — open `app.redthread.boutique/.well-known/agent.json` in a new tab if there's time. Skip if running long.
 
-### Beat 7 (2:20–2:30) — Close
+### Beat 7 (2:25–2:40) — Close
 
 **Say:** *"The thread is cast before she lands. Held while she's here. Continues after she leaves. That's not a feature. That's the operating system Rosewood already promised — we just shipped it."*
 
@@ -153,6 +192,8 @@ If both live and DEMO_MODE are dead:
 - ❌ Do not say "AI" if you can say "the agent" or "Claude." More specific = more credible.
 - ❌ Do not apologise for anything that wasn't asked about.
 - ❌ Do not show the terminal. If something breaks, switch to backup video, do not debug live.
+- ❌ Do not drag the dial more than three times (down · up · home). Each move needs a beat of silence to land — over-scrubbing kills the gravity.
+- ❌ Do not say "Privacy Openness Score" on stage. Internal name. On stage: *"Hold the Thread"* or *"the dial"*.
 
 ---
 
@@ -168,8 +209,9 @@ WALK:   Lin Chen. CEO Lattice. Series B last month. Flew SFO.
 SWITCH: Sand Hill → HK → Crillon.
         "Same guest. Three radically different bespoke arrivals."
 
-DSCRT:  POS 62. Haiku 4.5 strips wealth/family/health. Logged in
-        suppressed[]. GDPR + EU AI Act answer.
+DIAL:   Open /profile. Drag 6 → 2 → 9 → 6.
+        "She holds the thread. We never speculate. Floor never moves.
+         She trades anticipation depth, never safety."
 
 VOICE:  Click "Brief me." Wait in silence.
 
