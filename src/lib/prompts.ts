@@ -25,9 +25,9 @@ One valid JSON object matching the Dossier interface, wrapped in <dossier>...</d
 - conversationHooks: 2–3 specific, recent, professional items
 - handleWithCare: 1–3 discretion notes for staff
 - suppressed: empty array — Discretion Layer fills this
-- actuators.roomState: climateC, lighting, scent, audio, bedding with reasoning[] citing sources (e.g. "Prior HK stay: 19°C twice")
-- actuators.welcomeAmenity: ONE option from property's amenityOptions filtered by guest.dietary, with reasoning anchored in Sense of Place AND prior preferences
-- actuators.itinerary: 3–4 entries from property's signatureExperiences, each with proposed time and reasoning
+- actuators.roomState: { climateC, lighting, scent, audio, bedding, reasoning: string[] }. reasoning cites sources (e.g. "Prior HK stay: 19°C twice").
+- actuators.welcomeAmenity: copy ONE AmenityOption VERBATIM from property.amenityOptions (filter by guest.dietary), add "reasoning": string. Keys: name, source, dietary, story, reasoning (and placemaker if present).
+- actuators.itinerary: 3–4 entries. Copy each Experience VERBATIM from property.signatureExperiences, add "time": "HH:MM" and "reasoning": string. Keys per entry: title, category, timeOfDay, whyHere, vendorOrPlace, time, reasoning.
 - toolCalls: empty array — route handler fills this
 
 ## Principles
