@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useDossier } from "@/lib/dossierStore";
 import { bandFor, posToUi, BAND_LABEL } from "./DiscretionDial";
+import { ThreadHashScale } from "./ThreadHashScale";
 
 // What the concierge is permitted to do at each level — one short line so
 // staff can act without leaving the dashboard. These are the same three
@@ -57,66 +58,12 @@ export function DashboardDial() {
             </span>
           </div>
 
-          {/* Hash-mark scale 0..10 with the saved level marked */}
-          <div
-            role="img"
-            aria-label={`${savedUi} of 10 — ${BAND_LABEL[band]}`}
-            className="relative h-7"
-          >
-            {/* Continuous baseline */}
-            <div className="absolute top-1/2 left-0 right-0 h-px bg-rule -translate-y-1/2" />
-            {/* Filled portion from 0 to current */}
-            <div
-              className="absolute top-1/2 left-0 h-px bg-thread -translate-y-1/2"
-              style={{ width: `${(savedUi / 10) * 100}%`, opacity: 0.85 }}
-              aria-hidden="true"
-            />
-            {/* 11 hash marks */}
-            {Array.from({ length: 11 }, (_, i) => {
-              const isActive = i === savedUi;
-              const isFilled = i <= savedUi;
-              return (
-                <span
-                  key={i}
-                  className="absolute top-1/2 w-px h-3 -translate-y-1/2"
-                  style={{
-                    left: `${(i / 10) * 100}%`,
-                    background: isFilled ? "var(--thread)" : "var(--rule)",
-                    opacity: isActive ? 0 : isFilled ? 0.85 : 0.7,
-                  }}
-                  aria-hidden="true"
-                />
-              );
-            })}
-            {/* Numerals 0..10 below */}
-            <div className="absolute top-[calc(50%+10px)] left-0 right-0 flex justify-between text-[9px] font-mono text-ink-faint">
-              {Array.from({ length: 11 }, (_, i) => (
-                <span
-                  key={i}
-                  className={
-                    i === savedUi
-                      ? "text-thread-deep font-medium"
-                      : ""
-                  }
-                  style={{
-                    width: 0,
-                    transform: `translateX(${i === 0 ? 0 : i === 10 ? -100 : -50}%)`,
-                  }}
-                >
-                  {i}
-                </span>
-              ))}
-            </div>
-            {/* Active knot */}
-            <span
-              className="absolute top-1/2 w-[12px] h-[12px] rounded-full bg-thread -translate-y-1/2"
-              style={{
-                left: `calc(${(savedUi / 10) * 100}% - 6px)`,
-                boxShadow: "0 0 12px rgba(200,16,46,0.65)",
-              }}
-              aria-hidden="true"
-            />
-          </div>
+          {/* Hash-mark scale 0..10 — read-only on the concierge surface */}
+          <ThreadHashScale
+            value={savedUi}
+            ariaLabel="Hold the Thread"
+            ariaValueText={`${savedUi} of 10 — ${BAND_LABEL[band]}`}
+          />
 
           <div className="mt-6 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
             <span>Loosely</span>

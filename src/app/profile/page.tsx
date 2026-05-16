@@ -6,12 +6,24 @@ import { useEffect, useState } from "react";
 
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import {
-  DiscretionDial,
+  BAND_LABEL,
   bandFor,
   posToUi,
   uiToPos,
 } from "@/components/DiscretionDial";
+import { ThreadHashScale } from "@/components/ThreadHashScale";
 import { useDossier } from "@/lib/dossierStore";
+
+// Guest-facing guidance per band — what the dashboard will (and won't) do
+// at this level. Mirrors the concierge-facing copy on DashboardDial but
+// addressed to the guest.
+const GUEST_GUIDANCE: Record<"minimal" | "standard" | "full", string> = {
+  minimal:
+    "We acknowledge only what you've shared. No public signals, no inferred context — strict need-to-know.",
+  standard:
+    "We may use public signals — press, events, prior stays — as quiet conversation starters. Private context stays private.",
+  full: "We may anticipate from your public and professional context, and surface proactively. Every detail is marked with provenance.",
+};
 
 /**
  * Guest-side profile — canonical surface for the Hold the Thread dial. The
@@ -202,15 +214,65 @@ export default function ProfilePage() {
         </section>
 
         <div className="mt-10 space-y-6">
-          <DiscretionDial
-            value={value}
-            onChange={setValue}
-            caption={
-              isDirty
-                ? `your saved preference: ${savedUi} of 10 — unsaved change`
-                : `your saved preference: ${savedUi} of 10`
-            }
-          />
+          {/* Hold the Thread — same hash-mark dial as the concierge dashboard,
+              but interactive here. The guest is the only one who can change
+              this; Save writes to the shared store so the dashboard updates
+              live. */}
+          <section
+            aria-label="Hold the Thread — your privacy openness"
+            className="bg-paper border hairline px-5 py-5"
+          >
+            <div className="flex items-baseline justify-between gap-3 mb-3">
+              <div className="caps flex items-center gap-2">
+                <span className="inline-block w-4 h-px bg-thread" />
+                Hold the Thread · {value} of 10
+                <span className="text-ink-faint normal-case tracking-normal italic ml-2 text-[11px]">
+                  {isDirty
+                    ? `— saved: ${savedUi} of 10 · unsaved change`
+                    : "— your saved preference"}
+                </span>
+              </div>
+              <span
+                className={`text-[10px] tracking-[0.22em] uppercase font-medium ${
+                  band === "minimal"
+                    ? "text-ink-faint"
+                    : band === "standard"
+                      ? "text-thread-deep"
+                      : "text-thread"
+                }`}
+              >
+                {BAND_LABEL[band]}
+              </span>
+            </div>
+
+            <ThreadHashScale
+              value={value}
+              onChange={setValue}
+              ariaLabel="Hold the Thread — drag to set your privacy openness"
+              ariaValueText={`${value} of 10 — ${BAND_LABEL[band]}`}
+            />
+
+            <div className="mt-6 flex justify-between text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+              <span>Loosely</span>
+              <span aria-hidden="true">·</span>
+              <span>Fully</span>
+            </div>
+
+            <p className="mt-5 text-[13px] leading-relaxed text-ink">
+              <span
+                className={`font-medium ${
+                  band === "minimal"
+                    ? "text-ink-faint"
+                    : band === "standard"
+                      ? "text-thread-deep"
+                      : "text-thread"
+                }`}
+              >
+                At {BAND_LABEL[band]}:
+              </span>{" "}
+              {GUEST_GUIDANCE[band]}
+            </p>
+          </section>
 
           <div className="flex items-center justify-between gap-4">
             <p className="text-[12px] text-ink-faint">
