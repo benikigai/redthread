@@ -17,18 +17,16 @@ export function ZoneShell({
 }) {
   const isDark = tone === "dark";
   const containerCls = isDark
-    ? "border border-white/15 bg-transparent p-6 h-full"
+    ? "border border-on-dark/15 bg-transparent p-6 h-full"
     : "border hairline bg-paper p-6 h-full";
-  const headerCls = isDark ? "mb-5 pb-4 border-b border-white/15" : "mb-5 pb-4 border-b hairline";
-  const labelCls = isDark
-    ? "caps text-brass"
-    : "caps";
+  const headerCls = isDark ? "mb-5 pb-4 border-b border-on-dark/15" : "mb-5 pb-4 border-b hairline";
+  const labelCls = isDark ? "caps text-brass" : "caps";
   const titleCls = isDark
-    ? "font-display text-2xl mt-1 leading-none text-paper"
-    : "font-display text-2xl mt-1 leading-none";
+    ? "font-display text-2xl mt-1 leading-none text-on-dark"
+    : "font-display text-2xl mt-1 leading-none text-ink";
   const hintCls = isDark
-    ? "font-display italic text-paper/65 text-sm mt-2 leading-snug"
-    : "font-display italic text-ink-faint text-sm mt-2 leading-snug";
+    ? "font-display italic text-on-dark/75 text-sm mt-2 leading-snug"
+    : "font-display italic text-ink-mute text-sm mt-2 leading-snug";
 
   return (
     <div className={containerCls}>

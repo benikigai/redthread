@@ -24,8 +24,8 @@ export function LiveThread() {
           style={{
             background:
               "linear-gradient(to right, transparent 0%, #C8102E 8%, #C8102E 92%, transparent 100%)",
-            opacity: 0.85,
-            boxShadow: "0 0 16px rgba(200,16,46,0.35)",
+            opacity: 0.9,
+            boxShadow: "0 0 18px rgba(200,16,46,0.55)",
           }}
           aria-hidden="true"
         />
@@ -33,17 +33,17 @@ export function LiveThread() {
           {BEATS.map((b) => (
             <li
               key={b.t}
-              className="relative bg-sage-deep border border-white/15 p-3"
+              className="relative bg-rose-darker border border-white/15 p-3"
             >
               {/* Knot — a small red dot anchoring this beat to the thread */}
               <span
-                className="absolute -top-[5px] left-4 w-[10px] h-[10px] rounded-full border border-white/40"
-                style={{ background: "#C8102E", boxShadow: "0 0 10px rgba(200,16,46,0.6)" }}
+                className="absolute -top-[5px] left-4 w-[10px] h-[10px] rounded-full border border-on-dark/40"
+                style={{ background: "#C8102E", boxShadow: "0 0 12px rgba(200,16,46,0.7)" }}
                 aria-hidden="true"
               />
               <div className="caps text-brass">{b.t}</div>
-              <div className="caps text-paper/55 mt-1 text-[0.6rem]">{b.phase}</div>
-              <p className="mt-2 text-xs text-paper/85 leading-snug">{b.note}</p>
+              <div className="caps text-on-dark/55 mt-1 text-[0.6rem]">{b.phase}</div>
+              <p className="mt-2 text-[13px] text-on-dark leading-snug font-normal">{b.note}</p>
             </li>
           ))}
         </ol>

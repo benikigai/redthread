@@ -31,8 +31,8 @@ export function Header() {
                   className={[
                     "px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition-colors",
                     on
-                      ? "bg-sage-deep text-paper"
-                      : "text-ink-faint hover:text-ink hover:bg-paper-soft",
+                      ? "bg-rose-deep text-on-dark"
+                      : "text-ink-mute hover:text-ink hover:bg-paper-soft",
                   ].join(" ")}
                 >
                   {p.name.replace("Rosewood ", "").replace("Hôtel de ", "")}

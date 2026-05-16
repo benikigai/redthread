@@ -1,29 +1,32 @@
 @import "tailwindcss";
 
-/* ─── Red Thread theme — Rosewood-faithful: white paper, sage accent ─── */
+/* ─── Red Thread theme — all-in rose red on white paper ─── */
 :root {
   /* Surfaces */
   --paper:        #FFFFFF;   /* pure white */
-  --paper-soft:   #FAF8F3;   /* faintest off-white for nested surfaces */
-  --paper-elev:   #F5F1E8;   /* warm cream for elevated cards */
-  --rule:         #E8E3D5;   /* hairline dividers — warm bone */
+  --paper-soft:   #FAF6EC;   /* warm cream nested surface */
+  --paper-elev:   #F5F1E8;   /* cream — used on dark bands for body text */
+  --rule:         #E8E3D5;   /* hairline divider — warm bone */
   --rule-soft:    #F0EBDF;
 
-  /* Text */
-  --ink:          #1A1A1A;   /* near-black primary text */
-  --ink-mute:     #5A5A5A;   /* secondary text */
-  --ink-faint:    #8A8A8A;   /* small-caps captions */
+  /* Text on white */
+  --ink:          #0F0F0F;   /* near-black, high contrast */
+  --ink-mute:     #444444;   /* secondary, AAA on white */
+  --ink-faint:    #6B6B6B;   /* captions, AA on white */
 
-  /* Brand accents — sage is the protagonist */
-  --sage:         #8FA68C;   /* primary brand accent */
-  --sage-deep:    #2D5A47;   /* emerald emphasis */
-  --discovery:    #1B3A2F;   /* Rosewood Discovery Green — sparing */
-  --brass:        #B08D57;   /* warm metal — hairlines, numerals */
+  /* Rose red — the whole palette */
+  --thread:       #C8102E;   /* bright literal thread — line, dot, knot */
+  --thread-deep:  #8B0000;   /* mid-rose — emphasis text on white */
+  --rose-deep:    #3D1318;   /* deep oxblood — full-bleed dark band */
+  --rose-darker:  #2A0E12;   /* deepest — footer */
 
-  /* The literal red thread — used only as line accent, never fill */
-  --thread:       #C8102E;
-  --thread-deep:  #8B0000;
-  --thread-glow:  rgba(200, 16, 46, 0.25);
+  /* Cream-on-dark text register */
+  --on-dark:      #F5F1E8;            /* primary text on rose-deep — warm cream */
+  --on-dark-mute: rgba(245,241,232,0.78);
+  --on-dark-faint:rgba(245,241,232,0.55);
+
+  /* Metal accent — kept sparingly for numerals + hairlines on dark */
+  --brass:        #C9A86A;   /* slightly brighter brass for legibility on rose */
 }
 
 @theme inline {
@@ -40,13 +43,13 @@
   --color-ink-mute: var(--ink-mute);
   --color-ink-faint: var(--ink-faint);
 
-  --color-sage: var(--sage);
-  --color-sage-deep: var(--sage-deep);
-  --color-discovery: var(--discovery);
-  --color-brass: var(--brass);
-
   --color-thread: var(--thread);
   --color-thread-deep: var(--thread-deep);
+  --color-rose-deep: var(--rose-deep);
+  --color-rose-darker: var(--rose-darker);
+
+  --color-on-dark: var(--on-dark);
+  --color-brass: var(--brass);
 
   --font-serif: var(--font-cormorant);
   --font-sans: var(--font-inter);
@@ -55,27 +58,27 @@
 html, body { background: var(--paper); color: var(--ink); }
 body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-::selection { background: var(--sage); color: var(--paper); }
+::selection { background: var(--thread); color: var(--paper); }
 
 /* Editorial micro-utilities */
 .font-display { font-family: var(--font-cormorant), Georgia, serif; }
 .caps {
-  font-size: 0.68rem;
-  letter-spacing: 0.28em;
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--ink-faint);
-  font-weight: 400;
+  color: var(--ink-mute);
+  font-weight: 500;
 }
 .thread-line {
   height: 1px;
-  background: linear-gradient(to right, transparent 0%, var(--thread) 12%, var(--thread) 88%, transparent 100%);
-  opacity: .7;
+  background: linear-gradient(to right, transparent 0%, var(--thread) 10%, var(--thread) 90%, transparent 100%);
+  opacity: .85;
 }
 .hairline { border-color: var(--rule); }
 
@@ -84,7 +87,7 @@ body {
   width: 28px; height: 1.5px;
   background: var(--thread);
   display: inline-block;
-  box-shadow: 0 0 8px var(--thread-glow);
+  box-shadow: 0 0 10px rgba(200,16,46,0.35);
   animation: thread-pulse 4.5s ease-in-out infinite;
 }
 @keyframes thread-pulse {

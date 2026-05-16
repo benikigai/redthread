@@ -34,20 +34,21 @@ export default function Home() {
         aria-hidden="true"
       />
 
-      {/* Sage-deep band — the live thread lives here */}
-      <section className="bg-sage-deep">
-        <div className="mx-auto w-full max-w-[1480px] px-8 py-12">
+      {/* Deep rose band — the live thread lives here */}
+      <section className="bg-rose-deep text-on-dark">
+        <div className="mx-auto w-full max-w-[1480px] px-8 py-14">
           <LiveThread />
         </div>
       </section>
 
-      {/* Dark footer band */}
-      <footer className="bg-[#1A1A1A] text-paper/75">
+      {/* Deeper rose footer */}
+      <footer className="bg-rose-darker text-on-dark">
         <div className="mx-auto w-full max-w-[1480px] px-8 py-8 flex items-end justify-between gap-4 flex-wrap text-xs">
           <div>
-            <span className="text-paper">Red Thread</span> · built for the Affluential Explorer
+            <span className="text-on-dark font-medium">Red Thread</span>
+            <span className="text-on-dark/55"> · built for the Affluential Explorer</span>
           </div>
-          <div className="text-right text-paper/50">
+          <div className="text-right text-on-dark/55">
             Hospitality 2030 · Rosewood Sand Hill
           </div>
         </div>
