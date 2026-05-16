@@ -63,17 +63,13 @@ export function DemoTrigger() {
           )}
           <Link
             href="/intake"
-            className={
-              "text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors inline-flex items-center gap-2 " +
-              (running ? "pointer-events-none opacity-50" : "")
-            }
-            aria-disabled={running}
+            className="text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors inline-flex items-center gap-2"
           >
             Voice intake <span aria-hidden="true">→</span>
           </Link>
           <button
             type="button"
-            disabled={running || showHandoff}
+            disabled={showHandoff}
             onClick={startHandoff}
             className="text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors disabled:opacity-50"
           >
