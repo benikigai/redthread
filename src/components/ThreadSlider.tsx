@@ -45,10 +45,11 @@ export function ThreadSlider({
   const pct = (value / 10) * 100;
 
   // Heights chosen so the knot stays touch-friendly (≥24px hit target) on both
-  // variants. The visible thread is much thinner; the input fills the row.
-  const rowHeight = compact ? 26 : 36;
-  const threadThickness = compact ? 3 : 4;
-  const knotSize = compact ? 14 : 18;
+  // variants. Threads are bumped slightly thicker than v1 so the textile body
+  // reads as woven, not wire.
+  const rowHeight = compact ? 28 : 40;
+  const threadThickness = compact ? 4 : 6;
+  const knotSize = compact ? 16 : 20;
 
   return (
     <div
@@ -123,34 +124,51 @@ export function ThreadSlider({
       />
 
       <style jsx>{`
+        /* Soft textile thread — restrained sheen, low-contrast fibers, warm
+           rose base, and a fuzzy halo around the edges suggesting loose
+           cotton/silk fibers catching the light. */
         .thread-track {
           background:
-            /* Sheen — bright highlight on the upper half, fading down */
+            /* Sheen — wide, diffuse, low-peak (matte cotton, not satin) */
             linear-gradient(
               180deg,
-              rgba(255, 255, 255, 0.32) 0%,
-              rgba(255, 255, 255, 0.06) 45%,
-              transparent 70%
+              rgba(255, 250, 245, 0.16) 0%,
+              rgba(255, 250, 245, 0.06) 35%,
+              transparent 75%
             ),
-            /* Fiber twist — diagonal hatch suggests woven strands */
+            /* Slubs — horizontal color variation along the thread length,
+               like the irregular thickness of natural fiber */
             repeating-linear-gradient(
-              68deg,
-              rgba(0, 0, 0, 0.18) 0px,
-              rgba(0, 0, 0, 0.18) 0.6px,
-              transparent 0.6px,
-              transparent 2.4px
+              90deg,
+              transparent 0px,
+              rgba(0, 0, 0, 0.025) 2px,
+              transparent 4px,
+              rgba(255, 220, 220, 0.04) 6px,
+              transparent 9px
             ),
-            /* Base — vertical shading for roundness on the thread */
+            /* Soft fiber twist — much lower contrast than v1, wider spacing */
+            repeating-linear-gradient(
+              72deg,
+              rgba(50, 0, 8, 0.07) 0px,
+              rgba(50, 0, 8, 0.07) 0.6px,
+              transparent 0.6px,
+              transparent 3.4px
+            ),
+            /* Base — warmer, gentler rose with less contrast top→bottom */
             linear-gradient(
               180deg,
-              #e11f3f 0%,
-              #c8102e 45%,
-              #a50c26 100%
+              #d2384c 0%,
+              #c01a35 50%,
+              #9c1226 100%
             );
           border-radius: 999px;
+          /* Fuzz halo + soft drop shadow — diffuse, not crisp */
           box-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.18),
-            0 0 12px rgba(200, 16, 46, 0.18);
+            0 0 0.5px rgba(200, 16, 46, 0.45),
+            0 0 4px rgba(200, 16, 46, 0.22),
+            0 2px 6px rgba(120, 20, 30, 0.14);
+          /* A whisper of edge softening — gives the thread a fiber halo */
+          filter: blur(0.18px) saturate(1.02);
         }
 
         .thread-knot {
@@ -159,22 +177,33 @@ export function ThreadSlider({
           border-radius: 50%;
           pointer-events: none;
           background:
-            /* Specular highlight, then radial body */
+            /* Softer specular — wider, less hot, matte-bead body */
             radial-gradient(
-              circle at 32% 28%,
-              #ff5070 0%,
-              #d61834 38%,
-              #8b0010 100%
+              circle at 35% 32%,
+              rgba(255, 220, 225, 0.55) 0%,
+              #d8334e 22%,
+              #b81830 60%,
+              #7a0c1a 100%
             );
-          /* Brass ring + soft cast shadow */
+          /* Soft cream-brass halo (replaces the crisp brass ring),
+             then diffuse cast shadow, then a fuzzy ambient glow */
           box-shadow:
-            0 0 0 1.5px var(--brass),
-            0 2px 4px rgba(0, 0, 0, 0.28),
-            0 0 12px rgba(200, 16, 46, 0.35);
+            0 0 0 1px rgba(201, 168, 106, 0.55),
+            0 0 0 2px rgba(245, 241, 232, 0.35),
+            0 2px 5px rgba(70, 10, 20, 0.25),
+            0 0 10px rgba(200, 16, 46, 0.28);
           transition:
             transform 80ms ease-out,
             box-shadow 120ms ease-out,
             left 60ms linear;
+          /* Same edge softening as the thread — they belong to the same fabric */
+          filter: blur(0.12px);
+        }
+
+        /* Lift the knot on focus/hover so it reads as a graspable bead */
+        .thread-slider-input:hover ~ .thread-knot,
+        .thread-slider-input:focus-visible ~ .thread-knot {
+          /* No-op fallback — the rule below using sibling order matters */
         }
 
         .thread-slider-input {
