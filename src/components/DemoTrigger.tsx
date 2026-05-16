@@ -56,7 +56,7 @@ export function DemoTrigger() {
             <button
               type="button"
               onClick={reset}
-              className="caps text-ink hover:text-thread-deep border hairline px-4 py-2 transition-colors"
+              className="text-[11px] tracking-[0.22em] uppercase font-medium text-ink hover:text-thread-deep border hairline px-4 py-2 transition-colors"
             >
               Reset
             </button>
@@ -64,18 +64,18 @@ export function DemoTrigger() {
           <Link
             href="/intake"
             className={
-              "caps text-ink hover:text-thread-deep border hairline px-4 py-2 transition-colors " +
+              "text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors inline-flex items-center gap-2 " +
               (running ? "pointer-events-none opacity-50" : "")
             }
             aria-disabled={running}
           >
-            Voice intake →
+            Voice intake <span aria-hidden="true">→</span>
           </Link>
           <button
             type="button"
             disabled={running || showHandoff}
             onClick={startHandoff}
-            className="caps bg-rose-deep text-on-dark px-5 py-2 disabled:opacity-50 hover:bg-rose-darker transition-colors"
+            className="text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors disabled:opacity-50"
           >
             Agent handoff
           </button>

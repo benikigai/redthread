@@ -160,7 +160,7 @@ export default function ProfilePage() {
           </div>
           <Link
             href="/intake"
-            className="shrink-0 inline-flex items-center gap-2 bg-rose-deep text-on-dark px-6 py-3 text-[12px] tracking-[0.22em] uppercase hover:bg-rose-darker transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 bg-rose-deep text-paper hover:bg-rose-darker px-6 py-3 text-[12px] tracking-[0.22em] uppercase font-medium transition-colors"
             style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
             Begin briefing

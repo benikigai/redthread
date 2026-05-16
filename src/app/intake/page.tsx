@@ -514,7 +514,7 @@ function IntakeInner() {
                     <button
                       type="button"
                       onClick={begin}
-                      className="px-8 py-4 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-sm hover:bg-rose-darker transition-colors"
+                      className="px-8 py-4 bg-rose-deep text-paper font-sans uppercase tracking-[0.22em] text-sm font-medium hover:bg-rose-darker transition-colors"
                     >
                       Begin briefing
                     </button>
@@ -704,7 +704,7 @@ function IntakeInner() {
                       setStage("idle");
                       setConvId(null);
                     }}
-                    className="px-6 py-3 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-xs hover:bg-rose-darker"
+                    className="px-6 py-3 bg-rose-deep text-paper font-sans uppercase tracking-[0.22em] text-xs font-medium hover:bg-rose-darker"
                   >
                     Try again
                   </button>
