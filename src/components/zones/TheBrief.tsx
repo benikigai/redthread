@@ -25,7 +25,7 @@ export function TheBrief() {
         </div>
 
         <div className="border hairline bg-paper-soft px-4 py-3">
-          <div className="caps text-thread mb-2">Handle with care</div>
+          <div className="caps text-sage-deep mb-2">Handle with care</div>
           <p className="text-sm text-ink-mute leading-snug">
             Discretion Layer suppressed 3 signals (medical, romantic, financial detail beyond
             public). Auditable.
@@ -34,7 +34,7 @@ export function TheBrief() {
 
         <button
           type="button"
-          className="caps text-ink hover:text-thread border hairline px-4 py-3 w-full transition-colors flex items-center justify-between"
+          className="caps text-ink hover:text-sage-deep border hairline px-4 py-3 w-full transition-colors flex items-center justify-between"
         >
           <span>Brief me · ElevenLabs voice</span>
           <span aria-hidden="true">↻</span>

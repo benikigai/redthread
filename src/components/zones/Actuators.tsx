@@ -27,7 +27,7 @@ export function Actuators() {
 function Card({ label, headline, because }: { label: string; headline: string; because: string }) {
   return (
     <article className="border hairline bg-paper-soft p-4">
-      <div className="caps text-thread mb-1.5">{label}</div>
+      <div className="caps text-sage-deep mb-1.5">{label}</div>
       <div className="font-display text-lg leading-snug text-ink">{headline}</div>
       <p className="text-xs text-ink-faint mt-2 leading-snug italic">
         <span className="text-ink-mute not-italic">because</span> {because}

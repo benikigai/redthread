@@ -28,6 +28,6 @@ export function ResearchStreams() {
 
 function StatusBadge({ status }: { status: string }) {
   const color =
-    status === "complete" ? "text-discovery" : status === "streaming" ? "text-thread" : "text-ink-faint";
+    status === "complete" ? "text-sage-deep" : status === "streaming" ? "text-thread" : "text-ink-faint";
   return <span className={`caps ${color}`}>{status}</span>;
 }

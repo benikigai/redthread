@@ -17,7 +17,7 @@ export function LiveThread() {
         <ol className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {BEATS.map((b) => (
             <li key={b.t} className="bg-paper border hairline p-3 relative z-10">
-              <div className="caps text-thread">{b.t}</div>
+              <div className="caps text-sage-deep">{b.t}</div>
               <div className="caps text-ink-faint mt-1 text-[0.6rem]">{b.phase}</div>
               <p className="mt-2 text-xs text-ink-mute leading-snug">{b.note}</p>
             </li>

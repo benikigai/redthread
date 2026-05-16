@@ -1,25 +1,29 @@
 @import "tailwindcss";
 
-/* ─── Red Thread theme: dark rose red, editorial restraint ─── */
+/* ─── Red Thread theme — Rosewood-faithful: white paper, sage accent ─── */
 :root {
   /* Surfaces */
-  --paper:        #1a0e14;   /* deep oxblood near-black */
-  --paper-soft:   #221218;   /* card surface */
-  --paper-elev:   #2b1820;   /* elevated card */
-  --rule:         #3a2228;   /* hairline dividers */
-  --rule-soft:    #2a1820;
+  --paper:        #FFFFFF;   /* pure white */
+  --paper-soft:   #FAF8F3;   /* faintest off-white for nested surfaces */
+  --paper-elev:   #F5F1E8;   /* warm cream for elevated cards */
+  --rule:         #E8E3D5;   /* hairline dividers — warm bone */
+  --rule-soft:    #F0EBDF;
 
   /* Text */
-  --ink:          #f5f1e8;   /* warm cream — primary text */
-  --ink-mute:     #c9b8b8;   /* muted rose-cream — body */
-  --ink-faint:    #8a6c70;   /* small-caps captions */
+  --ink:          #1A1A1A;   /* near-black primary text */
+  --ink-mute:     #5A5A5A;   /* secondary text */
+  --ink-faint:    #8A8A8A;   /* small-caps captions */
 
-  /* Brand accents */
-  --thread:       #b8485e;   /* the red thread */
-  --thread-glow:  rgba(184, 72, 94, 0.55);
-  --thread-deep:  #6b2937;   /* burgundy — legacy Rosewood nod */
-  --brass:        #b08d57;   /* warm metal — sparing */
-  --discovery:    #2d5a47;   /* Rosewood emerald — secondary nod */
+  /* Brand accents — sage is the protagonist */
+  --sage:         #8FA68C;   /* primary brand accent */
+  --sage-deep:    #2D5A47;   /* emerald emphasis */
+  --discovery:    #1B3A2F;   /* Rosewood Discovery Green — sparing */
+  --brass:        #B08D57;   /* warm metal — hairlines, numerals */
+
+  /* The literal red thread — used only as line accent, never fill */
+  --thread:       #C8102E;
+  --thread-deep:  #8B0000;
+  --thread-glow:  rgba(200, 16, 46, 0.25);
 }
 
 @theme inline {
@@ -36,10 +40,13 @@
   --color-ink-mute: var(--ink-mute);
   --color-ink-faint: var(--ink-faint);
 
+  --color-sage: var(--sage);
+  --color-sage-deep: var(--sage-deep);
+  --color-discovery: var(--discovery);
+  --color-brass: var(--brass);
+
   --color-thread: var(--thread);
   --color-thread-deep: var(--thread-deep);
-  --color-brass: var(--brass);
-  --color-discovery: var(--discovery);
 
   --font-serif: var(--font-cormorant);
   --font-sans: var(--font-inter);
@@ -49,11 +56,12 @@ html, body { background: var(--paper); color: var(--ink); }
 body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   font-weight: 300;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-::selection { background: var(--thread); color: var(--paper); }
+::selection { background: var(--sage); color: var(--paper); }
 
 /* Editorial micro-utilities */
 .font-display { font-family: var(--font-cormorant), Georgia, serif; }
@@ -67,19 +75,19 @@ body {
 .thread-line {
   height: 1px;
   background: linear-gradient(to right, transparent 0%, var(--thread) 12%, var(--thread) 88%, transparent 100%);
-  opacity: .85;
+  opacity: .7;
 }
 .hairline { border-color: var(--rule); }
 
-/* The literal red thread mark */
+/* The literal red thread mark — wordmark accent */
 .mark-thread {
   width: 28px; height: 1.5px;
   background: var(--thread);
   display: inline-block;
-  box-shadow: 0 0 12px var(--thread-glow);
+  box-shadow: 0 0 8px var(--thread-glow);
   animation: thread-pulse 4.5s ease-in-out infinite;
 }
 @keyframes thread-pulse {
-  0%, 100% { opacity: .85; }
+  0%, 100% { opacity: .8; }
   50%      { opacity: 1; }
 }
