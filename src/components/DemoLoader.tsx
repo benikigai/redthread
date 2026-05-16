@@ -84,6 +84,8 @@ export async function streamAgent(
     overrides?: IntakeOverrides;
     flightNumber?: string;
     previewPos?: number;
+    /** Bypass DEMO_MODE — force a fully live agent run. */
+    live?: boolean;
   },
   signal?: AbortSignal,
 ): Promise<void> {

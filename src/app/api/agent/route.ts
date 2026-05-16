@@ -67,6 +67,10 @@ interface RequestBody {
    *  the brief without re-running Claude. Sent by the client after
    *  /api/voice/intake/complete returns. */
   overrides?: VoiceIntakeOverrides;
+  /** Force a live agent run regardless of the DEMO_MODE env. The dynamic
+   *  reservation flow uses this so the dashboard isn't reading from a
+   *  pre-baked fixture. */
+  live?: boolean;
 }
 
 const POSTURE_TO_POS: Record<NonNullable<VoiceIntakeOverrides["privacyPosture"]>, number> = {
@@ -477,7 +481,7 @@ export async function POST(req: Request): Promise<Response> {
     (req.headers.get("accept") ?? "").toLowerCase().includes("text/event-stream");
 
   // Demo mode — replay fixture, optionally band-reduced for previewPos
-  if (process.env.DEMO_MODE === "1") {
+  if (process.env.DEMO_MODE === "1" && !body.live) {
     const fixture = loadFixture(body.guestId, body.propertyId);
     if (!fixture) {
       return Response.json(
