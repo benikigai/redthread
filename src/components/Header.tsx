@@ -103,7 +103,7 @@ export function Header() {
                   className={[
                     "px-3 py-2 text-[11px] tracking-[0.18em] uppercase transition-colors disabled:opacity-60 disabled:cursor-wait",
                     on
-                      ? "bg-rose-deep text-on-dark"
+                      ? "bg-rose-deep text-paper font-medium"
                       : "text-ink-mute hover:text-ink hover:bg-paper-soft",
                   ].join(" ")}
                 >
