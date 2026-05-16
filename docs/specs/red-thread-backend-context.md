@@ -1,36 +1,24 @@
 # Context: Red Thread — Backend Services (Terminal 2)
-**Last updated:** 2026-05-16 (post-realignment)
-**Phase:** Spec approved & realigned
+**Last updated:** 2026-05-16 (execution complete)
+**Phase:** Execution complete
 **Approved option:** JSON-default `/api/agent` with SSE opt-in via `Accept: text/event-stream`
-**Tasks:** 9 (Simple: 6, Moderate: 2, Complex: 1)
+**Tasks:** 9/9 complete (Simple: 6, Moderate: 2, Complex: 1)
 
-**T1 (terminal 1) already shipped:** Next 16 + Tailwind 4 + bun scaffold under `src/`, `src/lib/types.ts` (contract), `src/lib/anthropic.ts` (SDK singleton + MODELS const with Opus 4.7 + Haiku 4.5), `src/app/api/agent/route.ts` stub, four zone components, initial seed data with `_t2_notes` flags for what T2 should expand, README.md with the working agreement.
+**Final status:**
+- All backend deliverables shipped and pushed to `origin/main`
+- Live tests: `bun typecheck` clean, `bun lint` clean, JSON agent run 200 (70.8s), voice 200 (393ms), agent.json 200 (3ms)
+- DEMO_MODE=1 verified: 86ms JSON replay, SSE replays 5 phases, missing fixture → 503
+- Three fixtures captured for lin-chen × { sand-hill, hong-kong, crillon }
+- README has documented API Contract section
 
-**Working agreement (verbatim from T1's README):**
-- T2 owns `src/app/api/**` and `data/**`
-- T1 owns `src/components/**` and `src/app/page.tsx`
-- Both can edit `src/lib/anthropic.ts`
-- `src/lib/types.ts` is the contract — additive ok, renames/removals require sync
+**Key risks / follow-ups:**
+- Live agent run ~60-90s — use DEMO_MODE for live demo presentations
+- AviationStack free tier 100 calls/month — avoid passing flightNumber in demo runs unless required
+- No automated test suite — only one-shot smokes during yolo
+- Fixture timestamps may need recapture for a different demo day
 
-**Key contract details (decided by T1, honored by T2):**
-- `Guest.privacyOpennessScore` is a `number 0–100` field (not a separate computed object). No `computePOS()` Claude call needed — agent reads it directly and bands it.
-- `Dossier.suppressed: { signal, reason }[]` replaces the more elaborate `RedactionLog`.
-- `Dossier.toolCalls: ToolCallTrace[]` is embedded — UI can render the live stream from a single returned dossier even without SSE.
-- Discretion model is `claude-haiku-4-5` (not Sonnet 4.6 as originally specced).
-
-**Key risks:**
-- Claude token budget overrun → max_tokens=4096, max_turns=8, Haiku for filter pass, DEMO_MODE bypass
-- Wifi failure during live demo → `DEMO_MODE=1` replays fixture JSON or SSE
-- Next.js 16 breaking changes from training-data conventions → implementer must consult `node_modules/next/dist/docs/` per `AGENTS.md`
-- Type contract drift → T2 additive-only; renames need explicit sync with T1
-
-**Critic verdict:** APPROVE (inline pass, subagent skipped for time)
-
-**Research:** N/A — T1's scaffold is itself the de-risking artifact
-
-**Secrets:**
-- `ANTHROPIC_API_KEY` → `op://Clawdbot/Anthropic API Key/credential`
-- `ELEVENLABS_API_KEY` → shell secrets (already exported)
-- `AVIATIONSTACK_API_KEY` → optional, mock fallback designed in
-
-**Local dev command:** `op run -- bun dev`
+**Two-terminal coordination notes:**
+- T1's UI continues to work against the existing JSON Dossier contract — SSE was added purely additively
+- `src/lib/types.ts` got one additive change: `"phuket"` added to `PropertyId` union (for prior-stay reference)
+- Voice route default: Alice (`Xb7hH8MSUJpSbSDYk0k2`); UI can override via voiceId in request body or `ELEVENLABS_VOICE_ID` env
+- Force-push of git history happened to strip Claude attribution; T1 needs `git fetch && git reset --hard origin/main` next pull
