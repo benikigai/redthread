@@ -1,15 +1,16 @@
 "use client";
 
 // Red Thread — Pre-Arrival Intake
-// Browser-side Convai widget. Voice in, voice out, mic captured by the
-// SDK. When the conversation ends, the client hands the conversationId
-// to our /api/voice/intake/complete route, which pulls the extraction
-// from ElevenLabs and returns the normalized overrides. We stash the
-// overrides in sessionStorage and bounce the user to the dashboard with
-// `?fromIntake=1`, where the existing dashboard code picks them up and
-// re-runs the agent with the new prefs landing on the dossier.
+// Browser-side Convai widget. Voice in, voice out, mic captured by the SDK.
+// When the conversation ends, the client hands the conversationId to
+// /api/voice/intake/complete, which pulls the extraction from ElevenLabs.
+//
+// UI surfaces the five questions Ms. Chen will be asked alongside a live
+// transcript so she can see what's being asked, follow along, and feel the
+// thread populate. If the mic / network falls over, the visible scaffolding
+// stays — she still knows what we'd ask.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,27 +22,101 @@ const AGENT_ID =
 
 type Stage = "idle" | "connecting" | "talking" | "threading" | "done" | "error";
 
+interface TranscriptLine {
+  id: number;
+  speaker: "ai" | "you";
+  text: string;
+  at: number;
+}
+
+const QUESTIONS = [
+  {
+    key: "room",
+    label: "Room",
+    title: "How would you like your room set?",
+    hint: "Temperature, lighting, scent.",
+    match: /(temperatur|room|degree|warm|cool|°|lighting|scent)/i,
+  },
+  {
+    key: "bedding",
+    label: "Bedding",
+    title: "Any bedding preferences?",
+    hint: "Down, down-free, memory.",
+    match: /(bed|pillow|down|memory|allerg)/i,
+  },
+  {
+    key: "morning",
+    label: "Morning",
+    title: "What's your morning rhythm?",
+    hint: "Coffee, run, swim, slow start.",
+    match: /(morning|wake|breakfast|coffee|run|swim|hike|spa)/i,
+  },
+  {
+    key: "dietary",
+    label: "Food",
+    title: "Anything we should know about food?",
+    hint: "Diet, restrictions, favourites.",
+    match: /(food|diet|eat|allerg|pescat|vegan|vegetarian|meat|fish|drink|alcohol)/i,
+  },
+  {
+    key: "privacy",
+    label: "Privacy",
+    title: "How tightly should we hold the thread?",
+    hint: "Minimal · Standard · Full.",
+    match: /(privacy|public|press|article|social|signal|news|background)/i,
+  },
+] as const;
+
 function IntakeInner() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("idle");
   const [convId, setConvId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [latestLine, setLatestLine] = useState<string>("");
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const [doneKeys, setDoneKeys] = useState<Set<string>>(new Set());
+  const lineIdRef = useRef(0);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const conversation = useConversation({
     onConnect: ({ conversationId }) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setConvId(conversationId);
       setStage("talking");
     },
     onDisconnect: () => {
-      // We trigger the extraction in a separate effect that watches `convId`,
-      // so this just nudges the stage. The convId may not be in state yet
-      // depending on event ordering — the effect handles both orderings.
       setStage((prev) => (prev === "talking" ? "threading" : prev));
     },
     onMessage: ({ message, source }) => {
-      if (source === "ai" && typeof message === "string") {
-        setLatestLine(message);
+      if (typeof message !== "string" || !message.trim()) return;
+      const speaker = source === "ai" ? "ai" : "you";
+      lineIdRef.current += 1;
+      setTranscript((t) => [
+        ...t,
+        { id: lineIdRef.current, speaker, text: message.trim(), at: Date.now() },
+      ]);
+      if (speaker === "ai") {
+        const idx = QUESTIONS.findIndex((q) => q.match.test(message));
+        if (idx !== -1) {
+          setActiveIdx(idx);
+          // Any earlier question the AI moved past is implicitly answered
+          setDoneKeys((prev) => {
+            const next = new Set(prev);
+            for (let i = 0; i < idx; i++) next.add(QUESTIONS[i].key);
+            return next;
+          });
+        }
+      } else if (speaker === "you") {
+        // user just answered → mark current as done
+        setDoneKeys((prev) => {
+          const next = new Set(prev);
+          next.add(QUESTIONS[activeIdx].key);
+          return next;
+        });
       }
     },
     onError: (msg) => {
@@ -50,13 +125,17 @@ function IntakeInner() {
     },
   });
 
-  // After disconnect, fetch the extraction once we have a convId.
+  // Auto-scroll transcript
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [transcript.length]);
+
+  // Trigger extraction after disconnect
   useEffect(() => {
     if (stage !== "threading" || !convId) return;
     let cancelled = false;
     (async () => {
       try {
-        // Small grace period so ElevenLabs has time to finalize analysis.
         await new Promise((r) => setTimeout(r, 1500));
         const res = await fetch("/api/voice/intake/complete", {
           method: "POST",
@@ -88,12 +167,47 @@ function IntakeInner() {
     };
   }, [stage, convId, router]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const begin = async () => {
     setError(null);
+    setTranscript([]);
+    setActiveIdx(0);
+    setDoneKeys(new Set());
     setStage("connecting");
+
+    // Connection timeout — if onConnect never fires (silent mic denial,
+    // CORS, agent misconfigured), surface a real error instead of a spinner.
+    timeoutRef.current = window.setTimeout(() => {
+      setStage((prev) => {
+        if (prev !== "connecting") return prev;
+        setError(
+          "Couldn't open the voice channel. Check that your browser has microphone permission for this site, then try again.",
+        );
+        return "error";
+      });
+    }, 12_000);
+
     try {
+      // Explicit mic permission probe so denials don't fail silently
+      if (navigator?.mediaDevices?.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {
+          throw new Error(
+            "Microphone access was blocked. Allow it in your browser's site settings and try again.",
+          );
+        });
+      }
       await conversation.startSession({ agentId: AGENT_ID });
     } catch (err) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
       setStage("error");
@@ -101,10 +215,19 @@ function IntakeInner() {
   };
 
   const cancel = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     conversation.endSession();
-    setStage("idle");
-    setConvId(null);
+    setStage((prev) => (prev === "talking" ? "threading" : "idle"));
+    setConvId((c) => c);
   };
+
+  const showQuestionPanel =
+    stage === "talking" || stage === "threading" || stage === "done";
+
+  const lastFewLines = useMemo(() => transcript.slice(-6), [transcript]);
 
   return (
     <main className="min-h-screen bg-paper-canvas text-ink flex flex-col">
@@ -149,103 +272,236 @@ function IntakeInner() {
         </div>
       </header>
 
-      <section className="flex-1 flex items-center justify-center px-8 py-16">
-        <div className="w-full max-w-[640px]">
-          <p className="text-ink-faint text-xs uppercase tracking-[0.22em] mb-4">
+      <section className="flex-1 px-6 sm:px-8 py-12">
+        <div className="mx-auto w-full max-w-[1080px]">
+          <p className="text-ink-faint text-xs uppercase tracking-[0.22em] mb-3">
             For Ms. Mei-Ling Chen
           </p>
-          <h1 className="font-serif text-5xl leading-[1.05] mb-6">
+          <h1 className="font-display text-[clamp(2.25rem,4vw,3rem)] leading-[1.05] mb-4">
             Five quick questions to set your arrival.
           </h1>
-          <p className="text-ink-mute text-base leading-relaxed mb-12">
-            A short call with our pre-arrival voice. Room, bedding, morning
-            rhythm, anything we should know about food, and how publicly
-            you&rsquo;d like us to draw on what&rsquo;s already public about you. About
-            a minute.
+          <p className="text-ink-mute text-base leading-relaxed mb-10 max-w-[640px]">
+            A short call with our pre-arrival voice. Speak naturally — the
+            thread populates as you answer.
           </p>
 
-          {stage === "idle" && (
-            <button
-              type="button"
-              onClick={begin}
-              className="px-8 py-4 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-sm hover:bg-rose-darker transition-colors"
-            >
-              Begin briefing
-            </button>
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
+            {/* LEFT — five questions */}
+            <aside aria-label="Questions">
+              <p className="caps mb-4 text-thread-deep">What we&rsquo;ll ask</p>
+              <ol className="space-y-3">
+                {QUESTIONS.map((q, i) => {
+                  const done = doneKeys.has(q.key);
+                  const active = showQuestionPanel && activeIdx === i && !done;
+                  return (
+                    <li
+                      key={q.key}
+                      className={[
+                        "border p-4 transition-colors",
+                        done
+                          ? "border-rule bg-paper-soft"
+                          : active
+                            ? "border-thread bg-paper"
+                            : "border-rule bg-paper",
+                      ].join(" ")}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={[
+                            "shrink-0 w-6 h-6 inline-flex items-center justify-center text-[11px] font-medium border rounded-full transition-colors",
+                            done
+                              ? "border-thread-deep bg-thread-deep text-on-dark"
+                              : active
+                                ? "border-thread text-thread"
+                                : "border-rule text-ink-faint",
+                          ].join(" ")}
+                          aria-hidden="true"
+                        >
+                          {done ? "✓" : i + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="caps text-ink-faint mb-1">
+                            {q.label}
+                          </div>
+                          <div className="font-display text-lg leading-snug">
+                            {q.title}
+                          </div>
+                          <div className="text-[12px] text-ink-mute mt-1">
+                            {q.hint}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </aside>
 
-          {stage === "connecting" && (
-            <div className="font-serif italic text-ink-mute text-lg">
-              Connecting…
-            </div>
-          )}
-
-          {stage === "talking" && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 text-thread-deep">
-                <span className="relative inline-flex w-2.5 h-2.5">
-                  <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-70" />
-                  <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-thread" />
-                </span>
-                <span className="font-sans uppercase tracking-[0.22em] text-xs">
-                  Listening
-                </span>
-              </div>
-              {latestLine && (
-                <p className="font-serif italic text-2xl leading-snug text-ink-mute">
-                  &ldquo;{latestLine}&rdquo;
-                </p>
+            {/* RIGHT — control + transcript */}
+            <section aria-label="Voice intake" className="space-y-6">
+              {stage === "idle" && (
+                <div className="border border-rule bg-paper p-6 sm:p-8">
+                  <p className="caps text-thread-deep">Voice channel</p>
+                  <h2 className="font-display text-2xl mt-2 mb-4 leading-snug">
+                    Begin when you&rsquo;re ready.
+                  </h2>
+                  <p className="text-ink-mute text-sm leading-relaxed mb-6">
+                    Your browser will ask for microphone access — that&rsquo;s
+                    expected. Speak conversationally; the thread will weave in
+                    your answers as you go.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={begin}
+                    className="px-8 py-4 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-sm hover:bg-rose-darker transition-colors"
+                  >
+                    Begin briefing
+                  </button>
+                </div>
               )}
-              <button
-                type="button"
-                onClick={cancel}
-                className="text-ink-faint text-xs uppercase tracking-[0.18em] hover:text-thread-deep"
-              >
-                End early
-              </button>
-            </div>
-          )}
 
-          {stage === "threading" && (
-            <div className="space-y-3">
-              <div className="font-serif italic text-2xl text-ink-mute">
-                Threading the dossier…
-              </div>
-              <p className="text-ink-faint text-sm">
-                Your answers are being woven into the brief.
-              </p>
-            </div>
-          )}
+              {stage === "connecting" && (
+                <div className="border border-rule bg-paper p-6 sm:p-8 space-y-3">
+                  <div className="flex items-center gap-3 text-thread-deep">
+                    <span className="relative inline-flex w-2.5 h-2.5">
+                      <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-70" />
+                      <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-thread" />
+                    </span>
+                    <span className="caps">Opening the channel</span>
+                  </div>
+                  <p className="font-display italic text-ink-mute text-lg">
+                    Allow microphone access in the browser prompt, then the
+                    voice will speak first.
+                  </p>
+                </div>
+              )}
 
-          {stage === "done" && (
-            <div className="font-serif italic text-2xl text-thread-deep">
-              The thread is set. Taking you to the dashboard.
-            </div>
-          )}
+              {(stage === "talking" || stage === "threading" || stage === "done") && (
+                <div className="border border-rule bg-paper p-6 sm:p-8 space-y-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 text-thread-deep">
+                      <span className="relative inline-flex w-2.5 h-2.5">
+                        {stage === "talking" && (
+                          <span className="absolute inset-0 rounded-full bg-thread animate-ping opacity-70" />
+                        )}
+                        <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-thread" />
+                      </span>
+                      <span className="caps">
+                        {stage === "talking"
+                          ? "Listening"
+                          : stage === "threading"
+                            ? "Threading the dossier"
+                            : "Thread set"}
+                      </span>
+                    </div>
+                    {stage === "talking" && (
+                      <button
+                        type="button"
+                        onClick={cancel}
+                        className="text-ink-faint text-xs uppercase tracking-[0.18em] hover:text-thread-deep"
+                      >
+                        End early
+                      </button>
+                    )}
+                  </div>
 
-          {stage === "error" && (
-            <div className="space-y-4">
-              <div className="text-thread-deep font-sans uppercase tracking-[0.18em] text-xs">
-                Something went wrong
-              </div>
-              <p className="text-ink-mute text-sm">{error}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setError(null);
-                  setStage("idle");
-                  setConvId(null);
-                }}
-                className="px-6 py-3 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-xs hover:bg-rose-darker"
-              >
-                Try again
-              </button>
-            </div>
-          )}
+                  {/* Live transcript */}
+                  <div
+                    className="h-[300px] overflow-y-auto pr-2 space-y-3"
+                    aria-live="polite"
+                    aria-atomic="false"
+                  >
+                    {lastFewLines.length === 0 && (
+                      <p className="text-ink-faint text-sm italic">
+                        Waiting for the voice to speak first…
+                      </p>
+                    )}
+                    {lastFewLines.map((line) => (
+                      <div
+                        key={line.id}
+                        className={[
+                          "p-3 border-l-2 max-w-[95%]",
+                          line.speaker === "ai"
+                            ? "border-thread-deep bg-paper-canvas"
+                            : "border-brass bg-paper ml-auto",
+                        ].join(" ")}
+                      >
+                        <div className="caps text-[0.6rem] mb-1 text-ink-faint">
+                          {line.speaker === "ai" ? "Red Thread" : "You"}
+                        </div>
+                        <div
+                          className={[
+                            "text-sm leading-snug",
+                            line.speaker === "ai"
+                              ? "font-display italic text-ink"
+                              : "text-ink",
+                          ].join(" ")}
+                        >
+                          {line.speaker === "ai" ? `“${line.text}”` : line.text}
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={transcriptEndRef} />
+                  </div>
+
+                  {stage === "threading" && (
+                    <p className="font-display italic text-thread-deep text-base">
+                      Weaving your answers into the brief…
+                    </p>
+                  )}
+                  {stage === "done" && (
+                    <p className="font-display italic text-thread-deep text-base">
+                      The thread is set. Taking you to the dashboard.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {stage === "error" && (
+                <div className="border border-thread-deep bg-paper p-6 sm:p-8 space-y-4">
+                  <div className="caps text-thread-deep">
+                    Something went wrong
+                  </div>
+                  <p className="text-ink leading-relaxed">{error}</p>
+                  <details className="text-sm text-ink-mute">
+                    <summary className="cursor-pointer hover:text-ink">
+                      Troubleshooting
+                    </summary>
+                    <ul className="mt-2 ml-4 list-disc space-y-1">
+                      <li>
+                        Click the lock icon in your browser&rsquo;s address bar
+                        and ensure microphone permission is set to
+                        <strong> Allow </strong>for this site.
+                      </li>
+                      <li>
+                        On macOS, check System Settings → Privacy &amp; Security
+                        → Microphone — your browser must be enabled.
+                      </li>
+                      <li>
+                        Refresh the page if you&rsquo;ve just granted the
+                        permission.
+                      </li>
+                    </ul>
+                  </details>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError(null);
+                      setStage("idle");
+                      setConvId(null);
+                    }}
+                    className="px-6 py-3 bg-rose-deep text-on-dark font-sans uppercase tracking-[0.22em] text-xs hover:bg-rose-darker"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </section>
 
-      <footer className="border-t border-rule-soft">
+      <footer className="border-t border-rule">
         <div className="mx-auto w-full max-w-[1100px] px-8 py-4 text-ink-faint text-xs tracking-[0.18em] uppercase">
           Voice rendered by ElevenLabs · Reasoning by Claude · A Sense of Place, threaded
         </div>
