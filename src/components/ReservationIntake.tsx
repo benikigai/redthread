@@ -242,9 +242,9 @@ function IntakeForm({
               type="button"
               onClick={() => selectPreset(id)}
               className={[
-                "caps px-3 py-1.5 border hairline transition-colors text-[11px]",
+                "text-[11px] tracking-[0.22em] uppercase font-medium border hairline transition-colors px-3 py-1.5",
                 active
-                  ? "bg-rose-deep text-on-dark border-rose-deep"
+                  ? "bg-rose-deep text-paper border-rose-deep hover:bg-rose-darker"
                   : "bg-paper text-ink-mute hover:text-ink",
               ].join(" ")}
             >
@@ -312,7 +312,7 @@ function IntakeForm({
         <button
           type="button"
           onClick={onSubmit}
-          className="caps bg-rose-deep text-on-dark px-6 py-2.5 hover:bg-rose-darker transition-colors"
+          className="text-[11px] tracking-[0.22em] uppercase font-medium bg-rose-deep text-paper px-6 py-2.5 hover:bg-rose-darker transition-colors"
         >
           Begin briefing
         </button>

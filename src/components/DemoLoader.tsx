@@ -86,6 +86,9 @@ export async function streamAgent(
     previewPos?: number;
     /** Bypass DEMO_MODE — force a fully live agent run. */
     live?: boolean;
+    /** Surfaced to the research prompt to help disambiguate the guest in
+     *  web_search. Real product would also hash + index by domain. */
+    guestEmail?: string;
   },
   signal?: AbortSignal,
 ): Promise<void> {
