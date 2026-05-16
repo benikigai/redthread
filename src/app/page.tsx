@@ -7,6 +7,7 @@ import { DemoLoader } from "@/components/DemoLoader";
 import { DemoTrigger } from "@/components/DemoTrigger";
 import { Header } from "@/components/Header";
 import { InStayEventInjector } from "@/components/InStayEventInjector";
+import { ProblemTwoContext } from "@/components/ProblemTwoContext";
 import { ReservationIntake } from "@/components/ReservationIntake";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
@@ -29,6 +30,9 @@ export default function Home() {
           <ReservationIntake />
           {/* Read-only Hold-the-Thread band — guest controls this on /profile */}
           <DashboardDial />
+          {/* Demo callout — maps the dial + Discretion Layer to Problem 2
+              ("The Invisible Concierge"). Always visible. */}
+          <ProblemTwoContext />
           {/* The next two only render at POS 9-10 (Fully bespoke) — A2A weekly
               call transcript on top, the offers it produced below. */}
           <WeeklyAgentDialog />
