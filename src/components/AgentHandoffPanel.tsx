@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { streamAgent } from "@/components/DemoLoader";
 import { useDossier } from "@/lib/dossierStore";
 
-type Role = "threadkeeper" | "atlas";
+type Role = "threadkeeper" | "elias";
 
 interface Message {
   role: Role;
@@ -79,6 +79,8 @@ export function AgentHandoffPanel({
     runHandoff({
       guestId,
       propertyId,
+      endpoint: "/api/agent-handoff-live",
+      fallbackEndpoint: "/api/agent-handoff",
       signal: ac.signal,
       onTyping: (role) => setTyping(role),
       onMessage: (msg) => {
@@ -123,7 +125,7 @@ export function AgentHandoffPanel({
         <div>
           <div className="caps text-thread-deep">Agent handoff · live</div>
           <p className="text-sm text-ink-mute mt-1">
-            {phase === "streaming" && "Threadkeeper ↔ Atlas — negotiating consent and preferences."}
+            {phase === "streaming" && "Threadkeeper (Vercel) ↔ elias (Mac Mini) — live A2A over Cloudflare tunnel."}
             {phase === "agent" && "Manifest sealed. Threading the dossier on the new preferences…"}
             {phase === "done" && "Handoff complete. Dossier rendered from the negotiated manifest."}
             {phase === "error" && (error ?? "Handoff error.")}
@@ -169,7 +171,7 @@ function MessageBubble({ message }: { message: Message }) {
         <div
           className={`caps mb-1.5 ${isThreadkeeper ? "text-thread-deep" : "text-brass"}`}
         >
-          {isThreadkeeper ? "Threadkeeper · Rosewood" : "Atlas · Ms. Chen"}
+          {isThreadkeeper ? "Threadkeeper · Rosewood" : "elias · Ben's Mac Mini"}
         </div>
         <p className="text-sm text-ink leading-relaxed">{message.text}</p>
       </article>
@@ -192,7 +194,7 @@ function TypingIndicator({ role }: { role: Role }) {
         <div
           className={`caps mb-1 ${isThreadkeeper ? "text-thread-deep" : "text-brass"}`}
         >
-          {isThreadkeeper ? "Threadkeeper" : "Atlas"}
+          {isThreadkeeper ? "Threadkeeper" : "elias"}
         </div>
         <div className="flex items-center gap-1 h-4">
           <Dot delay={0} />
@@ -254,6 +256,8 @@ function ManifestCard({ manifest }: { manifest: ManifestPayload }) {
 interface RunHandoffOpts {
   guestId: string;
   propertyId: string;
+  endpoint: string;
+  fallbackEndpoint?: string;
   signal: AbortSignal;
   onTyping: (role: Role) => void;
   onMessage: (m: Message) => void;
@@ -264,7 +268,28 @@ interface RunHandoffOpts {
 
 async function runHandoff(opts: RunHandoffOpts) {
   try {
-    const res = await fetch("/api/agent-handoff", {
+    await runStream(opts.endpoint, opts);
+  } catch (err) {
+    if ((err as { name?: string })?.name === "AbortError") return;
+    // Live endpoint failed — fall back to scripted so the demo doesn't die.
+    if (opts.fallbackEndpoint) {
+      try {
+        await runStream(opts.fallbackEndpoint, opts);
+        return;
+      } catch (fallbackErr) {
+        if ((fallbackErr as { name?: string })?.name === "AbortError") return;
+        const msg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+        opts.onError(msg);
+        return;
+      }
+    }
+    const msg = err instanceof Error ? err.message : String(err);
+    opts.onError(msg);
+  }
+}
+
+async function runStream(endpoint: string, opts: RunHandoffOpts) {
+  const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         Accept: "text/event-stream",
@@ -299,15 +324,16 @@ async function runHandoff(opts: RunHandoffOpts) {
             opts.onManifest(frame.payload as ManifestPayload);
           } else if (frame.type === "complete" && frame.payload?.overrides) {
             await opts.onComplete(frame.payload.overrides);
+          } else if (frame.type === "error") {
+            const m = (frame.payload as { message?: string } | undefined)?.message ?? "handoff error";
+            throw new Error(m);
           }
-        } catch {
-          // skip malformed
+        } catch (parseErr) {
+          // If we threw with a real error message, propagate it; ignore JSON noise.
+          if (parseErr instanceof Error && parseErr.message && parseErr.message !== "handoff error") {
+            throw parseErr;
+          }
         }
       }
     }
-  } catch (err) {
-    if ((err as { name?: string })?.name === "AbortError") return;
-    const msg = err instanceof Error ? err.message : String(err);
-    opts.onError(msg);
-  }
 }
