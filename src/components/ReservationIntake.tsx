@@ -25,6 +25,9 @@ interface Reservation {
   flightNumber: string;
   checkIn: string;
   checkOut: string;
+  /** Guest's Hold-the-Thread setting (0-100 POS). Gates which web research
+   *  steps run in /api/arrival-chain. */
+  previewPos?: number;
 }
 
 type PresetId = "ben" | "lin-chen";
@@ -111,6 +114,7 @@ export function ReservationIntake() {
     // Honor the user's inline edits but anchor guestId from the selected
     // preset — that's what reads from data/guests/<id>.json (the "right
     // database") server-side.
+    const holdPosLocal = useDossier.getState().activeGuestPos;
     const reservation: Reservation & { departureDate: string } = {
       guestId: presetId,
       guestName,
@@ -120,6 +124,7 @@ export function ReservationIntake() {
       checkIn,
       checkOut,
       propertyId,
+      previewPos: holdPosLocal,
     };
     const store = useDossier.getState();
     store.clear();
@@ -458,6 +463,7 @@ async function streamArrivalChain(reservation: Reservation, signal: AbortSignal)
       propertyId: reservation.propertyId,
       flightNumber: reservation.flightNumber,
       checkIn: reservation.checkIn,
+      previewPos: reservation.previewPos,
     }),
     signal,
   });
