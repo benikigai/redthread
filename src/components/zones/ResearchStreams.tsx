@@ -157,9 +157,7 @@ export function ResearchStreams() {
               )}
 
               {s.result && (
-                <div className="mt-1.5 text-sm text-ink leading-snug">
-                  {s.result}
-                </div>
+                <ResultList result={s.result} />
               )}
             </li>
           );
@@ -202,6 +200,30 @@ function formatArgs(args: unknown): string | null {
       return `${k}: ${JSON.stringify(v)}`;
     })
     .join(" · ");
+}
+
+function ResultList({ result }: { result: string }) {
+  // Backend may emit multi-line summaries (newline-separated). One line →
+  // single text row; many lines → bulleted list with the same ink color.
+  const lines = result.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 1) {
+    return (
+      <div className="mt-1.5 text-sm text-ink leading-snug">{lines[0]}</div>
+    );
+  }
+  return (
+    <ul className="mt-2 space-y-1">
+      {lines.map((line, i) => (
+        <li
+          key={i}
+          className="text-[13px] text-ink leading-snug flex items-start gap-1.5"
+        >
+          <span className="text-thread shrink-0 mt-[7px] w-1 h-1 rounded-full bg-thread" />
+          <span>{line}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function StatusBadge({ status }: { status: ToolCallTrace["status"] }) {

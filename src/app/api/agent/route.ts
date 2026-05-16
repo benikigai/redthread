@@ -476,25 +476,35 @@ function formatSSE(event: SSEEvent): Uint8Array {
  *  · TechCrunch: 'OpenClaw raises…' · +3 more" — so Zone I shows real
  *  findings instead of just "5 results". */
 function summarizeWebSearchResults(content: unknown): string {
-  if (!Array.isArray(content)) return "0 results";
+  if (!Array.isArray(content)) return "no results";
   const results = content as Array<{ url?: string; title?: string; type?: string }>;
-  if (results.length === 0) return "0 results";
+  if (results.length === 0) return "no results";
 
-  const labeled = results
+  // Up to 4 result lines, each "Source — Title" or "host — Title". Join
+  // with newlines so the frontend can render one per row. Anything more
+  // than 4 collapses into a "+N more" trailer line.
+  const lines = results
+    .slice(0, 4)
     .map((r) => {
       const title = (r.title ?? "").trim();
       const host = hostnameOf(r.url ?? "");
-      const source = friendlySource(host);
-      if (!title) return source || host || "result";
-      const titleShort = title.length > 56 ? `${title.slice(0, 53)}…` : title;
-      return source ? `${source}: “${titleShort}”` : titleShort;
+      const source = friendlySource(host) || host;
+      const titleShort = title
+        ? title.length > 72
+          ? `${title.slice(0, 69)}…`
+          : title
+        : "";
+      if (source && titleShort) return `${source} — ${titleShort}`;
+      if (titleShort) return titleShort;
+      if (source) return source;
+      return "result";
     })
     .filter(Boolean);
 
-  if (labeled.length === 0) return `${results.length} results`;
-  const head = labeled.slice(0, 2).join(" · ");
-  const rest = labeled.length - 2;
-  return rest > 0 ? `${head} · +${rest} more` : head;
+  if (lines.length === 0) return `${results.length} results`;
+  const rest = results.length - lines.length;
+  if (rest > 0) lines.push(`+${rest} more result${rest === 1 ? "" : "s"}`);
+  return lines.join("\n");
 }
 
 function hostnameOf(url: string): string {
