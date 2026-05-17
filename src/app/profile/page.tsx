@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
+import { streamAgent } from "@/components/DemoLoader";
 import {
   BAND_LABEL,
   BAND_BENEFIT,
@@ -89,26 +90,32 @@ export default function ProfilePage() {
     const snapshot = value;
     const newPos = uiToPos(snapshot);
     try {
-      // 1. Push the new saved value to the shared store FIRST. The dashboard's
-      //    DashboardDial subscribes via zustand and will re-render live the
-      //    moment this lands — no page reload needed, no manual notification.
+      // 1. Write the new saved POS to the shared store. The dashboard's
+      //    DashboardDial subscribes via zustand and re-renders the moment
+      //    this lands — no page reload needed.
       setActiveGuestPos(newPos);
       setSavedUi(snapshot);
 
-      // 2. Round-trip through /api/agent (preview) so the demo can immediately
-      //    show what the dossier looks like at the new level. Best-effort —
-      //    we don't undo the saved value if the preview fetch fails.
-      await fetch("/api/agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // 2. If the briefing has already been run on the dashboard, re-stream
+      //    /api/agent at the new POS so the zones 1/2/3 actually repaint at
+      //    the new band. Fire-and-forget — when the guest navigates back to
+      //    the dashboard, the new dossier is already loaded (or streaming).
+      //    Without this, the dial moves but the cards stay stuck on the
+      //    previous band's content.
+      const store = useDossier.getState();
+      const propertyId = store.activeProperty;
+      const briefingHasRun = !!store.dossier || !!store.arrivalReservation;
+      if (briefingHasRun) {
+        store.startRun("manual");
+        streamAgent({
           guestId: GUEST.id,
-          propertyId: "sand-hill",
+          propertyId,
           previewPos: newPos,
-        }),
-      }).catch(() => {
-        // network failure doesn't roll back the user's intent
-      });
+          live: true,
+        }).catch(() => {
+          // network failure doesn't roll back the user's intent
+        });
+      }
 
       setStatus("saved");
     } catch {
