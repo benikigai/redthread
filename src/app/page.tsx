@@ -69,7 +69,15 @@ export default function Home() {
             <span className="text-on-dark/55"> · built for the Affluential Explorer</span>
           </div>
           <div className="text-right text-on-dark/55">
-            Hospitality 2030 · Rosewood Sand Hill
+            <a
+              href="https://cerebralvalley.ai/e/rosewood-hospitality-2030/details"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-b border-current hover:text-thread transition-colors"
+            >
+              Hospitality 2030
+            </a>{" "}
+            · Rosewood Sand Hill
           </div>
         </div>
       </footer>
