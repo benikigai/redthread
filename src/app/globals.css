@@ -58,6 +58,12 @@
   --font-han: var(--font-noto-serif-sc);
 }
 
+html {
+  /* Demo-screen legibility: bump root from default 16px → 17px so every
+   * rem-based size (almost everything in Tailwind) scales up ~6%. Keeps
+   * the editorial register; no layout changes required. */
+  font-size: 17px;
+}
 html, body { background: var(--paper-canvas); color: var(--ink); }
 body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
@@ -72,8 +78,9 @@ body {
 /* Editorial micro-utilities */
 .font-display { font-family: var(--font-cormorant), Georgia, serif; }
 .caps {
-  font-size: 0.7rem;
-  letter-spacing: 0.26em;
+  /* Bumped 0.7 → 0.78 for demo-screen legibility. Still uppercase + spaced. */
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--ink-mute);
   font-weight: 500;
