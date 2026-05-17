@@ -280,6 +280,9 @@ function IntakeInner() {
       new Promise<void>((resolve) => {
         const audio = new Audio(url);
         demoAudioRef.current = audio;
+        // 1.3× speech rate — natural-sounding while shaving ~25% off the
+        // demo. Keeps both voices intelligible without sounding chipmunked.
+        audio.playbackRate = 1.3;
         audio.onended = () => resolve();
         audio.onerror = () => resolve();
         void audio.play().catch(() => resolve());
@@ -314,8 +317,8 @@ function IntakeInner() {
       }
 
       await playOne(audioUrls[i]);
-      // small natural pause
-      if (!demoCancelRef.current) await new Promise((r) => setTimeout(r, 320));
+      // tighter beat between lines — demo pacing trumps natural rhythm
+      if (!demoCancelRef.current) await new Promise((r) => setTimeout(r, 120));
     }
 
     audioUrls.forEach((u) => URL.revokeObjectURL(u));
