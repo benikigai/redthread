@@ -217,7 +217,9 @@ function bandReduceFixture(d: Dossier, pos: number): Dossier {
     );
   }
 
-  // UI 5: drop remaining hook(s).
+  // UI 5: drop remaining hook(s) + drop the audio/silence preference note
+  // from handleWithCare so 5→6 shows a visible step even when the fixture
+  // has no remaining hooks to suppress.
   if (ui <= 5) {
     for (const h of cloned.conversationHooks ?? []) {
       const label = typeof h === "string" ? h : "hook";
@@ -227,6 +229,16 @@ function bandReduceFixture(d: Dossier, pos: number): Dossier {
       });
     }
     cloned.conversationHooks = [];
+    const hwc = cloned.handleWithCare ?? [];
+    const audioIdx = hwc.findIndex((s) => /audio|silence|music/i.test(s));
+    if (audioIdx >= 0) {
+      const removed = hwc[audioIdx];
+      cloned.handleWithCare = [...hwc.slice(0, audioIdx), ...hwc.slice(audioIdx + 1)];
+      extra.push({
+        signal: `handle-with-care: ${removed.slice(0, 60)}`,
+        reason: "POS<60 — ambient/audio preference removed from staff brief",
+      });
+    }
   }
 
   // UI 4: strip amenity sourcing reasoning (keep the amenity itself).
