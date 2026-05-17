@@ -107,11 +107,13 @@ export default function ProfilePage() {
       const briefingHasRun = !!store.dossier || !!store.arrivalReservation;
       if (briefingHasRun) {
         store.startRun("manual");
+        // No live:true — the fixture path with per-tick band reduction is
+        // what makes the dial repaint instantly. live:true would force the
+        // slow Claude pipeline.
         streamAgent({
           guestId: GUEST.id,
           propertyId,
           previewPos: newPos,
-          live: true,
         }).catch(() => {
           // network failure doesn't roll back the user's intent
         });

@@ -135,48 +135,179 @@ function bandFor(pos: number): Band {
 }
 
 /** Demo-only: reduce a fixture Dossier to simulate what the Discretion Layer
- *  would emit at the target POS. Mirrors the band logic in
- *  DISCRETION_LAYER_SYSTEM (src/lib/prompts.ts) closely enough for the dial
- *  to read as live without re-invoking Claude on every slider tick. */
+ *  would emit at the target POS. Per-tick (0..10) ladder so judges can
+ *  watch one signal disappear per click as they drag the dial down.
+ *
+ *  Ladder (descending from POS 100 → 0, each tick removes ONE more signal):
+ *    10 (100) full — no reduction
+ *     9 ( 90) drop A2A / cross-property continuity reasoning
+ *     8 ( 80) drop recent-press hook (the more public one)
+ *     7 ( 70) drop calendar-adjacency itinerary entry
+ *     6 ( 60) drop personal-history hook
+ *     5 ( 50) drop remaining hook (any kind)
+ *     4 ( 40) strip amenity sourcing reasoning (keep amenity)
+ *     3 ( 30) drop full itinerary (keeps room + amenity)
+ *     2 ( 20) downgrade amenity to generic "Welcome tea service"
+ *     1 ( 10) drop room scent + lighting personalization
+ *     0 (  0) vault — room defaults only (no temp, no bedding logged) */
 function bandReduceFixture(d: Dossier, pos: number): Dossier {
-  const band = bandFor(pos);
-  if (band === "full") return d;
+  const ui = Math.max(0, Math.min(10, Math.round(pos / 10)));
+  if (ui >= 10) return d;
 
   const cloned: Dossier = JSON.parse(JSON.stringify(d));
-  const extraSuppressed: { signal: string; reason: string }[] = [];
+  const extra: { signal: string; reason: string }[] = [];
 
-  if (band === "minimal") {
-    for (const h of cloned.conversationHooks ?? []) {
-      const label = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "hook";
-      extraSuppressed.push({
+  // Helper: pop the last hook off and log it.
+  const dropOneHook = (reason: string, predicate?: (h: string) => boolean) => {
+    const hooks = cloned.conversationHooks ?? [];
+    let idx = -1;
+    if (predicate) {
+      idx = hooks.findIndex((h) => predicate(typeof h === "string" ? h : ""));
+    }
+    if (idx < 0 && hooks.length > 0) idx = hooks.length - 1;
+    if (idx >= 0) {
+      const removed = hooks[idx];
+      const label = typeof removed === "string" ? removed : "hook";
+      cloned.conversationHooks = [...hooks.slice(0, idx), ...hooks.slice(idx + 1)];
+      extra.push({
         signal: `conversation-hook: ${String(label).slice(0, 60)}`,
-        reason: "Below POS standard floor — minimal band suppresses all conversation hooks",
+        reason,
+      });
+    }
+  };
+
+  // UI 9: drop cross-property / A2A continuity reasoning.
+  if (ui <= 9) {
+    const r = cloned.actuators.roomState.reasoning ?? [];
+    const before = r.length;
+    cloned.actuators.roomState.reasoning = r.filter(
+      (s) => !/cross-property|A2A|continuity|Hong Kong precedent/i.test(s),
+    );
+    if (cloned.actuators.roomState.reasoning.length < before) {
+      extra.push({ signal: "cross-property-continuity", reason: "POS<100 — A2A/cross-property reasoning withheld from staff log" });
+    }
+  }
+
+  // UI 8: drop a press-flavored hook (LinkedIn / TechCrunch / fundraise / press).
+  if (ui <= 8) {
+    dropOneHook(
+      "POS<90 — recent public-press reference suppressed",
+      (s) => /linkedin|techcrunch|series|press|keynote|announce|raise|funding|launch/i.test(s),
+    );
+  }
+
+  // UI 7: drop one itinerary entry (the calendar-adjacency one — last entry).
+  if (ui <= 7) {
+    const itin = cloned.actuators.itinerary ?? [];
+    if (itin.length > 0) {
+      const removed = itin[itin.length - 1];
+      cloned.actuators.itinerary = itin.slice(0, -1);
+      extra.push({
+        signal: `itinerary: ${(removed.title ?? "entry").slice(0, 60)}`,
+        reason: "POS<80 — calendar-adjacency itinerary entry suppressed",
+      });
+    }
+  }
+
+  // UI 6: drop a personal-history hook.
+  if (ui <= 6) {
+    dropOneHook(
+      "POS<70 — personal-history hook suppressed",
+      (s) => /(family|wife|husband|partner|son|daughter|child|kids|wedding|engagement|anniversary|birthday)/i.test(s),
+    );
+  }
+
+  // UI 5: drop remaining hook(s).
+  if (ui <= 5) {
+    for (const h of cloned.conversationHooks ?? []) {
+      const label = typeof h === "string" ? h : "hook";
+      extra.push({
+        signal: `conversation-hook: ${String(label).slice(0, 60)}`,
+        reason: "POS<60 — all conversation hooks suppressed",
       });
     }
     cloned.conversationHooks = [];
-    cloned.handleWithCare = [
-      "Guest is privacy-conscious. Standard luxury service. No personalized references.",
-    ];
-  } else {
-    // STANDARD: drop hooks that read as personal/recent-life, keep professional.
-    const before = cloned.conversationHooks ?? [];
-    const after = before.filter((h) => {
-      const text = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "";
-      const personal = /(family|wife|husband|partner|son|daughter|child|kids|wedding|engagement|breakup|illness|diagnosis|recovery|therapy|treatment)/i;
-      return !personal.test(text);
-    });
-    for (const h of before) {
-      if (after.includes(h)) continue;
-      const label = typeof h === "string" ? h : (h as { hook?: string }).hook ?? "hook";
-      extraSuppressed.push({
-        signal: `conversation-hook: ${String(label).slice(0, 60)}`,
-        reason: "Standard band — personal/non-professional reference removed",
-      });
-    }
-    cloned.conversationHooks = after;
   }
 
-  cloned.suppressed = [...(cloned.suppressed ?? []), ...extraSuppressed];
+  // UI 4: strip amenity sourcing reasoning (keep the amenity itself).
+  if (ui <= 4) {
+    if (cloned.actuators.welcomeAmenity.reasoning) {
+      extra.push({
+        signal: "amenity-sourcing-reasoning",
+        reason: "POS<50 — amenity history/sourcing reasoning withheld",
+      });
+      cloned.actuators.welcomeAmenity.reasoning = "Held in confidence per guest preference.";
+    }
+  }
+
+  // UI 3: drop full itinerary (anticipated experiences).
+  if (ui <= 3) {
+    const itin = cloned.actuators.itinerary ?? [];
+    for (const entry of itin) {
+      extra.push({
+        signal: `itinerary: ${(entry.title ?? "entry").slice(0, 60)}`,
+        reason: "POS<40 — anticipated itinerary suppressed",
+      });
+    }
+    cloned.actuators.itinerary = [];
+  }
+
+  // UI 2: downgrade welcome amenity to generic.
+  if (ui <= 2) {
+    extra.push({
+      signal: `welcome-amenity: ${cloned.actuators.welcomeAmenity.name}`,
+      reason: "POS<30 — history-sourced amenity downgraded to generic",
+    });
+    cloned.actuators.welcomeAmenity = {
+      ...cloned.actuators.welcomeAmenity,
+      name: "Welcome tea service",
+      reasoning: "Generic property amenity. No history reference.",
+    };
+  }
+
+  // UI 1: drop room scent + lighting personalization.
+  if (ui <= 1) {
+    const rs = cloned.actuators.roomState;
+    if (rs.scent && rs.scent !== "neutral") {
+      extra.push({ signal: `room-scent: ${rs.scent}`, reason: "POS<20 — scent personalization suppressed" });
+      rs.scent = "neutral";
+    }
+    if (rs.lighting && rs.lighting !== "ambient") {
+      extra.push({ signal: `room-lighting: ${rs.lighting}`, reason: "POS<20 — ambient/lighting personalization suppressed" });
+      rs.lighting = "ambient";
+    }
+    rs.reasoning = ["Loosely held — only allergy/dietary safety items retained."];
+  }
+
+  // UI 0: vault — drop temp + bedding personalization. Default room only.
+  if (ui <= 0) {
+    const rs = cloned.actuators.roomState;
+    if (typeof rs.climateC === "number") {
+      extra.push({ signal: `room-temp: ${rs.climateC}°C`, reason: "POS=0 — vault: temperature reset to property default" });
+      rs.climateC = 22;
+    }
+    if (rs.bedding && !/standard/i.test(rs.bedding)) {
+      extra.push({ signal: `room-bedding: ${rs.bedding}`, reason: "POS=0 — vault: bedding reset to property standard" });
+      rs.bedding = "standard linen, down pillows";
+    }
+    rs.reasoning = ["Vault mode. No personalization logged to staff."];
+    cloned.handleWithCare = [
+      "Vault mode. Guest has asked for a fresh-eye welcome. Greet as a first-time arrival; rely on the room defaults only.",
+    ];
+  } else if (ui <= 3) {
+    // Loosely held band — retain only the safety items in handleWithCare.
+    const before = cloned.handleWithCare ?? [];
+    const safety = before.filter((s) => /aller|dietary|vegetarian|vegan|pescatarian|tree-nut|peanut|gluten|kosher|halal/i.test(s));
+    for (const s of before) {
+      if (safety.includes(s)) continue;
+      extra.push({ signal: `handle-with-care: ${s.slice(0, 60)}`, reason: "POS<40 — non-safety care note suppressed" });
+    }
+    cloned.handleWithCare = safety.length > 0
+      ? safety
+      : ["Loosely held. Generic luxury service; honour any stated allergy or dietary requirement."];
+  }
+
+  cloned.suppressed = [...(cloned.suppressed ?? []), ...extra];
   return cloned;
 }
 
@@ -553,15 +684,14 @@ export async function POST(req: Request): Promise<Response> {
   const wantsSSE =
     (req.headers.get("accept") ?? "").toLowerCase().includes("text/event-stream");
 
-  // Demo mode — replay fixture, optionally band-reduced for previewPos
-  if (process.env.DEMO_MODE === "1" && !body.live) {
-    const fixture = loadFixture(body.guestId, body.propertyId);
-    if (!fixture) {
-      return Response.json(
-        { error: `No fixture for ${body.guestId} × ${body.propertyId}` },
-        { status: 503 },
-      );
-    }
+  // Demo mode — replay fixture, optionally band-reduced for previewPos.
+  // Defaults to using fixture when one exists for this guest/property so the
+  // dial repaints instantly per tick. body.live=true forces the live Claude
+  // pipeline (slower; for non-fixture guests).
+  const fixture = loadFixture(body.guestId, body.propertyId);
+  const useFixture =
+    !body.live && (process.env.DEMO_MODE === "1" || fixture !== null);
+  if (useFixture && fixture) {
     // Apply voice-intake overrides first (substantive prefs land on the base),
     // then band-reduce per POS (privacy filtering is the last layer).
     const withOverrides = body.overrides

@@ -48,13 +48,21 @@ You receive: a candidate Dossier JSON + the guest's Privacy Openness Score (POS,
 
 Your task: filter the dossier to respect the guest's privacy posture. Log every removal or alteration into the suppressed[] array with a one-line reason.
 
-## POS Bands
+## POS Ladder (per-tick — every 10 points removes one more signal)
 
-MINIMAL (0–30): Replace conversationHooks with []. Strip all press references and inferred purpose from bio. Set handleWithCare to: ["Guest is privacy-conscious. Standard luxury service. No personalized references."]
+POS 100 — full pass-through. Still scrub anything surveillance-y.
+POS 90  — drop cross-property / A2A continuity reasoning from actuators.roomState.reasoning. Keep the values themselves.
+POS 80  — drop any conversationHook referencing recent public press (LinkedIn / TechCrunch / Series / keynote / launch).
+POS 70  — drop the calendar-adjacency itinerary entry (one personal-calendar item). Keep room + amenity.
+POS 60  — drop any conversationHook referencing family / partner / children / wedding / personal anniversary.
+POS 50  — drop ALL remaining conversationHooks. Empty array.
+POS 40  — strip welcomeAmenity.reasoning to a single line ("Held in confidence per guest preference."). Keep the amenity itself.
+POS 30  — clear actuators.itinerary (empty array). Keep room + amenity. handleWithCare retains ONLY allergy/dietary safety items.
+POS 20  — downgrade welcomeAmenity.name to "Welcome tea service" with generic reasoning. handleWithCare retains ONLY allergy/dietary safety.
+POS 10  — set roomState.scent = "property default" and roomState.lighting = "property default". roomState.reasoning collapses to one line ("Loosely held — only allergy/dietary safety items retained."). handleWithCare retains ONLY safety items.
+POS 0   — vault: also reset roomState.climateC to 22, roomState.bedding to "property standard", roomState.reasoning to ["Vault mode. No personalization logged to staff."], and handleWithCare to ["Vault mode. Guest has asked for a fresh-eye welcome. Greet as a first-time arrival; rely on the room defaults only."]
 
-STANDARD (31–69): Keep conversationHooks ONLY if they reference professional accomplishments. Strip anything about family, health, romantic life, or recent personal events.
-
-FULL (70–100): Pass through, but still strip any item that would feel surveillance-y if the guest read it. Test: "Would this guest be comfortable knowing staff knows this?"
+Apply ALL rules at-and-below the guest's POS. (Example: POS 50 also applies POS 60, 70, 80, 90, 100 floors.) Allergy and dietary safety items in handleWithCare are NEVER suppressed at any level — they protect the guest, not the brand.
 
 ## Suppressed Log
 
