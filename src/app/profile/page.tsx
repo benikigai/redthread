@@ -197,11 +197,11 @@ export default function ProfilePage() {
               className="mt-2 text-[22px] leading-tight text-ink"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
-              Five quick questions, in your voice.
+              Three quick questions, in your voice.
             </h2>
             <p className="mt-2 text-[14px] text-ink-mute max-w-md leading-relaxed">
-              Room, bedding, morning rhythm, food, and how publicly we may draw
-              on what&rsquo;s known about you. About a minute.
+              Room, food, and how publicly we may draw on what&rsquo;s known
+              about you. Under a minute.
             </p>
           </div>
           <Link

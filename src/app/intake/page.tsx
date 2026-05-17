@@ -5,7 +5,7 @@
 // When the conversation ends, the client hands the conversationId to
 // /api/voice/intake/complete, which pulls the extraction from ElevenLabs.
 //
-// UI surfaces the five questions the guest will be asked alongside a live
+// UI surfaces the three questions the guest will be asked alongside a live
 // transcript so they can see what's being asked, follow along, and feel the
 // thread populate. If the mic / network falls over, the visible scaffolding
 // stays — they still know what we'd ask.
@@ -29,13 +29,9 @@ const GUEST_VOICE_ID =
   process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_GUEST || "9BWtsMINqrJLrRacOk9x"; // Aria
 
 const DEMO_DIALOG: { speaker: "ai" | "you"; text: string; questionKey?: string }[] = [
-  { speaker: "ai", text: "Welcome back, Mr. Shyong. Five quick things, in your voice." },
+  { speaker: "ai", text: "Welcome back, Mr. Shyong. Three quick things, in your voice." },
   { speaker: "ai", text: "First, the room — how would you like it set?", questionKey: "room" },
   { speaker: "you", text: "Twenty Celsius. Lights low when I arrive. Neutral scent, please." },
-  { speaker: "ai", text: "Bedding — any preference?", questionKey: "bedding" },
-  { speaker: "you", text: "Down-free pillows, same as last time." },
-  { speaker: "ai", text: "And your morning rhythm?", questionKey: "morning" },
-  { speaker: "you", text: "A ride first — the Bici provisioning was right. Then a quiet vegetarian breakfast." },
   { speaker: "ai", text: "Anything we should know about food?", questionKey: "dietary" },
   { speaker: "you", text: "Vegetarian. Chaat got it right last visit — I trust the kitchen." },
   { speaker: "ai", text: "And how publicly may we draw on what's already known about you?", questionKey: "privacy" },
@@ -48,8 +44,6 @@ const DEMO_DIALOG: { speaker: "ai" | "you"; text: string; questionKey?: string }
 // would extract from a real ElevenLabs conversation.
 const DEMO_OVERRIDES = {
   roomTempC: 20,
-  bedding: "down-free" as const,
-  morningRitual: "morning ride with Bici provisioning, then a quiet vegetarian breakfast",
   dietary: "vegetarian",
   privacyPosture: "standard" as const,
 };
@@ -78,20 +72,6 @@ const QUESTIONS = [
     title: "How would you like your room set?",
     hint: "Temperature, lighting, scent.",
     match: /(temperatur|room|degree|warm|cool|°|lighting|scent)/i,
-  },
-  {
-    key: "bedding",
-    label: "Bedding",
-    title: "Any bedding preferences?",
-    hint: "Down, down-free, memory.",
-    match: /(bed|pillow|down|memory|allerg)/i,
-  },
-  {
-    key: "morning",
-    label: "Morning",
-    title: "What's your morning rhythm?",
-    hint: "Coffee, run, swim, slow start.",
-    match: /(morning|wake|breakfast|coffee|run|swim|hike|spa)/i,
   },
   {
     key: "dietary",
@@ -453,7 +433,7 @@ function IntakeInner() {
             For Mr. Benjamin Shyong
           </p>
           <h1 className="font-display text-[clamp(2.25rem,4vw,3rem)] leading-[1.05] mb-4">
-            Five quick questions to set your arrival.
+            Three quick questions to set your arrival.
           </h1>
           <p className="text-ink-mute text-base leading-relaxed mb-10 max-w-[640px]">
             A short call with our pre-arrival voice. Speak naturally — the
@@ -461,7 +441,7 @@ function IntakeInner() {
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
-            {/* LEFT — five questions */}
+            {/* LEFT — three questions */}
             <aside aria-label="Questions">
               <p className="caps mb-4 text-thread-deep">What we&rsquo;ll ask</p>
               <ol className="space-y-3">
