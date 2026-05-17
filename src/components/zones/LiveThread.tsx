@@ -75,20 +75,28 @@ function checkInBeats(dossier: Dossier | null): Beat[] {
 }
 
 function stayBeats(dossier: Dossier | null, inStay: InStayEvent[]): Beat[] {
+  // Live signals (user clicks in InStayEventInjector) come first — they are
+  // the demo's interactive proof and must always be visible. Itinerary fills
+  // any remaining slots. Cap at 6 so the column doesn't dwarf its neighbors.
+  const MAX = 6;
+  const fromEvents: Beat[] = inStay
+    .slice()
+    .reverse()
+    .map((e) => ({
+      t: formatClock(e.at),
+      note: e.detail ? `${e.label} · ${e.detail}` : e.label,
+    }));
+  const remaining = Math.max(0, MAX - fromEvents.length);
   const fromItinerary: Beat[] =
-    dossier?.actuators.itinerary.slice(0, 3).map((it) => ({
+    dossier?.actuators.itinerary.slice(0, remaining).map((it) => ({
       t: it.time ?? it.timeOfDay,
       note: `${it.title}${it.vendorOrPlace ? ` · ${it.vendorOrPlace.split("·")[0].trim()}` : ""}`,
     })) ?? [];
-  const fromEvents: Beat[] = inStay.map((e) => ({
-    t: formatClock(e.at),
-    note: e.detail ? `${e.label} · ${e.detail}` : e.label,
-  }));
-  const combined = [...fromItinerary, ...fromEvents];
+  const combined = [...fromEvents, ...fromItinerary];
   if (combined.length === 0) {
     return [{ t: "—", note: "Itinerary will populate here" }];
   }
-  return combined.slice(0, 4);
+  return combined.slice(0, MAX);
 }
 
 function checkoutBeats(reservation: ReturnType<typeof useDossier.getState>["arrivalReservation"]): Beat[] {
