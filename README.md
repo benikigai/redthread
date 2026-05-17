@@ -98,6 +98,28 @@ A second "Play demo" path on `/intake` sidesteps Convai entirely and plays a 12-
 
 ---
 
+## Hold the Thread — per-tick discretion
+
+The 0–10 dial is not a 3-band coarse switch. It's an **11-step descending ladder**: each adjacent tick drops one specific signal from the dossier so the judge can drag from 6 → 5 → 4 and watch the brief and actuators shrink one line at a time. Every removal lands in `dossier.suppressed[]` with the reason, so the audit log shows exactly what the band cost.
+
+| UI | POS | What gets removed at this tick |
+|---|---|---|
+| 10 | 100 | — full dossier, no reduction |
+| 9 | 90 | A2A / cross-property continuity reasoning |
+| 8 | 80 | Recent-press hook (LinkedIn / TechCrunch / fundraise / keynote) |
+| 7 | 70 | Calendar-adjacency itinerary entry |
+| 6 | 60 | Personal-history hook (family / anniversary / partner) |
+| 5 | 50 | Remaining conversation hooks |
+| 4 | 40 | Amenity sourcing reasoning (amenity itself kept) |
+| 3 | 30 | Full itinerary (room + amenity kept) |
+| 2 | 20 | Amenity downgraded to generic "Welcome tea service" |
+| 1 | 10 | Room scent + lighting personalization |
+| 0 | 0 | Vault — room defaults only (no temperature, no bedding logged) |
+
+The ladder is implemented twice, in lockstep: `bandReduceFixture` in `src/app/api/agent/route.ts` for the fast fixture path that powers slider repaints, and the `DISCRETION_LAYER_SYSTEM` prompt in `src/lib/prompts.ts` for the live Claude Haiku 4.5 path. When the guest moves the dial on `/profile` and saves, `/api/agent` re-streams with the new `previewPos` → fixture path applies the ladder per-tick → zones 1/2/3 repaint without burning a Claude call. `body.live=true` forces the slow live path when you want to demo the real Haiku reasoning.
+
+---
+
 ## ElevenLabs integration
 
 - **API key**: `ELEVENLABS_API_KEY` (workspace-level)
@@ -123,7 +145,7 @@ A second "Play demo" path on `/intake` sidesteps Convai entirely and plays a 12-
   - `flight_lookup` — custom; AviationStack with deterministic mock fallback
 - **Prompt structure** (`src/lib/prompts.ts`):
   - `RESEARCH_AGENT_SYSTEM` — instructs Opus to verify identity, research in parallel (LinkedIn / X / company / email-domain), synthesize a Dossier wrapped in `<dossier>` tags
-  - `DISCRETION_LAYER_SYSTEM` — instructs Haiku to filter the dossier per POS band (minimal 0–30 / standard 31–69 / full 70–100) and log every redaction into `suppressed[]`
+  - `DISCRETION_LAYER_SYSTEM` — instructs Haiku to filter the dossier along the **11-step Hold-the-Thread ladder** (see [Hold the Thread — per-tick discretion](#hold-the-thread--per-tick-discretion) above) and log every removal into `suppressed[]` with the tick that caused it
 - **Streaming**: `messages.stream` for token-by-token reasoning (arrival chain web research, A2A turns); `messages.create` for the tool-use loop in the main agent
 
 ## Other integrations
