@@ -77,7 +77,15 @@ export default function Home() {
             >
               Hospitality 2030
             </a>{" "}
-            · Rosewood Sand Hill
+            ·{" "}
+            <a
+              href="https://www.rosewoodhotels.com/en/sand-hill-menlo-park"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-b border-current hover:text-thread transition-colors"
+            >
+              Rosewood Sand Hill
+            </a>
           </div>
         </div>
       </footer>
