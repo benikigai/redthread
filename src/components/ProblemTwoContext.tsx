@@ -1,18 +1,14 @@
 "use client";
 
-// Demo callout — explicitly maps Hold the Thread + Discretion Layer to
-// Hackathon Problem Statement #2: The Invisible Concierge.
-// The challenge: ambient intelligence that anticipates without surveillance —
-// the line between "they just knew" and "that's creepy."
-// Our answer: the guest draws the line themselves on a single dial. The
-// Discretion Layer (Claude Haiku 4.5) audits every signal before staff
-// sees it, and every removal is logged auditably in dossier.suppressed[].
+// Maps Hold the Thread + Discretion Layer to Hackathon Problem #2:
+// ambient intelligence without surveillance. The guest draws the line;
+// the Discretion Layer audits every signal before staff see it.
 
 const MECHANISMS = [
-  { label: "Guest-tuned depth", detail: "Dial set by the guest, not us" },
+  { label: "Guest draws the line", detail: "Their dial, not ours" },
   { label: "Discretion Layer", detail: "Haiku 4.5 audits every signal" },
-  { label: "Auditable removals", detail: "Every redaction logged" },
-  { label: "One-tap-decline", detail: "Offers never repeat unwanted" },
+  { label: "Auditable removals", detail: "Logged; guest can contest" },
+  { label: "Decline once", detail: "The offer never returns" },
 ];
 
 export function ProblemTwoContext() {
@@ -31,24 +27,18 @@ export function ProblemTwoContext() {
         >
           The Invisible Concierge
         </span>
-        <span className="text-[10px] tracking-[0.22em] uppercase text-ink-faint">
-          how Hold the Thread addresses it
-        </span>
       </div>
 
       <p className="text-[13px] text-ink leading-relaxed max-w-prose">
-        Ultra-luxury guests want needs anticipated — not asked for. The hard
-        design line is between{" "}
         <em className="not-italic font-medium text-thread-deep">
-          &ldquo;they just knew&rdquo;
+          &ldquo;They just knew&rdquo;
         </em>{" "}
-        and{" "}
+        vs.{" "}
         <em className="not-italic font-medium text-thread-deep">
-          &ldquo;that&rsquo;s creepy.&rdquo;
+          &ldquo;that&rsquo;s creepy&rdquo;
         </em>{" "}
-        Red Thread doesn&rsquo;t guess where the line is — the guest draws it,
-        on a single dial they own. Every inferred signal then passes a second,
-        auditable Discretion Layer before any staff member sees it.
+        — the line is different for every guest. So the guest draws it. Every
+        signal then clears a second, auditable layer before staff see it.
       </p>
 
       <ul className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
