@@ -9,7 +9,6 @@ import { Header } from "@/components/Header";
 import { InStayEventInjector } from "@/components/InStayEventInjector";
 import { ProblemTwoContext } from "@/components/ProblemTwoContext";
 import { ReservationIntake } from "@/components/ReservationIntake";
-import { StoreHydrator } from "@/components/StoreHydrator";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
 import { Actuators } from "@/components/zones/Actuators";
@@ -18,7 +17,6 @@ import { LiveThread } from "@/components/zones/LiveThread";
 export default function Home() {
   return (
     <div className="flex-1 flex flex-col">
-      <StoreHydrator />
       {/* Reads ?fromIntake=1 + sessionStorage, fetches /api/agent, populates store. */}
       <Suspense fallback={null}>
         <DemoLoader />
