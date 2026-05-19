@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
-import { useDemoLock } from "@/components/DemoLock";
 import { streamAgent } from "@/components/DemoLoader";
 import {
   BAND_LABEL,
@@ -68,7 +67,6 @@ export default function ProfilePage() {
   const [savedUi, setSavedUi] = useState(() => posToUi(activeGuestPos));
   const [value, setValue] = useState(() => posToUi(activeGuestPos));
   const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
-  const { requireUnlock } = useDemoLock();
 
   // Sync local state if the active guest changes while /profile is open
   // (e.g. via a multi-tab demo or another route writing the store).
@@ -87,14 +85,7 @@ export default function ProfilePage() {
   const band = bandFor(pos);
   const isDirty = value !== savedUi;
 
-  function save() {
-    // Saving fires a re-stream of /api/agent at the new POS, so the modal
-    // gates this too. Local POS edits don't actually update zones until
-    // the agent re-runs.
-    requireUnlock(runSave);
-  }
-
-  async function runSave() {
+  async function save() {
     setStatus("saving");
     const snapshot = value;
     const newPos = uiToPos(snapshot);

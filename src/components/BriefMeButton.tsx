@@ -6,7 +6,6 @@
 
 import { useRef, useState } from "react";
 
-import { useDemoLock } from "@/components/DemoLock";
 import type { Dossier } from "@/lib/types";
 
 type State = "idle" | "loading" | "playing" | "error";
@@ -67,7 +66,6 @@ export function BriefMeButton({ narration }: Props) {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
-  const { requireUnlock } = useDemoLock();
 
   const stop = () => {
     if (audioRef.current) {
@@ -86,11 +84,6 @@ export function BriefMeButton({ narration }: Props) {
       stop();
       return;
     }
-    // Gate ElevenLabs TTS behind the demo password.
-    requireUnlock(runPlay);
-  };
-
-  const runPlay = async () => {
     setError(null);
     setState("loading");
     try {

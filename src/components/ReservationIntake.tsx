@@ -14,7 +14,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { streamAgent } from "@/components/DemoLoader";
-import { useDemoLock } from "@/components/DemoLock";
 import { useDossier, type ArrivalStep, type ArrivalSummary } from "@/lib/dossierStore";
 import type { PropertyId } from "@/lib/types";
 
@@ -90,7 +89,6 @@ export function ReservationIntake() {
   // removed in favor of the read-only DashboardDial below this form, which
   // reads from store.activeGuestPos. The guest changes it on /profile.
   const aborter = useRef<AbortController | null>(null);
-  const { requireUnlock } = useDemoLock();
 
   const selectPreset = (id: PresetId) => {
     setPresetId(id);
@@ -113,13 +111,6 @@ export function ReservationIntake() {
   useEffect(() => () => aborter.current?.abort(), []);
 
   const submit = async () => {
-    // Gate the expensive live agent run behind the demo password modal.
-    // If unlocked, runBriefing fires immediately; if locked, the modal
-    // queues it and runs on successful unlock.
-    requireUnlock(runBriefing);
-  };
-
-  const runBriefing = async () => {
     // Honor the user's inline edits but anchor guestId from the selected
     // preset — that's what reads from data/guests/<id>.json (the "right
     // database") server-side.
@@ -154,10 +145,9 @@ export function ReservationIntake() {
 
     try {
       await streamArrivalChain(reservation, ac.signal);
-      // After arrival chain — kick the FULL LIVE agent flow so the brief +
-      // actuators populate from real Claude. live=true bypasses DEMO_MODE.
-      // previewPos = the guest's just-set Hold-the-Thread value (0–100) so
-      // the Discretion Layer band-reduces zones 1/2/3 accordingly.
+      // After arrival chain — kick the agent flow. No live:true here, so the
+      // fast fixture path runs (band-reduced by previewPos per the 11-tick
+      // ladder in bandReduceFixture). No live Claude tokens spent.
       useDossier.getState().startRun("manual");
       await streamAgent(
         {
@@ -166,7 +156,6 @@ export function ReservationIntake() {
           flightNumber: reservation.flightNumber,
           guestEmail: email,
           previewPos: holdPos,
-          live: true,
         },
         ac.signal,
       );

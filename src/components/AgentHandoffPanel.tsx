@@ -158,7 +158,10 @@ export function AgentHandoffPanel({
     runHandoff({
       guestId,
       propertyId,
-      endpoint: "/api/agent-handoff-live",
+      // Demo mode — go straight to the scripted fallback. The live endpoint
+      // burns Claude tokens on both Vercel and the Mac Mini bridge, which
+      // is overkill for public demo traffic.
+      endpoint: "/api/agent-handoff",
       fallbackEndpoint: "/api/agent-handoff",
       signal: ac.signal,
       onTyping: (role) => setTyping(role),

@@ -16,8 +16,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 
-import { useDemoLock } from "@/components/DemoLock";
-
 const AGENT_ID =
   process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_INTAKE ??
   "agent_5001krs8b43gfjstkz92k6fx9e3n";
@@ -93,7 +91,6 @@ const QUESTIONS = [
 
 function IntakeInner() {
   const router = useRouter();
-  const { requireUnlock } = useDemoLock();
   const [stage, setStage] = useState<Stage>("idle");
   const [convId, setConvId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -511,7 +508,7 @@ function IntakeInner() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => requireUnlock(begin)}
+                      onClick={begin}
                       className="px-8 py-4 bg-rose-deep text-paper font-sans uppercase tracking-[0.22em] text-sm font-medium hover:bg-rose-darker transition-colors"
                     >
                       Begin briefing
@@ -533,7 +530,7 @@ function IntakeInner() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => requireUnlock(playDemoDialog)}
+                        onClick={playDemoDialog}
                         className="shrink-0 px-6 py-3 border border-thread-deep text-thread-deep font-sans uppercase tracking-[0.22em] text-xs hover:bg-thread-deep hover:text-on-dark transition-colors"
                       >
                         Play demo
