@@ -14,6 +14,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { streamAgent } from "@/components/DemoLoader";
+import { useDemoLock } from "@/components/DemoLock";
 import { useDossier, type ArrivalStep, type ArrivalSummary } from "@/lib/dossierStore";
 import type { PropertyId } from "@/lib/types";
 
@@ -89,6 +90,7 @@ export function ReservationIntake() {
   // removed in favor of the read-only DashboardDial below this form, which
   // reads from store.activeGuestPos. The guest changes it on /profile.
   const aborter = useRef<AbortController | null>(null);
+  const { requireUnlock } = useDemoLock();
 
   const selectPreset = (id: PresetId) => {
     setPresetId(id);
@@ -111,6 +113,13 @@ export function ReservationIntake() {
   useEffect(() => () => aborter.current?.abort(), []);
 
   const submit = async () => {
+    // Gate the expensive live agent run behind the demo password modal.
+    // If unlocked, runBriefing fires immediately; if locked, the modal
+    // queues it and runs on successful unlock.
+    requireUnlock(runBriefing);
+  };
+
+  const runBriefing = async () => {
     // Honor the user's inline edits but anchor guestId from the selected
     // preset — that's what reads from data/guests/<id>.json (the "right
     // database") server-side.

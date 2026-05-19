@@ -11,9 +11,11 @@
 // a Reset button appears when the dossier is rendered or errored.
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AgentHandoffPanel } from "@/components/AgentHandoffPanel";
+import { useDemoLock } from "@/components/DemoLock";
 import { useDossier, type RunPhase } from "@/lib/dossierStore";
 
 export function DemoTrigger() {
@@ -22,6 +24,14 @@ export function DemoTrigger() {
   const liveToolCalls = useDossier((s) => s.liveToolCalls);
   const error = useDossier((s) => s.error);
   const [showHandoff, setShowHandoff] = useState(false);
+  const { requireUnlock } = useDemoLock();
+  const router = useRouter();
+
+  const goToIntake = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // /intake uses ElevenLabs Convai + TTS — gate behind the demo password.
+    requireUnlock(() => router.push("/intake"));
+  };
 
   const running = phase !== "idle" && phase !== "done" && phase !== "error";
   const completed = phase === "done" && !!dossier;
@@ -32,8 +42,12 @@ export function DemoTrigger() {
   };
 
   const startHandoff = () => {
-    useDossier.getState().clear();
-    setShowHandoff(true);
+    // Gate the A2A handoff (Threadkeeper + elias bridge, both real Claude
+    // calls) behind the demo password.
+    requireUnlock(() => {
+      useDossier.getState().clear();
+      setShowHandoff(true);
+    });
   };
 
   return (
@@ -63,6 +77,7 @@ export function DemoTrigger() {
           )}
           <Link
             href="/intake"
+            onClick={goToIntake}
             className="text-[11px] tracking-[0.22em] uppercase font-medium text-paper bg-rose-deep hover:bg-rose-darker px-5 py-2 transition-colors inline-flex items-center gap-2"
           >
             Voice intake <span aria-hidden="true">→</span>

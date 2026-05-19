@@ -38,12 +38,17 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("rt_gate", expected, {
-    httpOnly: true,
+  const opts = {
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 60 * 60 * 12, // 12 hours
-  });
+  };
+  // rt_gate — httpOnly, validated by middleware on every /api/* request.
+  res.cookies.set("rt_gate", expected, { ...opts, httpOnly: true });
+  // rt_unlocked — readable by JS so the client knows whether to show the
+  // unlock modal. Value is meaningless on its own; auth still flows through
+  // the httpOnly rt_gate cookie above.
+  res.cookies.set("rt_unlocked", "1", { ...opts, httpOnly: false });
   return res;
 }

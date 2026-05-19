@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { Suspense } from "react";
 
 import { ContinuityOffers } from "@/components/ContinuityOffers";
@@ -9,14 +11,28 @@ import { Header } from "@/components/Header";
 import { InStayEventInjector } from "@/components/InStayEventInjector";
 import { ProblemTwoContext } from "@/components/ProblemTwoContext";
 import { ReservationIntake } from "@/components/ReservationIntake";
+import { StoreHydrator } from "@/components/StoreHydrator";
 import { ResearchStreams } from "@/components/zones/ResearchStreams";
 import { TheBrief } from "@/components/zones/TheBrief";
 import { Actuators } from "@/components/zones/Actuators";
 import { LiveThread } from "@/components/zones/LiveThread";
+import type { Dossier } from "@/lib/types";
 
-export default function Home() {
+// Cold-load fixture so LinkedIn visitors land on a fully-populated dashboard
+// without any API call. Read at request time (no Claude tokens spent, no
+// API calls — just the filesystem). Once the user runs a real briefing,
+// StoreHydrator no-ops and the live data takes over.
+async function loadPrimedDossier(): Promise<Dossier> {
+  const filePath = path.join(process.cwd(), "data/fixtures/ben__hong-kong.json");
+  const raw = await readFile(filePath, "utf-8");
+  return JSON.parse(raw) as Dossier;
+}
+
+export default async function Home() {
+  const primedDossier = await loadPrimedDossier();
   return (
     <div className="flex-1 flex flex-col">
+      <StoreHydrator initialDossier={primedDossier} />
       {/* Reads ?fromIntake=1 + sessionStorage, fetches /api/agent, populates store. */}
       <Suspense fallback={null}>
         <DemoLoader />
