@@ -145,9 +145,10 @@ export function ReservationIntake() {
 
     try {
       await streamArrivalChain(reservation, ac.signal);
-      // After arrival chain — kick the agent flow. Default = fast fixture
-      // path with per-tick HTT reduction (no live Claude tokens spent).
-      // The Live mode toggle (see header) will add live:true when active.
+      // After arrival chain — kick the FULL LIVE agent flow so the brief +
+      // actuators populate from real Claude. live=true bypasses DEMO_MODE.
+      // previewPos = the guest's just-set Hold-the-Thread value (0–100) so
+      // the Discretion Layer band-reduces zones 1/2/3 accordingly.
       useDossier.getState().startRun("manual");
       await streamAgent(
         {
@@ -156,6 +157,7 @@ export function ReservationIntake() {
           flightNumber: reservation.flightNumber,
           guestEmail: email,
           previewPos: holdPos,
+          live: true,
         },
         ac.signal,
       );

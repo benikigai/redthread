@@ -158,10 +158,7 @@ export function AgentHandoffPanel({
     runHandoff({
       guestId,
       propertyId,
-      // Default to the scripted A2A — no live Claude on Vercel, no Mac Mini
-      // bridge round-trip. The Live mode toggle in the header swaps this to
-      // /api/agent-handoff-live when active.
-      endpoint: "/api/agent-handoff",
+      endpoint: "/api/agent-handoff-live",
       fallbackEndpoint: "/api/agent-handoff",
       signal: ac.signal,
       onTyping: (role) => setTyping(role),
